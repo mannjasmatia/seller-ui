@@ -1,0 +1,250 @@
+{
+    "profile": {
+        "title": "Profile",
+        "edit": "Edit",
+        "save": "Save",
+        "cancel": "Cancel",
+        "changePassword": "Change Password",
+        "wishlist": "Wishlist",
+        "preferences": "Preferences",
+        "fields": {
+            "fullName": "Full Name",
+            "email": "Email",
+            "phoneNumber": "Phone Number",
+            "memberId": "Member ID",
+            "state": "State",
+            "city": "City",
+            "country": "Country",
+            "createdAt": "Member Since"
+        },
+        "avatar": {
+            "title": "Choose Avatar",
+            "uploadFromPC": "Upload from PC",
+            "chooseFromAvatars": "Choose from Avatars",
+            "chooseFrom": "Choose from"
+        },
+        "emailVerification": {
+            "title": "Email Verification Required",
+            "message": "You have changed your email address. Please verify your new email to continue.",
+            "sendVerification": "Send Verification Email",
+            "cancel": "Cancel",
+            "verifyEmail": "Verify Email",
+            "enterValidEmail": "Please enter a valid email address before verifying."
+        },
+        "saveConfirmation": {
+            "title": "Save Changes",
+            "message": "Are you sure you want to save these changes?",
+            "confirm": "Save",
+            "cancel": "Cancel",
+            "emailNotVerified": "You haven't verified your email yet.",
+            "emailNotVerifiedMessage": "The email you entered has not been verified. To save it, please verify your email first. If you proceed without verification, the email will not be stored.",
+            "continueWithoutVerifying": "Continue without verifying email"
+        },
+        "toast": {
+            "profileUpdated": "Profile Updated Successfully",
+            "profileNotUpdated": "Profile wasn't updated",
+            "emailSent": "Mail sent successfully",
+            "emailVerified": "Your Email was verified"
+        },
+        "personalDetails": "Personal Details",
+        "shippingAndBilling": "Shipping and billing details",
+        "notAvailable": "Not available",
+        "seller": "Seller",
+        "memberSince": "Member Since",
+        "onCanadianBazaar": "on Canadian Bazaar",
+        "locatedIn": "Located in",
+        "validation": {
+            "email": {
+                "required": "Email is required",
+                "pattern": "Please enter a valid email address"
+            },
+            "fullName": {
+                "required": "Full name is required"
+            },
+            "city": {
+                "required": "City is required"
+            },
+            "state": {
+                "required": "State/Province is required"
+            }
+        },
+        "components": {
+            "userPreferences": {
+                "shippingAddresses": "Shipping Addresses",
+                "yourAddresses": "Your Addresses",
+                "addNew": "Add New",
+                "preferredPaymentMethods": "Preferred Payment Methods",
+                "selectPaymentMethods": "Select Payment Methods",
+                "preferredCurrencyAndLanguage": "Preferred Currency and Language",
+                "selectCurrency": "Select Currency",
+                "selectLanguage": "Select Language",
+                "savePreferences": "Save Preferences",
+                "addressDeleted": "Address deleted successfully",
+                "preferencesUpdated": "Preferences updated successfully",
+                "addressAdded": "Address added successfully",
+                "addressUpdated": "Address updated successfully"
+            },
+            "addressModal": {
+                "editAddress": "Edit Address",
+                "addNewAddress": "Add New Address",
+                "streetAddress": "Street Address",
+                "streetPlaceholder": "123 Main St, Apt 4B",
+                "country": "Country",
+                "selectCountry": "Select your country",
+                "stateProvince": "State/Province",
+                "selectState": "Select state",
+                "selectCountryFirst": "Select country first",
+                "city": "City",
+                "selectCity": "Select city",
+                "selectStateFirst": "Select state first",
+                "postalCode": "Postal Code",
+                "setAsDefault": "Set as your default shipping address",
+                "cancel": "Cancel",
+                "saveAddress": "Save Address",
+                "validation": {
+                    "street": "Street address is required",
+                    "country": "Country is required",
+                    "state": "State/Province is required",
+                    "city": "City is required",
+                    "postalCode": "Postal code is required",
+                    "invalidPostalCode": "Invalid postal code format"
+                }
+            },
+            "avatarModal": {
+                "title": "Choose your Avatar",
+                "select": "Select"
+            }
+        }
+    },
+    "auth": {
+            "login": {
+                "welcomeBack": "Welcome back !!",
+                "loginAgain": "Please Login again with your credentials",
+                "forgotPassword": "Forgot password?",
+                "orContinueWith": "Or Continue with :",
+                "termsAndPrivacy": "By clicking Sign up you agree to terms and privacy policy",
+                "loggingIn": "Logging in...",
+                "login": "Login",
+                "dontHaveAccount": "Don't have an account?",
+                "signUp": "Sign up",
+                "error": "Some error occured, please try again later"
+            },
+            "signup": {
+                "welcomeBuyers": "Welcome Buyers!!",
+                "createAccount": "Please create an account by providing your Personal details:",
+                "fullName": "Full name :",
+                "phoneNumber": "Phone number :",
+                "provinceState": "Province/state :",
+                "city": "City :",
+                "password": "Password :",
+                "confirmPassword": "Confirm password :",
+                "canadaOnly": "This service is available only in Canada",
+                "termsAndPrivacy": "By clicking Sign up you agree to terms and privacy policy",
+                "verifyPhone": "Verify Phone Number",
+                "alreadyHaveAccount": "Already have an account?",
+                "login": "Login",
+                "passwordRequirements": {
+                    "title": "Password requirements:",
+                    "minLength": "✓ Minimum 8 characters",
+                    "oneNumber": "✓ At least one number",
+                    "oneSpecial": "✓ At least one special character",
+                    "oneUppercase": "✓ At least one uppercase letter"
+                },
+                "verifyOtp": {
+                    "title": "Verify OTP",
+                    "description": "Please enter the OTP sent to your phone number"
+                }
+            },
+            "verifyOtp": {
+                "title": "Verify OTP",
+                "description": "Please enter the OTP sent to your phone number",
+                "codeExpiresIn": "Code expires in",
+                "codeExpired": "Code expired",
+                "verifying": "Verifying",
+                "verifyOtp": "Verify Otp",
+                "didntReceiveCode": "Didn't receive the code?",
+                "resendCode": "Resend Code",
+                "securityNote": "Your verification is secure and encrypted",
+                "invalidOtp": "Invalid Otp, Please enter the correct one",
+                "maxOtpExceeded": "You have exceeded the maximum number of OTP requests. Please try again later."
+            }
+        },
+    "authModal": {
+        "defaultModal": "login",
+        "signupSuccess": "Signup successful, please login to continue"
+    },
+    "canadianBazaarVerified": {
+            "title": "Canadian Bazaar",
+            "verified": "Verified"
+        },
+    "confirmationModal": {
+            "title": "Confirmation",
+            "message": "Are you sure you want to proceed?",
+            "confirm": "Confirm",
+            "cancel": "Cancel"
+        },
+    "mediaModal": {
+        "title": "Media",
+        "close": "Close",
+        "previous": "Previous",
+        "next": "Next",
+        "loading": "Loading...",
+        "error": "Error loading media"
+    },
+    "copyButton": {
+        "copy": "Copy",
+        "copied": "Copied!",
+        "copyToClipboard": "Copy to clipboard"
+    },
+    "footer": {
+            "sections": {
+                "support": {
+                    "title": "Get Support",
+                    "helpCenter": "Help Center",
+                    "liveChat": "Live chat",
+                    "checkOrder": "Check order status",
+                    "refunds": "Refunds",
+                    "reportAbuse": "Report abuse"
+                },
+                "payments": {
+                    "title": "Payments and protections",
+                    "safePayments": "Safe and easy payments",
+                    "moneyBack": "Money-back policy",
+                    "shipping": "On-time shipping",
+                    "afterSales": "After-sales protections",
+                    "monitoring": "Product monitoring services"
+                },
+                "source": {
+                    "title": "Source on Canadian Bazaar",
+                    "quotation": "Request for Quotation",
+                    "membership": "Membership program",
+                    "logistics": "Canadian Bazaar Logistics",
+                    "tax": "Sales tax and VAT",
+                    "reads": "Canadian Bazaar Reads"
+                },
+                "sell": {
+                    "title": "Sell on Canadian Bazaar",
+                    "startSelling": "Start selling",
+                    "sellerCentral": "Seller Central",
+                    "verifiedSupplier": "Become a Verified Supplier",
+                    "partnerships": "Partnerships"
+                },
+                "about": {
+                    "title": "Get to know us",
+                    "aboutUs": "About Canadian Bazaar",
+                    "corporate": "Corporate responsibility",
+                    "news": "News center",
+                    "careers": "Careers"
+                }
+            },
+            "copyright": "© {year} Canadian Bazaar. All rights reserved.",
+            "menu": "Menu"
+        },
+    "searchBar": {
+        "placeholder": "Search...",
+        "noResults": "No results found for",
+        "loading": "Loading...",
+        "search": "Search",
+        "clear": "Clear search"
+    }
+}

@@ -1,0 +1,250 @@
+{
+    "profile": {
+            "title": "प्रोफ़ाइल",
+            "edit": "संपादित करें",
+            "save": "सहेजें",
+            "cancel": "रद्द करें",
+            "changePassword": "पासवर्ड बदलें",
+            "wishlist": "इच्छा सूची",
+            "preferences": "प्राथमिकताएँ",
+            "fields": {
+                "fullName": "पूरा नाम",
+                "email": "ईमेल",
+                "phoneNumber": "फोन नंबर",
+                "memberId": "सदस्य ID",
+                "state": "राज्य",
+                "city": "शहर",
+                "country": "देश",
+                "createdAt": "सदस्यता प्राप्ति तिथि"
+            },
+            "avatar": {
+                "title": "अवतार चुनें",
+                "uploadFromPC": "कंप्यूटर से अपलोड करें",
+                "chooseFromAvatars": "अवतारों में से चुनें",
+                "chooseFrom": "चुनें"
+            },
+            "emailVerification": {
+                "title": "ईमेल सत्यापन आवश्यक",
+                "message": "आपने अपना ईमेल पता बदल दिया है। जारी रखने के लिए कृपया अपने नए ईमेल को सत्यापित करें।",
+                "sendVerification": "सत्यापन ईमेल भेजें",
+                "cancel": "रद्द करें",
+                "verifyEmail": "ईमेल सत्यापित करें",
+                "enterValidEmail": "सत्यापित करने से पहले कृपया एक वैध ईमेल पता दर्ज करें।"
+            },
+            "saveConfirmation": {
+                "title": "परिवर्तन सहेजें",
+                "message": "क्या आप वाकई ये परिवर्तन सहेजना चाहते हैं?",
+                "confirm": "सहेजें",
+                "cancel": "रद्द करें",
+                "emailNotVerified": "आपने अपना ईमेल अभी तक सत्यापित नहीं किया है।",
+                "emailNotVerifiedMessage": "आपके द्वारा दर्ज किया गया ईमेल सत्यापित नहीं हुआ है। इसे सहेजने के लिए, कृपया पहले अपना ईमेल सत्यापित करें। यदि आप सत्यापन के बिना आगे बढ़ते हैं, तो ईमेल संग्रहीत नहीं किया जाएगा।",
+                "continueWithoutVerifying": "सत्यापन के बिना जारी रखें"
+            },
+            "toast": {
+                "profileUpdated": "प्रोफ़ाइल सफलतापूर्वक अपडेट हो गई",
+                "profileNotUpdated": "प्रोफ़ाइल अपडेट नहीं हुई",
+                "emailSent": "ईमेल सफलतापूर्वक भेजा गया",
+                "emailVerified": "आपका ईमेल सत्यापित हो गया"
+            },
+            "personalDetails": "व्यक्तिगत विवरण",
+            "shippingAndBilling": "शिपिंग और बिलिंग विवरण",
+            "notAvailable": "उपलब्ध नहीं",
+            "seller": "विक्रेता",
+            "memberSince": "सदस्यता प्राप्ति तिथि",
+            "onCanadianBazaar": "कैनेडियन बाज़ार पर",
+            "locatedIn": "स्थित",
+            "validation": {
+                "email": {
+                    "required": "ईमेल आवश्यक है",
+                    "pattern": "कृपया एक वैध ईमेल पता दर्ज करें"
+                },
+                "fullName": {
+                    "required": "पूरा नाम आवश्यक है"
+                },
+                "city": {
+                    "required": "शहर आवश्यक है"
+                },
+                "state": {
+                    "required": "राज्य/प्रांत आवश्यक है"
+                }
+            },
+            "components": {
+                "userPreferences": {
+                    "shippingAddresses": "शिपिंग पते",
+                    "yourAddresses": "आपके पते",
+                    "addNew": "नया जोड़ें",
+                    "preferredPaymentMethods": "पसंदीदा भुगतान विधियाँ",
+                    "selectPaymentMethods": "भुगतान विधियाँ चुनें",
+                    "preferredCurrencyAndLanguage": "पसंदीदा मुद्रा और भाषा",
+                    "selectCurrency": "मुद्रा चुनें",
+                    "selectLanguage": "भाषा चुनें",
+                    "savePreferences": "प्राथमिकताएँ सहेजें",
+                    "addressDeleted": "पता सफलतापूर्वक हटा दिया गया",
+                    "preferencesUpdated": "प्राथमिकताएँ सफलतापूर्वक अपडेट हो गई",
+                    "addressAdded": "पता सफलतापूर्वक जोड़ा गया",
+                    "addressUpdated": "पता सफलतापूर्वक अपडेट हो गई"
+                },
+                "addressModal": {
+                    "editAddress": "पता संपादित करें",
+                    "addNewAddress": "नया पता जोड़ें",
+                    "streetAddress": "सड़क का पता",
+                    "streetPlaceholder": "123 मेन स्ट्रीट, अपार्टमेंट 4B",
+                    "country": "देश",
+                    "selectCountry": "अपना देश चुनें",
+                    "stateProvince": "राज्य/प्रांत",
+                    "selectState": "राज्य चुनें",
+                    "selectCountryFirst": "पहले देश चुनें",
+                    "city": "शहर",
+                    "selectCity": "शहर चुनें",
+                    "selectStateFirst": "पहले राज्य चुनें",
+                    "postalCode": "पोस्टल कोड",
+                    "setAsDefault": "इसे अपना डिफ़ॉल्ट शिपिंग पता बनाएं",
+                    "cancel": "रद्द करें",
+                    "saveAddress": "पता सहेजें",
+                    "validation": {
+                        "street": "सड़क का पता आवश्यक है",
+                        "country": "देश आवश्यक है",
+                        "state": "राज्य/प्रांत आवश्यक है",
+                        "city": "शहर आवश्यक है",
+                        "postalCode": "पोस्टल कोड आवश्यक है",
+                        "invalidPostalCode": "अमान्य पोस्टल कोड प्रारूप"
+                    }
+                },
+                "avatarModal": {
+                    "title": "अपना अवतार चुनें",
+                    "select": "चुनें"
+                }
+            }
+        },
+    "auth": {
+            "login": {
+                "welcomeBack": "वापस स्वागत है !!",
+                "loginAgain": "कृपया अपने क्रेडेंशियल्स के साथ फिर से लॉगिन करें",
+                "forgotPassword": "पासवर्ड भूल गए?",
+                "orContinueWith": "या इसके साथ जारी रखें :",
+                "termsAndPrivacy": "साइन अप करके आप नियम और गोपनीयता नीति से सहमत होते हैं",
+                "loggingIn": "लॉगिन हो रहा है...",
+                "login": "लॉगिन",
+                "dontHaveAccount": "खाता नहीं है?",
+                "signUp": "साइन अप",
+                "error": "कुछ त्रुटि हुई, कृपया बाद में पुनः प्रयास करें"
+            },
+            "signup": {
+                "welcomeBuyers": "खरीदारों का स्वागत है!!",
+                "createAccount": "कृपया अपने व्यक्तिगत विवरण प्रदान करके एक खाता बनाएं:",
+                "fullName": "पूरा नाम :",
+                "phoneNumber": "फोन नंबर :",
+                "provinceState": "प्रांत/राज्य :",
+                "city": "शहर :",
+                "password": "पासवर्ड :",
+                "confirmPassword": "पासवर्ड पुष्टि करें :",
+                "canadaOnly": "यह सेवा केवल कनाडा में उपलब्ध है",
+                "termsAndPrivacy": "साइन अप करके आप नियम और गोपनीयता नीति से सहमत होते हैं",
+                "verifyPhone": "फोन नंबर सत्यापित करें",
+                "alreadyHaveAccount": "पहले से ही खाता है?",
+                "login": "लॉगिन",
+                "passwordRequirements": {
+                    "title": "पासवर्ड आवश्यकताएँ:",
+                    "minLength": "✓ न्यूनतम 8 वर्ण",
+                    "oneNumber": "✓ कम से कम एक नंबर",
+                    "oneSpecial": "✓ कम से कम एक विशेष वर्ण",
+                    "oneUppercase": "✓ कम से कम एक बड़ा अक्षर"
+                },
+                "verifyOtp": {
+                    "title": "OTP सत्यापित करें",
+                    "description":"कृपया अपने फोन नंबर पर भेजा गया OTP दर्ज करें"
+                }
+            },
+            "verifyOtp": {
+                "title": "OTP सत्यापित करें",
+                "description": "कृपया अपने फोन नंबर पर भेजा गया OTP दर्ज करें",
+                "codeExpiresIn": "कोड समाप्त होता है",
+                "codeExpired": "कोड समाप्त हो गया",
+                "verifying": "सत्यापित किया जा रहा है",
+                "verifyOtp": "OTP सत्यापित करें",
+                "didntReceiveCode": "कोड प्राप्त नहीं हुआ?",
+                "resendCode": "कोड पुनः भेजें",
+                "securityNote": "आपका सत्यापन सुरक्षित और एन्क्रिप्टेड है",
+                "invalidOtp": "अमान्य OTP, कृपया सही OTP दर्ज करें",
+                "maxOtpExceeded": "आपने OTP अनुरोधों की अधिकतम संख्या पार कर ली है। कृपया बाद में पुनः प्रयास करें।"
+            }
+        },
+    "authModal": {
+        "defaultModal": "लॉगिन",
+        "signupSuccess": "साइनअप सफल, कृपया जारी रखने के लिए लॉगिन करें"
+    },
+    "canadianBazaarVerified": {
+            "title": "कैनेडियन बाज़ार",
+            "verified": "सत्यापित"
+        },
+    "confirmationModal": {
+            "title": "पुष्टिकरण",
+            "message": "क्या आप वाकई आगे बढ़ना चाहते हैं?",
+            "confirm": "पुष्टि करें",
+            "cancel": "रद्द करें"
+        },
+    "mediaModal": {
+        "title": "मीडिया",
+        "close": "बंद करें",
+        "previous": "पिछला",
+        "next": "अगला",
+        "loading": "लोड हो रहा है...",
+        "error": "मीडिया लोड करने में त्रुटि"
+    },
+    "copyButton": {
+        "copy": "कॉपी करें",
+        "copied": "कॉपी हो गया!",
+        "copyToClipboard": "क्लिपबोर्ड पर कॉपी करें"
+    },
+    "footer": {
+            "sections": {
+                "support": {
+                    "title": "समर्थन प्राप्त करें",
+                    "helpCenter": "सहायता केंद्र",
+                    "liveChat": "लाइव चैट",
+                    "checkOrder": "ऑर्डर स्थिति जांचें",
+                    "refunds": "धनवापसी",
+                    "reportAbuse": "दुरुपयोग की रिपोर्ट करें"
+                },
+                "payments": {
+                    "title": "भुगतान और सुरक्षा",
+                    "safePayments": "सुरक्षित और आसान भुगतान",
+                    "moneyBack": "धनवापसी नीति",
+                    "shipping": "समय पर शिपिंग",
+                    "afterSales": "बिक्री के बाद की सुरक्षा",
+                    "monitoring": "उत्पाद निगरानी सेवाएँ"
+                },
+                "source": {
+                    "title": "कैनेडियन बाज़ार पर सोर्स करें",
+                    "quotation": "कोटेशन के लिए अनुरोध",
+                    "membership": "सदस्यता कार्यक्रम",
+                    "logistics": "कैनेडियन बाज़ार लॉजिस्टिक्स",
+                    "tax": "बिक्री कर और VAT",
+                    "reads": "कैनेडियन बाज़ार रीड्स"
+                },
+                "sell": {
+                    "title": "कैनेडियन बाज़ार पर बेचें",
+                    "startSelling": "बेचना शुरू करें",
+                    "sellerCentral": "विक्रेता केंद्र",
+                    "verifiedSupplier": "सत्यापित आपूर्तिकर्ता बनें",
+                    "partnerships": "साझेदारियाँ"
+                },
+                "about": {
+                    "title": "हमारे बारे में जानें",
+                    "aboutUs": "कैनेडियन बाज़ार के बारे में",
+                    "corporate": "कॉर्पोरेट जिम्मेदारी",
+                    "news": "समाचार केंद्र",
+                    "careers": "करियर"
+                }
+            },
+            "copyright": "© {year} कैनेडियन बाज़ार। सर्वाधिकार सुरक्षित।",
+            "menu": "मेनू"
+        },
+    "searchBar": {
+        "placeholder": "खोजें...",
+        "noResults": "इसके लिए कोई परिणाम नहीं मिला",
+        "loading": "लोड हो रहा है...",
+        "search": "खोजें",
+        "clear": "खोज साफ़ करें"
+    }
+}
