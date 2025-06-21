@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { VerifyOtpModalProps } from "../../../types/verifyOtpModal";
+import { VerifyOtpModalProps } from "../../types/verifyOtpModal";
 import { useSelector } from 'react-redux';
 
 const MAX_RESEND_OTP_COUNT = 3; // Maximum number of OTP resend attempts

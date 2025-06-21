@@ -1,8 +1,8 @@
 import React, { MouseEvent, useEffect, useState } from 'react';
-import { useChangePasswordApi } from '../../../api/api-hooks/useAuthApi';
-import { customToast } from '../../../toast-config/customToast';
-import Input from '../../../components/BasicComponents/Input';
-import Button from '../../../components/BasicComponents/Button';
+import { useChangePasswordApi } from '../../api/api-hooks/useAuthApi';
+import { customToast } from '../../toast-config/customToast';
+import Input from '../../components/BasicComponents/Input';
+import Button from '../../components/BasicComponents/Button';
 
 // Type definitions for the component props
 interface PasswordChangeModalProps {

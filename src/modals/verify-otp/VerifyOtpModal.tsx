@@ -1,5 +1,5 @@
-import Button from '../../../components/BasicComponents/Button';
-import { VerifyOtpModalProps } from '../../../types/verifyOtpModal';
+import Button from '../../components/BasicComponents/Button';
+import { VerifyOtpModalProps } from '../../types/verifyOtpModal';
 import useVerifyOtpModal from './useVerifyOtpModal';
 import { useSelector } from 'react-redux';
 

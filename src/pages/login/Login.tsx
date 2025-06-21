@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { LoginModalProps } from '../../../types/login';
-import useLogin from './useLogin';
 import { useSelector } from 'react-redux';
-import Input from '../../../components/BasicComponents/Input';
-import Button from '../../../components/BasicComponents/Button';
+import { LoginModalProps } from '../../types/login';
+import useLogin from './useLogin';
+import Input from '../../components/BasicComponents/Input';
+import Button from '../../components/BasicComponents/Button';
 
-const Login: React.FC<LoginModalProps> = ({ 
-  open, 
-  onClose,
-  handleSignupClick,
-  handleSuccessfullLogin
-}) => {
+const Login = () => {
   const language = useSelector((state: any) => state.language?.value)['auth']['login'];
 
   const {
@@ -19,27 +14,24 @@ const Login: React.FC<LoginModalProps> = ({
     inputFields,
     handleChange,
     handleLogin,
+    handleSignupClick,
     handleSocialLogin,
     isPending,
     isError,
     error,
-  }=useLogin({ 
-    open, 
-    onClose,
-    handleSignupClick,
-    handleSuccessfullLogin
-  })
+    isLoggedIn,
+  }=useLogin();
 
-  if (!open) return null;
+  if (isLoggedIn) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-transparent bg-opacity-10 backdrop-blur-sm transition-opacity ">
       <div 
-        className="bg-gray-200 rounded-lg shadow-xl w-full max-w-md mx-4 transition-transform duration-300 transform translate-y-full"
+        className="bg-gray-200 rounded-lg shadow-xl w-full max-w-md mx-4 "
         onClick={(e) => e.stopPropagation()}
-        style={{ animation: open ? 'slideIn 0.5s forwards' : 'none' }}
+        // style={{ animation: !isLoggedIn ? 'slideIn 0.5s forwards' : 'none' }}
       >
-        <style>
+        {/* <style>
           {`
         @keyframes slideIn {
           from {
@@ -50,18 +42,8 @@ const Login: React.FC<LoginModalProps> = ({
           }
         }
           `}
-        </style>
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute p-3 z-10 top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
-          aria-label="Close"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-        
+        </style> */}
+
         <div className="p-6">
           {/* Logo */}
           <div className="flex justify-center mb-6">

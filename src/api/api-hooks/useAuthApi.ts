@@ -20,7 +20,10 @@ export const useVerifyTokensApi = (isInitialLoad: boolean) => {
       staleTime: 0, // Always consider data stale
       
       // Only enable on initial load OR if user is logged in (prevents redundant calls)
-      enabled: isInitialLoad || isLoggedIn,
+    //   enabled: isInitialLoad || isLoggedIn,
+
+    // For testing i have set it as false
+        enabled:false,
       
       // Don't refetch on window focus except during initial load
       refetchOnWindowFocus: isInitialLoad || isLoggedIn,

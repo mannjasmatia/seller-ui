@@ -1,0 +1,16 @@
+{
+  "salesSummaryTitle": "Sales summary",
+  "totalProductShipped": "Total product shipped",
+  "inProgress": "In Progress",
+  "popularityScore": "Popularity score",
+  "totalProductViewed": "Total product viewed",
+  "totalQuotationReceived": "Total Quotation received",
+  "totalOrderAccepted": "Total order accepted",
+  "totalOrderRejected": "Total order rejected",
+  "viewMore": "View more",
+  "loading": "Loading sales data...",
+  "error": "Failed to load sales data",
+  "retry": "Retry",
+  "refreshData": "Refreshing sales data...",
+  "navigationError": "Unknown navigation type"
+}

@@ -4,14 +4,26 @@ import { BrowserRouter as Router, Routes, Route, useParams, useLocation, Navigat
 import { useVerifyTokensApi } from "./api/api-hooks/useAuthApi"
 import { setLanguage } from "./store/languageSlice"
 import { setIsLoggedIn } from "./store/userSlice"
-import Authorization from "./pages/Authorization/Authorization"
-
+import Login from "./pages/login/Login"
+import PublicRoutes from "./routes/PublicRoutes"
+import PrivateRoutes from "./routes/PrivateRoutes"
+import Signup from "./pages/signup/Signup"
+import Dashboard from "./pages/dashboard/Dashboard"
 
 interface Route {
   path: string
   element: ReactElement
 }
 const availableLanguages = ["en","hi", "fr", "zh-CN", "pa", "es", "ar", "tl", "it", "de", "yue"]
+
+const publicRoutes: Route[] = [
+  {path:"/login", element:<Login/>},
+  {path:"/signup", element:<Signup/>},
+]
+
+const privateRoutes: Route[] = [
+  {path:"/dashboard", element:<Dashboard/>},
+]
 
 // Helper to get the current language from localStorage or default to "en"
 function getCurrentLanguage() {
@@ -78,47 +90,43 @@ function AppContent() {
     console.log("Preferred Language path name: ", location.pathname)
     
     const currentPath = location.pathname.split('/').slice(3).join('/');
-    // return <Navigate to={`/${preferredLang}/${currentPath}`} replace />;
+    return <Navigate to={`/${preferredLang}/${currentPath}`} replace />;
   }
 
   return (
     <Routes>
       {/* Public routes */}
-      {/* {publicRoutes.map((route, index) => (
+      {publicRoutes.map((route, index) => (
         <Route 
           key={index} 
           path={route.path} 
           element={
-            <DefaultLayout>
-              <PublicRoutes>{route.element}</PublicRoutes>
-            </DefaultLayout>
+              <PublicRoutes>
+                {route.element}
+              </PublicRoutes>
           } 
         />
-      ))} */}
+      ))}
 
       {/* Private routes - conditionally render based on auth state */}
-      {/* {privateRoutes.map((route, index) => (
+      {privateRoutes.map((route, index) => (
         <Route 
           key={index + publicRoutes.length} 
           path={route.path} 
           element={
-            isLoggedIn ? (
-              <DefaultLayout>{route.element}</DefaultLayout>
-            ) : (
-              <DefaultLayout>
-                <PublicRoutes>
-                  <LandingPage />
-                </PublicRoutes>
-              </DefaultLayout>
-            )
+            // isLoggedIn ? (
+              <PrivateRoutes>{route.element}</PrivateRoutes>
+            // ) : (
+            //     <PublicRoutes>
+            //       <Login />
+            //     </PublicRoutes>
+            // )
           } 
         />
-      ))} */}
-
-      <Route path="/auth" element={<Authorization/>} />
+      ))}
 
       {/* Redirect to the same language but with home route */}
-      <Route path="*" element={<Navigate to={`/${lang || getCurrentLanguage()}/`} />} />
+      <Route path="*" element={<Navigate to={`/${lang || getCurrentLanguage()}/${isLoggedIn ? 'dashboard' : 'login'}`} />} />
     </Routes>
   );
 }

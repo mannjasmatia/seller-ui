@@ -1,23 +1,22 @@
-import { BuyerSignupModalProps, FormField } from "../../../types/signup";
 import { Country, State, City } from 'country-state-city';
 import { isValidPhoneNumber, CountryCode, getCountries, getCountryCallingCode } from 'libphonenumber-js';
 import { useEffect, useRef, useState } from "react";
-import { SelectOption } from "../../../components/BasicComponents/types";
-import { useSignupApi, useVerifyOtpApi } from "../../../api/api-hooks/useAuthApi";
+import { SelectOption } from '../../components/BasicComponents/types';
+import { useSignupApi, useVerifyOtpApi } from '../../api/api-hooks/useAuthApi';
+import { customToast } from '../../toast-config/customToast';
+import { useNavigate } from 'react-router-dom';
+import { FormField } from '../../types/signup';
 
 const OTP_EXPIRY_TIME = 120; // 2 minutes
 
-const useSignup =({
-  open,
-  onClose,
-  handleLoginClick,
-  handleSuccesfullSignup
-} : BuyerSignupModalProps) => {
+const useSignup =() => {
     // Get Canada states from the country-state-city library
       const canadaStates = State.getStatesOfCountry('CA').map(state => ({
         value: state.isoCode,
         label: state.name
       }));
+      
+      const navigate = useNavigate();
     
       // State for selected province and cities
       const [selectedProvince, setSelectedProvince] = useState<string>('');
@@ -39,7 +38,8 @@ const useSignup =({
         // handle signup along with otp verification
       useEffect(()=>{
           if(verifyOtpSuccess){
-            handleSuccesfullSignup()
+            customToast.success("Signup successful, please login to continue")
+            navigate("/login" , {replace:true})
             setShowVerifyOtpModal(false)
           }
         },[verifyOtpSuccess])
@@ -203,22 +203,6 @@ const useSignup =({
       const [formState, setFormState] = useState(initialFormState);
       const [errors, setErrors] = useState<Record<string, string>>({});
     
-      // Effect to handle modal open/close state
-      // This effect adds a class to the body to prevent scrolling when the modal is open
-      useEffect(() => {
-        // Add no-scroll class to body when modal is open
-        if (open) {
-          document.body.classList.add('overflow-hidden');
-        } else {
-          document.body.classList.remove('overflow-hidden');
-        }
-        
-        // Cleanup function to remove class when component unmounts
-        return () => {
-          document.body.classList.remove('overflow-hidden');
-        };
-      }, [open]);
-    
       // Handle form input changes
       const handleChange = (value: any, event?: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         let name = '';
@@ -307,6 +291,11 @@ const useSignup =({
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
       };
+      
+
+      const handleLoginClick = () => {
+        navigate('/login', { replace: true });
+      };
     
       // Handle signup button click
       const handleSignup = () => {
@@ -343,6 +332,7 @@ const useSignup =({
         isError,
         error,
         isSuccess,
+        handleLoginClick,
 
         // For verify otp modal
         handleVerifyOtp,

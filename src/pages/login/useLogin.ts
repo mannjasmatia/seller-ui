@@ -1,24 +1,26 @@
 import { useEffect, useState } from "react";
-import { LoginModalProps } from "../../../types/login";
-import { useDispatch } from "react-redux";
-import { setIsLoggedIn, setUser } from "../../../store/userSlice";
-import { useLoginApi } from "../../../api/api-hooks/useAuthApi";
-import { customToast } from "../../../toast-config/customToast";
-import { InputType } from "../../../components/BasicComponents/Input";
+import { useDispatch, useSelector } from "react-redux";
+import { LoginModalProps } from "../../types/login";
+import { useLoginApi } from "../../api/api-hooks/useAuthApi";
+import { customToast } from "../../toast-config/customToast";
+import { setIsLoggedIn, setUser } from "../../store/userSlice";
+import { InputType } from "../../components/BasicComponents/Input";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
-const useLogin = ({ 
-    open, 
-    onClose,
-    handleSignupClick,
-    handleSuccessfullLogin
-  } : LoginModalProps)=>{
+const useLogin = ()=>{
     // Form state with initial values
       const [formState, setFormState] = useState({
         uid: '',
         password: '',
       });
 
+      const {lang} = useParams();
       const dispatch = useDispatch()
+      const navigate = useNavigate();
+      const [searchParams] = useSearchParams();
+      const redirectUrl = searchParams.get('redirectUrl') || '/';
+      
+      const isLoggedIn = useSelector((state: any) => state.user.isLoggedIn);
       
       const [errors, setErrors] = useState<Record<string, string>>({});
       const { data:loginData, mutate: login,isPending, isError, error, isSuccess } = useLoginApi();
@@ -28,15 +30,8 @@ const useLogin = ({
           customToast.success("Logged in successfully")
           dispatch(setIsLoggedIn(true))
           dispatch(setUser(loginData?.data?.response))
-          handleSuccessfullLogin()
         }
       },[isSuccess])
-    
-      useEffect(()=>{
-        if(isError){
-          console.log("error in api query while logging in : ", error)
-        }
-      },[isError])
     
       // Input field configurations
       const inputFields = [
@@ -78,21 +73,6 @@ const useLogin = ({
           window.removeEventListener('keydown', handleKeyPress);
         };
       }, [formState]);
-
-    
-      useEffect(() => {
-        // Add no-scroll class to body when modal is open
-        if (open) {
-          document.body.classList.add('overflow-hidden');
-        } else {
-          document.body.classList.remove('overflow-hidden');
-        }
-        
-        // Cleanup function to remove class when component unmounts
-        return () => {
-          document.body.classList.remove('overflow-hidden');
-        };
-      }, [open]);
     
       // Handle form input changes
       const handleChange = (value: any, event?: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -129,8 +109,11 @@ const useLogin = ({
       }
       // Handle social login
       const handleSocialLogin = (provider: 'google' | 'facebook' | 'linkedin') => {
-        console.log(`Logging in with ${provider}`);
         // Implement social login logic here
+      };
+
+      const handleSignupClick = () => {
+        navigate(`/${lang}/signup` , {replace:true});
       };
 
       return{
@@ -141,11 +124,13 @@ const useLogin = ({
         inputFields,
         handleChange,
         handleLogin,
+        handleSignupClick,
         handleSocialLogin,
         isPending,
         isError,
         error,
-        isSuccess
+        isSuccess,
+        isLoggedIn
       }
 }
 

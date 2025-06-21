@@ -1,16 +1,10 @@
-import { BuyerSignupModalProps } from '../../../types/signup';
+import Button from '../../components/BasicComponents/Button';
+import Input from '../../components/BasicComponents/Input';
 import useSignup from './useSignup';
-import VerifyOtpModal from '../VerifyOtp/VerifyOtpModal';
 import { useSelector } from 'react-redux';
-import Input from '../../../components/BasicComponents/Input';
-import Button from '../../../components/BasicComponents/Button';
+import VerifyOtpModal from '../../modals/verify-otp/VerifyOtpModal';
 
-const Signup: React.FC<BuyerSignupModalProps> = ({
-  open,
-  onClose,
-  handleLoginClick,
-  handleSuccesfullSignup
-}) => {
+const Signup=() => {
   const language = useSelector((state: any) => state.language?.value)['auth']['signup'];
 
   const {
@@ -24,6 +18,7 @@ const Signup: React.FC<BuyerSignupModalProps> = ({
     error,
     showVerifyOtpModal,
     setShowVerifyOtpModal,
+    handleLoginClick,
 
     // For verify otp modal
     handleVerifyOtp,
@@ -33,13 +28,7 @@ const Signup: React.FC<BuyerSignupModalProps> = ({
     handleResendOtp,
     expiryTime,
 
-  } = useSignup({
-    open,
-    onClose,
-    handleLoginClick,
-    handleSuccesfullSignup,
-    
-  });
+  } = useSignup();
   
   if (!open) return null;
 
@@ -78,16 +67,6 @@ const Signup: React.FC<BuyerSignupModalProps> = ({
         className="relative bg-gray-200 rounded-lg shadow-xl w-full max-w-md mx-4 transition-transform duration-300 animate-scaleIn"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
-          aria-label="Close"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
         
         <div className="p-6">
           {/* Logo */}
