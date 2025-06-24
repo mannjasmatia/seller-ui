@@ -340,6 +340,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               {cancelButtonText || language.cancel}
             </Button>
             }
+
           </div>
         </div>
       </div>

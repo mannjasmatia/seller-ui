@@ -1,348 +1,334 @@
-import { Country, State, City } from 'country-state-city';
-import { isValidPhoneNumber, CountryCode, getCountries, getCountryCallingCode } from 'libphonenumber-js';
-import { useEffect, useRef, useState } from "react";
-import { SelectOption } from '../../components/BasicComponents/types';
-import { useSignupApi, useVerifyOtpApi } from '../../api/api-hooks/useAuthApi';
+// src/pages/signup/useSignup.ts
+
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { 
+  useSendEmailVerificationApi, 
+  useSendPhoneVerificationApi 
+} from '../../api/api-hooks/useAuthApi';
+import { SignupPageProps, SignupStep1Data, SignupStep2Data } from './types.signup';
 import { customToast } from '../../toast-config/customToast';
-import { useNavigate } from 'react-router-dom';
-import { FormField } from '../../types/signup';
 
-const OTP_EXPIRY_TIME = 120; // 2 minutes
+type SignupStep = 'step1' | 'step2';
 
-const useSignup =() => {
-    // Get Canada states from the country-state-city library
-      const canadaStates = State.getStatesOfCountry('CA').map(state => ({
-        value: state.isoCode,
-        label: state.name
-      }));
-      
-      const navigate = useNavigate();
-    
-      // State for selected province and cities
-      const [selectedProvince, setSelectedProvince] = useState<string>('');
-      const [cities, setCities] = useState<SelectOption[]>([]);
-      const [phoneNumber, setPhoneNumber] = useState<string>('');
-      const [showVerifyOtpModal, setShowVerifyOtpModal] = useState(false);
-      const [expiryTime, setExpiryTime] = useState<number>(0);
-      const { mutate:verifyOtp, isPending, isError, error, isSuccess } = useVerifyOtpApi();
-      const { mutate:signup, isPending: isVerifyOtpPending , isError: isVerifyOtpError, error:verifyOtpError, isSuccess: verifyOtpSuccess } = useSignupApi();
-    
-      // Handle successful signup form filling and otp sending
-      useEffect(()=>{
-          if(isSuccess){
-            setShowVerifyOtpModal(true)
-            setExpiryTime(OTP_EXPIRY_TIME)
-          }
-        },[isSuccess])
+const useSignup = ({
+  handleLoginClick,
+  handleSuccessfulSignup
+}: SignupPageProps = {}) => {
+  const navigate = useNavigate();
+  const { lang } = useParams();
 
-        // handle signup along with otp verification
-      useEffect(()=>{
-          if(verifyOtpSuccess){
-            customToast.success("Signup successful, please login to continue")
-            navigate("/login" , {replace:true})
-            setShowVerifyOtpModal(false)
-          }
-        },[verifyOtpSuccess])
-    
-      // Update cities when province changes
-      useEffect(() => {
-        if (selectedProvince) {
-          const provinceCities = City.getCitiesOfState('CA', selectedProvince).map(city => ({
-            value: city.name,
-            label: city.name
-          }));
-          setCities(provinceCities);
-        } else {
-          setCities([]);
-        }
-      }, [selectedProvince]);
-    
-      // Password validation function
-      const validatePassword = (password: string) => {
-        // Check if password meets all criteria
-        const hasMinLength = password.length >= 8;
-        const hasDigit = /\d/.test(password);
-        const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password);
-        const hasUppercase = /[A-Z]/.test(password);
-    
-        if (!hasMinLength) return 'Password must be at least 8 characters';
-        if (!hasDigit) return 'Password must contain at least one digit';
-        if (!hasSpecialChar) return 'Password must contain at least one special character';
-        if (!hasUppercase) return 'Password must contain at least one uppercase letter';
-    
-        return true;
-      };
-    
-      // Dynamic form fields configuration
-      const formFields: FormField[] = [
-        {
-          name: 'fullName',
-          type: 'text',
-          placeholder: 'Full name :',
-          validation: {
-        required: true,
-        custom: (value: string) => {
-          if (!value.trim()) return 'Full Name Cannot Be Empty';
-          if (!/^[a-zA-Z\s]+$/.test(value)) return 'Name must contain only letters and spaces';
-          return true;
-        },
-        errorMessages: {
-          required: 'Full name is required'
-        }
-          },
-          gridCols: 'full'
-        },
-        {
-          name: 'phoneNumber',
-          type: 'tel',
-          placeholder: 'Phone number :',
-          validation: {
-        required: true,
-        custom: (value: string) => {
-          if (!value.trim()) return 'Phone Number Cannot Be Empty';
-          if (!/^\d{10}$/.test(value)) return 'Phone Number is Invalid';
-          return true;
-        },
-        errorMessages: {
-          required: 'Phone number is required'
-        }
-          },
-          gridCols: 'full',
-          component: (
-        <div className="relative">
-          <div className="absolute left-0 top-0 bottom-0 flex items-center pl-4 text-gray-500">
-            <span className="text-sm">+1</span>
-          </div>
-          <input
-            type="tel"
-            name="phoneNumber"
-            placeholder="Phone number :"
-            value={phoneNumber?.replace(/^\+1/, '') || ''} // Remove +1 from display if present
-            onChange={(e) => {
-          // Only allow digits
-          const digits = e.target.value.replace(/\D/g, '');
-          setPhoneNumber(`${digits}`);
-          handleChange(`${digits}`);
-            }}
-            className="block rounded-full border bg-white transition-all duration-200 placeholder:text-gray-400 text-base px-4 py-1 pl-12 w-full border-gray-300 focus:border-cb-red focus:ring-cb-red/30 focus:outline-none focus:ring-2"
-          />
-        </div>
-          )
-        },
-        {
-          name: 'state',
-          type: 'select',
-          placeholder: 'Province/state :',
-          options: canadaStates,
-          validation: {
-        required: true,
-        custom: (value: string) => {
-          if (!value.trim()) return 'State cannot be empty';
-          return true;
-        },
-        errorMessages: {
-          required: 'Province/state is required'
-        }
-          },
-          gridCols: 'half'
-        },
-        {
-          name: 'city',
-          type: 'select',
-          placeholder: 'City :',
-          options: cities,
-          validation: {
-        required: true,
-        custom: (value: string) => {
-          if (!value.trim()) return 'City cannot be empty';
-          return true;
-        },
-        errorMessages: {
-          required: 'City is required'
-        }
-          },
-          gridCols: 'half'
-        },
-        {
-          name: 'password',
-          type: 'password',
-          placeholder: 'Password :',
-          validation: {
-        required: true,
-        custom: validatePassword,
-        errorMessages: {
-          required: 'Password is required'
-        }
-          },
-          gridCols: 'half'
-        },
-        {
-          name: 'confirmPassword',
-          type: 'password',
-          placeholder: 'Confirm password :',
-          validation: {
-        required: true,
-        custom: (value: string) => {
-          if (formState.password !== value) return 'Passwords do not match';
-          return validatePassword(value);
-        },
-        errorMessages: {
-          required: 'Confirm password is required'
-        }
-          },
-          gridCols: 'half'
-        },
-      ];
-    
-      // Initial form state based on field definitions
-      const initialFormState = formFields.reduce((acc, field) => {
-        acc[field.name] = '';
-        return acc;
-      }, {} as Record<string, string>);
-    
-      const [formState, setFormState] = useState(initialFormState);
-      const [errors, setErrors] = useState<Record<string, string>>({});
-    
-      // Handle form input changes
-      const handleChange = (value: any, event?: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        let name = '';
-        
-        if (event) {
-          name = event.target.name;
-        } else if (typeof value === 'object' && value.target) {
-          name = value.target.name;
-          value = value.target.value;
-        } else {
-          // For custom components like PhoneInput that don't provide event
-          name = 'phoneNumber';
-        }
-        
-        setFormState((prev) => ({
-          ...prev,
-          [name]: value,
-        }));
-        
-        // If changing province, update selectedProvince state
-        if (name === 'state') {
-          setSelectedProvince(value);
-          // Reset city when province changes
-          setFormState(prev => ({
-            ...prev,
-            city: ''
-          }));
-        }
-        
-        // Clear error for this field when it's changed
-        if (errors[name]) {
-          setErrors(prev => {
-            const newErrors = {...prev};
-            delete newErrors[name];
-            return newErrors;
-          });
-        }
-      };
-    
-      // Validate the form
-      const validateForm = () => {
-        const newErrors: Record<string, string> = {};
-        
-        formFields.forEach(field => {
-          const { name, validation } = field;
-          if (!validation) return;
-          
-          const value = formState[name];
-          
-          // Required validation
-          if (validation.required && (!value || value.trim() === '')) {
-            newErrors[name] = validation.errorMessages?.required || 'This field is required';
-            return;
-          }
-          
-          // Skip other validations if empty and not required
-          if (!value && !validation.required) return;
-          
-          // Pattern validation
-          if (validation.pattern && !validation.pattern.test(value)) {
-            newErrors[name] = validation.errorMessages?.pattern || 'Invalid format';
-            return;
-          }
-          
-          // Special validation for password confirmation
-          if (formState.password !== formState.confirmPassword && formState.confirmPassword) {
-            newErrors.confirmPassword = 'Passwords do not match';
-          }
-    
-          // Special validation for phone number validation , Disabled as of now for testing purpose
-          // if(formState.phoneNumber){
-          //   console.log("Phone Number : ",formState.phoneNumber)
-          // const phoneNumber = `+1${formState.phoneNumber}`;
-          //   if (!isValidPhoneNumber(phoneNumber, 'CA')) {
-          //     newErrors.phoneNumber = 'Invalid phone number';
-          //   }
-          // }
-          
-          // MinLength validation
-          if (validation.minLength !== undefined && value.length < validation.minLength) {
-            newErrors[name] = validation.errorMessages?.minLength || `Must be at least ${validation.minLength} characters`;
-            return;
-          }
-        });
-        
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-      };
-      
+  // Form states
+  const [currentStep, setCurrentStep] = useState<SignupStep>('step1');
+  const [step1Data, setStep1Data] = useState<SignupStep1Data>({
+    companyName: '',
+    email: ''
+  });
+  const [step2Data, setStep2Data] = useState<SignupStep2Data>({
+    phoneNumber: '',
+    password: '',
+    confirmPassword: ''
+  });
+  
+  // Session token from email verification
+  const [sessionToken, setSessionToken] = useState<string>('');
+  
+  // Modal states
+  const [showEmailVerificationModal, setShowEmailVerificationModal] = useState(false);
+  const [showPhoneVerificationModal, setShowPhoneVerificationModal] = useState(false);
+  const [wasEmailModalForcedClose, setWasEmailModalForcedClose] = useState(false);
+  const [wasPhoneModalForcedClose, setWasPhoneModalForcedClose] = useState(false);
+  
+  // Form validation errors
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-      const handleLoginClick = () => {
-        navigate('/login', { replace: true });
-      };
-    
-      // Handle signup button click
-      const handleSignup = () => {
-        if (validateForm()) {
-          verifyOtp(formState.phoneNumber)
-        }
-      };
+  // API hooks
+  const {
+    mutate: sendEmailVerification,
+    isPending: isStep1Pending,
+    isError: isStep1Error,
+    error: step1Error,
+    isSuccess: isStep1Success,
+    data: step1ApiData
+  } = useSendEmailVerificationApi();
 
-      const handleVerifyOtp = (otp: string) => {
-        signup({...formState, otp})
+  const {
+    mutate: sendPhoneVerification,
+    isPending: isStep2Pending,
+    isError: isStep2Error,
+    error: step2Error,
+    isSuccess: isStep2Success,
+    data: step2ApiData
+  } = useSendPhoneVerificationApi();
+
+  // Handle successful email verification request
+  useEffect(() => {
+    if (!wasEmailModalForcedClose && isStep1Success && step1ApiData?.data?.response) {
+      const { sessionToken, email } = step1ApiData.data.response;
+      setSessionToken(sessionToken);
+      setShowEmailVerificationModal(true);
+      customToast.success('Verification code sent to your email');
+    }
+  }, [isStep1Success, step1Data]);
+
+  // Handle successful phone verification request
+  useEffect(() => {
+    if (!wasPhoneModalForcedClose && isStep2Success && step2ApiData?.data?.response) {
+      const { sessionToken: newSessionToken, phoneNumber } = step2ApiData.data.response;
+      setSessionToken(newSessionToken);
+      setShowPhoneVerificationModal(true);
+      customToast.success('Verification code sent to your phone');
+    }
+  }, [isStep2Success, step2Data]);
+
+  // Validate email format
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Validate phone number (10 digits)
+  const validatePhoneNumber = (phone: string): boolean => {
+    const phoneRegex = /^\d{10}$/;
+    return phoneRegex.test(phone.replace(/\D/g, ''));
+  };
+
+  // Validate password strength
+  const validatePassword = (password: string): string | true => {
+    const hasMinLength = password.length >= 8;
+    const hasDigit = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password);
+    const hasUppercase = /[A-Z]/.test(password);
+
+    if (!hasMinLength) return 'Password must be at least 8 characters';
+    if (!hasDigit) return 'Password must contain at least one digit';
+    if (!hasSpecialChar) return 'Password must contain at least one special character';
+    if (!hasUppercase) return 'Password must contain at least one uppercase letter';
+
+    return true;
+  };
+
+  // Validate step 1 form
+  const validateStep1 = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!step1Data.companyName.trim()) {
+      newErrors.companyName = 'Company name is required';
+    }
+
+    if (!step1Data.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(step1Data.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Validate step 2 form
+  const validateStep2 = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!step2Data.phoneNumber.trim()) {
+      newErrors.phoneNumber = 'Phone number is required';
+    } else if (!validatePhoneNumber(step2Data.phoneNumber)) {
+      newErrors.phoneNumber = 'Please enter a valid 10-digit phone number';
+    }
+
+    if (!step2Data.password) {
+      newErrors.password = 'Password is required';
+    } else {
+      const passwordValidation = validatePassword(step2Data.password);
+      if (passwordValidation !== true) {
+        newErrors.password = passwordValidation;
       }
+    }
 
-      const handleResendOtp=()=>{
-        verifyOtp(formState.phoneNumber)
-      }
+    if (!step2Data.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (step2Data.password !== step2Data.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
 
-      return{
-        formState,
-        formFields,
-        setFormState,
-        handleChange,
-        validateForm,
-        handleSignup,
-        errors,
-        setSelectedProvince,
-        setCities,
-        setPhoneNumber,
-        showVerifyOtpModal,
-        setShowVerifyOtpModal,
-        selectedProvince,
-        cities,
-        phoneNumber,
-        isPending,
-        isError,
-        error,
-        isSuccess,
-        handleLoginClick,
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-        // For verify otp modal
-        handleVerifyOtp,
-        isVerifyOtpPending,
-        isVerifyOtpError,
-        verifyOtpError,
-        handleResendOtp,
-        expiryTime,
-      }
+  // Handle step 1 form changes
+  const handleStep1Change = (value: any, event?: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const name = event?.target.name || 'email';
+    const fieldValue = event?.target.value || value;
+
+    setStep1Data(prev => ({
+      ...prev,
+      [name]: fieldValue
+    }));
+
+    // Clear error for this field
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  // Handle step 2 form changes
+  const handleStep2Change = (value: any, event?: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const name = event?.target.name || 'phoneNumber';
+    let fieldValue = event?.target.value || value;
+
+    // For phone number, only allow digits
+    if (name === 'phoneNumber') {
+      fieldValue = fieldValue.replace(/\D/g, '');
+    }
+
+    setStep2Data(prev => ({
+      ...prev,
+      [name]: fieldValue
+    }));
+
+    // Clear error for this field
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  // Handle step 1 submission
+  const handleStep1Submit = () => {
+    if (validateStep1()) {
+      setWasEmailModalForcedClose(false);
+      sendEmailVerification(step1Data);
+    }
+  };
+
+  // Handle step 2 submission
+  const handleStep2Submit = () => {
+    if (validateStep2()) {
+      setWasPhoneModalForcedClose(false);
+      sendPhoneVerification({
+        ...step2Data,
+        sessionToken
+      });
+    }
+  };
+
+  // Handle successful email verification
+  const handleEmailVerificationSuccess = (newSessionToken: string) => {
+    setSessionToken(newSessionToken);
+    setShowEmailVerificationModal(false);
+    setCurrentStep('step2');
+    customToast.success('Email verified successfully');
+  };
+
+  // Handle successful phone verification
+  const handlePhoneVerificationSuccess = () => {
+    setShowPhoneVerificationModal(false);
+    customToast.success('Account created successfully! Please sign in.');
+    if (handleSuccessfulSignup) {
+      handleSuccessfulSignup();
+    } else {
+      // Default behavior - navigate to login
+      navigate(`/${lang}/login`);
+    }
+    // Reset form
+    setCurrentStep('step1');
+    setStep1Data({ companyName: '', email: '' });
+    setStep2Data({ phoneNumber: '', password: '', confirmPassword: '' });
+    setSessionToken('');
+    setErrors({});
+  };
+
+  // Handle resend email verification
+  const handleResendEmailVerification = () => {
+    sendEmailVerification(step1Data);
+  };
+
+  // Handle resend phone verification
+  const handleResendPhoneVerification = () => {
+    sendPhoneVerification({
+      ...step2Data,
+      sessionToken
+    });
+  };
+
+  // Handle back to step 1
+  const handleBackToStep1 = () => {
+    setCurrentStep('step1');
+    setErrors({});
+  };
+
+  // Handle modal close
+  const handleClose = () => {
+    // Reset everything
+    setCurrentStep('step1');
+    setStep1Data({ companyName: '', email: '' });
+    setStep2Data({ phoneNumber: '', password: '', confirmPassword: '' });
+    setSessionToken('');
+    setErrors({});
+    setShowEmailVerificationModal(false);
+    setShowPhoneVerificationModal(false);
+    // Navigate to login page
+    navigate(`/${lang}/login`);
+  };
+
+  // Password requirements check
+  const getPasswordRequirements = () => {
+    const password = step2Data.password || '';
+    return {
+      hasMinLength: password.length >= 8,
+      hasDigit: /\d/.test(password),
+      hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password),
+      hasUppercase: /[A-Z]/.test(password)
+    };
+  };
+
+  return {
+    // State
+    currentStep,
+    step1Data,
+    step2Data,
+    sessionToken,
+    errors,
+    showEmailVerificationModal,
+    showPhoneVerificationModal,
     
-}
+    // API states
+    isStep1Pending,
+    isStep1Error,
+    step1Error,
+    isStep2Pending,
+    isStep2Error,
+    step2Error,
+    
+    // Handlers
+    handleStep1Change,
+    handleStep2Change,
+    handleStep1Submit,
+    handleStep2Submit,
+    handleEmailVerificationSuccess,
+    handlePhoneVerificationSuccess,
+    handleResendEmailVerification,
+    handleResendPhoneVerification,
+    handleBackToStep1,
+    handleClose,
+    handleLoginClick: handleLoginClick || (() => navigate(`/${lang}/login`)),
+    
+    // Utilities
+    getPasswordRequirements,
+    
+    // Modal handlers
+    setShowEmailVerificationModal,
+    setShowPhoneVerificationModal,
+    setWasEmailModalForcedClose,
+    setWasPhoneModalForcedClose 
+  };
+};
 
 export default useSignup;

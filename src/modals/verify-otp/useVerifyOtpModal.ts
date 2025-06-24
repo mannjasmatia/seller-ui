@@ -6,7 +6,7 @@ const MAX_RESEND_OTP_COUNT = 3; // Maximum number of OTP resend attempts
 
 const useVerifyOtpModal = ({
     open,
-    otpLength = 6,
+    otpLength = 4,
     onClose,
     handleVerifyOtpClick,
     expiryTime =0,

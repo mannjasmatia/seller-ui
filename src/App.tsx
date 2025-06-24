@@ -7,8 +7,10 @@ import { setIsLoggedIn } from "./store/userSlice"
 import Login from "./pages/login/Login"
 import PublicRoutes from "./routes/PublicRoutes"
 import PrivateRoutes from "./routes/PrivateRoutes"
-import Signup from "./pages/signup/Signup"
 import Dashboard from "./pages/dashboard/Dashboard"
+import Signup from "./pages/signup/Signup"
+import ProductsList from "./pages/products/ProductsList"
+import AddEditProduct from "./pages/AddEditProduct/AddEditProduct"
 
 interface Route {
   path: string
@@ -23,6 +25,9 @@ const publicRoutes: Route[] = [
 
 const privateRoutes: Route[] = [
   {path:"/dashboard", element:<Dashboard/>},
+  { path: "/products", element: <ProductsList /> },
+{ path: "/products/add/:step", element: <AddEditProduct /> },
+{ path: "/products/edit/:productId/:step", element: <AddEditProduct /> },
 ]
 
 // Helper to get the current language from localStorage or default to "en"
@@ -60,8 +65,10 @@ function AppContent() {
   // Handle authentication state changes
   useEffect(() => {
     if (isVerifySuccess) {
+      console.log(" =======> Token Verification successful");
       dispatch(setIsLoggedIn(true));
     } else if (isVerifyError) {
+      console.error(" =======> Token Verification failed:", verifyError);
       // Only show toast if we had previously been logged in
       if (isLoggedIn && !isInitialMount.current) {
         // customToast.error("Session expired, please login again");
@@ -115,7 +122,9 @@ function AppContent() {
           path={route.path} 
           element={
             // isLoggedIn ? (
-              <PrivateRoutes>{route.element}</PrivateRoutes>
+              <PrivateRoutes>
+                {route.element}
+              </PrivateRoutes>
             // ) : (
             //     <PublicRoutes>
             //       <Login />

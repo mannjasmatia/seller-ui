@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   LayoutDashboard, 
@@ -10,7 +9,20 @@ import {
   X,
   ChevronRight
 } from 'lucide-react';
-import { SidebarItem, SidebarProps } from './types.sidebar';
+
+interface SidebarItem {
+  id: string;
+  label: string;
+  icon: React.ComponentType<any>;
+  badge?: number;
+  isActive?: boolean;
+}
+
+interface SidebarProps {
+  items?: SidebarItem[];
+  onItemClick?: (item: SidebarItem) => void;
+  className?: string;
+}
 
 const defaultItems: SidebarItem[] = [
   {
@@ -47,12 +59,13 @@ const defaultItems: SidebarItem[] = [
 const Sidebar: React.FC<SidebarProps> = ({ 
   items = defaultItems, 
   onItemClick,
-  className = '' 
+  className = ''
 }) => {
   const [activeItem, setActiveItem] = useState<string>(
     items.find(item => item.isActive)?.id || items[0]?.id || ''
   );
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleItemClick = (item: SidebarItem) => {
     setActiveItem(item.id);
@@ -63,6 +76,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   const toggleMobile = () => {
     setIsMobileOpen(!isMobileOpen);
   };
+
+  // On desktop: collapsed by default, expand on hover
+  // On mobile: normal full-width behavior
+  const shouldShowExpanded = isHovered || isMobileOpen;
+  const sidebarWidth = shouldShowExpanded ? 'w-64 lg:w-64 xl:w-72' : 'w-64 lg:w-16';
 
   return (
     <>
@@ -84,14 +102,18 @@ const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       {/* Sidebar - Fixed positioning */}
-      <div className={`
-        fixed top-0 left-0 z-40 h-screen pt-20
-        w-64 lg:w-64 xl:w-72
-        bg-white
-        transform transition-transform duration-300 ease-in-out
-        ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        ${className}
-      `}>
+      <div 
+        className={`
+          fixed top-0 left-0 z-40 h-screen pt-20
+          ${sidebarWidth}
+          bg-white
+          transform transition-all duration-300 ease-in-out
+          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${className}
+        `}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <div className="h-full flex flex-col shadow-2xl rounded-r-2xl overflow-hidden">
           {/* Navigation Items */}
           <nav className="flex-1 py-6 overflow-y-auto">
@@ -105,52 +127,67 @@ const Sidebar: React.FC<SidebarProps> = ({
                     <button
                       onClick={() => handleItemClick(item)}
                       className={`
-                        w-full flex items-center justify-between px-4 py-3 rounded-lg
+                        w-full flex items-center px-4 py-3 rounded-lg
                         text-left transition-all duration-200 ease-in-out
-                        group hover:shadow-sm
+                        group hover:shadow-sm relative
                         ${isActive 
                           ? 'bg-cb-red text-white shadow-md' 
                           : 'text-gray-700 hover:bg-gray-50 hover:text-cb-red'
                         }
+                        ${!shouldShowExpanded ? 'justify-center' : 'justify-between'}
                       `}
+                      title={!shouldShowExpanded ? item.label : undefined}
                     >
-                      <div className="flex items-center space-x-3">
-                        <Icon 
-                          size={20} 
-                          className={`
-                            transition-colors duration-200
-                            ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-cb-red'}
-                          `}
-                        />
-                        <span className="font-medium text-sm lg:text-base">
-                          {item.label}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        {item.badge && (
-                          <span className={`
-                            px-2 py-1 text-xs font-semibold rounded-full
-                            ${isActive 
-                              ? 'bg-white text-cb-red' 
-                              : 'bg-cb-red text-white'
-                            }
-                          `}>
-                            {item.badge}
+                      <div className={`flex items-center ${shouldShowExpanded ? 'space-x-3' : ''}`}>
+                        <div className="relative">
+                          <Icon 
+                            size={20} 
+                            className={`
+                              transition-colors duration-200
+                              ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-cb-red'}
+                            `}
+                          />
+                          {/* Badge for collapsed state */}
+                          {!shouldShowExpanded && item.badge && (
+                            <span className="absolute -top-2 -right-2 px-1.5 py-0.5 text-xs font-semibold rounded-full bg-cb-red text-white min-w-[18px] h-[18px] flex items-center justify-center">
+                              {item.badge}
+                            </span>
+                          )}
+                        </div>
+                        
+                        {shouldShowExpanded && (
+                          <span className="font-medium text-sm lg:text-base whitespace-nowrap">
+                            {item.label}
                           </span>
                         )}
-                        
-                        <ChevronRight 
-                          size={16} 
-                          className={`
-                            transition-all duration-200
-                            ${isActive 
-                              ? 'text-white transform rotate-90' 
-                              : 'text-gray-400 group-hover:text-cb-red group-hover:translate-x-1'
-                            }
-                          `}
-                        />
                       </div>
+                      
+                      {shouldShowExpanded && (
+                        <div className="flex items-center space-x-2">
+                          {item.badge && (
+                            <span className={`
+                              px-2 py-1 text-xs font-semibold rounded-full
+                              ${isActive 
+                                ? 'bg-white text-cb-red' 
+                                : 'bg-cb-red text-white'
+                              }
+                            `}>
+                              {item.badge}
+                            </span>
+                          )}
+                          
+                          <ChevronRight 
+                            size={16} 
+                            className={`
+                              transition-all duration-200
+                              ${isActive 
+                                ? 'text-white transform rotate-90' 
+                                : 'text-gray-400 group-hover:text-cb-red group-hover:translate-x-1'
+                              }
+                            `}
+                          />
+                        </div>
+                      )}
                     </button>
                   </li>
                 );
@@ -159,21 +196,32 @@ const Sidebar: React.FC<SidebarProps> = ({
           </nav>
 
           {/* Footer */}
-          <div className="p-6 border-t border-gray-100 bg-white">
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+          {shouldShowExpanded && (
+            <div className="p-6 border-t border-gray-100 bg-white">
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                <div className="w-8 h-8 bg-cb-red rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-semibold">U</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    User Account
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    user@example.com
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Collapsed Footer - Just Avatar */}
+          {!shouldShowExpanded && (
+            <div className="p-4 border-t border-gray-100 bg-white flex justify-center">
               <div className="w-8 h-8 bg-cb-red rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-semibold">U</span>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  User Account
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  user@example.com
-                </p>
-              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </>

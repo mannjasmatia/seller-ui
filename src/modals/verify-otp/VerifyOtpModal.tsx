@@ -7,7 +7,7 @@ const VerifyOtpModal: React.FC<VerifyOtpModalProps> = ({
   open,
   title,
   description,
-  otpLength = 6,
+  otpLength = 4,
   onClose,
   handleVerifyOtpClick,
   expiryTime = 0,

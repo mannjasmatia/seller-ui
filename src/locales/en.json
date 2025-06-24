@@ -1,5 +1,89 @@
 {
-    "header":{
-        
+    "auth": {
+    "signup": {
+      "title": "Create Your Account",
+      "subtitle": "Join us today and start your journey",
+      "step1Title": "Company & Email Information",
+      "step2Title": "Personal Information",
+      "companyName": "Company Name",
+      "companyNamePlaceholder": "Enter your company name",
+      "email": "Email Address",
+      "emailPlaceholder": "Enter your email address",
+      "phoneNumber": "Phone Number",
+      "phoneNumberPlaceholder": "Enter your phone number",
+      "password": "Password",
+      "passwordPlaceholder": "Create a password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm your password",
+      "sendVerification": "Send Verification Code",
+      "completeSignup": "Complete Signup",
+      "alreadyHaveAccount": "Already have an account?",
+      "login": "Sign In",
+      "backToStep1": "Back to Step 1",
+      "passwordRequirements": {
+        "title": "Password must contain:",
+        "minLength": "At least 8 characters",
+        "oneNumber": "At least one number",
+        "oneSpecial": "At least one special character",
+        "oneUppercase": "At least one uppercase letter"
+      },
+      "errors": {
+        "companyNameRequired": "Company name is required",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email address",
+        "phoneRequired": "Phone number is required",
+        "phoneInvalid": "Please enter a valid phone number",
+        "passwordRequired": "Password is required",
+        "passwordWeak": "Password does not meet requirements",
+        "passwordMismatch": "Passwords do not match",
+        "genericError": "Something went wrong. Please try again."
+      },
+      "success": {
+        "emailSent": "Verification code sent to your email",
+        "phoneSent": "Verification code sent to your phone",
+        "accountCreated": "Account created successfully! Please sign in."
+      }
+    },
+    "login" : {
+      "welcomeBack": "Welcome Back",
+      "loginAgain": "Please login to your account",
+      "forgotPassword": "Forgot Password?",
+      "orContinueWith": "Or continue with",
+      "termsAndPrivacy": "By continuing, you agree to our Terms of Service and Privacy Policy.",
+      "login": "Login",
+      "loggingIn": "Logging in...",
+      "error": "An error occurred. Please try again.",
+      "dontHaveAccount": "Don't have an account?",
+      "signUp": "Sign Up"
+    },
+    "verifyOtp": {
+      "emailTitle": "Verify Your Email",
+      "emailDescription": "Enter the verification code sent to",
+      "phoneTitle": "Verify Your Phone",
+      "phoneDescription": "Enter the verification code sent to",
+      "verifyOtp": "Verify Code",
+      "verifying": "Verifying...",
+      "resendCode": "Resend Code",
+      "didntReceiveCode": "Didn't receive the code?",
+      "codeExpiresIn": "Code expires in",
+      "codeExpired": "Code has expired",
+      "securityNote": "Your information is secure with us",
+      "invalidOtp": "Invalid verification code",
+      "maxOtpExceeded": "Maximum resend attempts exceeded"
+    }
+  },
+  "confirmationModal": {
+        "title": "Confirmation",
+        "message": "Are you sure you want to proceed?",
+        "confirm": "Confirm",
+        "cancel": "Cancel"
+    },
+    "mediaModal": {
+        "title": "Media",
+        "close": "Close",
+        "previous": "Previous",
+        "next": "Next",
+        "loading": "Loading...",
+        "error": "Error loading media"
     }
 }

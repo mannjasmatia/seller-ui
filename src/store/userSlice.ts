@@ -10,7 +10,7 @@ interface UserState {
 }
 
 const initialState: UserState = {
-  isLoggedIn: true, // change to false
+  isLoggedIn: false, // change to false
   isAuthModalOpen: false,
   userInfo: null,
   preferredState: "",

@@ -84,3 +84,32 @@ export const useChangePasswordApi = () => {
             authApi.changePassword(data),
     });
 };
+
+// New signup flow hooks
+export const useSendEmailVerificationApi = () => {
+    return useMutation({
+        mutationFn: (data: { companyName: string; email: string }) => 
+            authApi.sendEmailVerification(data)
+    });
+};
+
+export const useVerifyEmailOtpApi = () => {
+    return useMutation({
+        mutationFn: (data: { sessionToken: string; otp: string }) => 
+            authApi.verifyEmailOtp(data)
+    });
+};
+
+export const useSendPhoneVerificationApi = () => {
+    return useMutation({
+        mutationFn: (data: { phoneNumber: string; password: string; confirmPassword: string; sessionToken: string }) => 
+            authApi.sendPhoneVerification(data)
+    });
+};
+
+export const useVerifyPhoneOtpApi = () => {
+    return useMutation({
+        mutationFn: (data: { sessionToken: string; otp: string }) => 
+            authApi.verifyPhoneOtp(data)
+    });
+};

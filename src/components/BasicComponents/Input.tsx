@@ -364,7 +364,7 @@ export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement | HTMLSel
     
     // Base classes for all inputs
     const baseInputClasses = `
-      block rounded-full border bg-white
+      block rounded-md border bg-white
       transition-all duration-200
       placeholder:text-gray-400
       ${sizeClasses}

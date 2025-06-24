@@ -1,10 +1,11 @@
+// types.sidebar.ts
 
 export interface SidebarItem {
   id: string;
   label: string;
-  icon: React.ElementType;
-  isActive?: boolean;
+  icon: React.ComponentType<any>;
   badge?: number;
+  isActive?: boolean;
 }
 
 export interface SidebarProps {

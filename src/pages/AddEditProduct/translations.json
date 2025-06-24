@@ -1,0 +1,211 @@
+{
+  "addProduct": {
+    "title": "Add New Product",
+    "subtitle": "Create a comprehensive product listing to attract customers"
+  },
+  "editProduct": {
+    "title": "Edit Product",
+    "subtitle": "Update your product information and details"
+  },
+  "steps": {
+    "productInfo": {
+      "title": "Product Information",
+      "description": "Basic details about your product"
+    },
+    "attributes": {
+      "title": "Product Attributes", 
+      "description": "Detailed specifications and features"
+    },
+    "images": {
+      "title": "Product Images",
+      "description": "Visual representation of your product"
+    },
+    "pricing": {
+      "title": "Pricing & Lead Time",
+      "description": "Set competitive pricing and delivery timeframes"
+    },
+    "variations": {
+      "title": "Variations & Customization",
+      "description": "Product variants and customizable options"
+    },
+    "services": {
+      "title": "Additional Services",
+      "description": "Extra services you provide with this product"
+    },
+    "description": {
+      "title": "Product Description",
+      "description": "Detailed description and additional images"
+    }
+  },
+  "productInfo": {
+    "name": "Product Name",
+    "namePlaceholder": "Enter product name",
+    "nameHint": "Choose a clear, descriptive name for your product",
+    "category": "Category",
+    "categoryPlaceholder": "Select a category",
+    "categoryHint": "Choose the most relevant category",
+    "about": "About Product",
+    "aboutPlaceholder": "Describe key features of your product",
+    "aboutHint": "Add at least 2 points about your product (max 10)",
+    "addAboutPoint": "Add Point",
+    "removePoint": "Remove Point",
+    "moq": "Minimum Order Quantity",
+    "moqPlaceholder": "Enter minimum quantity",
+    "moqHint": "Minimum number of units customers must order"
+  },
+  "attributes": {
+    "title": "Product Attributes",
+    "addAttributeGroup": "Add Attribute Group",
+    "attributeGroupName": "Attribute Group Name",
+    "attributeGroupPlaceholder": "e.g., Material Properties, Dimensions",
+    "addAttribute": "Add Attribute",
+    "attributeField": "Attribute Name",
+    "attributeFieldPlaceholder": "e.g., Material, Weight",
+    "attributeValue": "Value",
+    "attributeValuePlaceholder": "e.g., Stainless Steel, 2.5kg",
+    "removeAttribute": "Remove Attribute",
+    "removeGroup": "Remove Group",
+    "noAttributes": "No attributes added yet",
+    "addFirstGroup": "Add your first attribute group to get started"
+  },
+  "images": {
+    "title": "Product Images",
+    "uploadImages": "Upload Images",
+    "dragAndDrop": "Drag & drop images here or click to browse",
+    "supportedFormats": "Supported: JPG, PNG, WebP (Max 10 images)",
+    "currentImages": "Current Images",
+    "removeImage": "Remove Image",
+    "noImages": "No images uploaded yet",
+    "uploadFirst": "Upload your first image to get started",
+    "imageUploaded": "Image uploaded successfully",
+    "imageRemoved": "Image removed"
+  },
+  "pricing": {
+    "title": "Pricing & Lead Time",
+    "basePrice": "Base Price",
+    "basePriceePlaceholder": "Enter base price",
+    "basePriceHint": "Starting price for your product",
+    "quantityTiers": "Quantity Price Tiers",
+    "addTier": "Add Price Tier",
+    "tierMin": "Min Quantity",
+    "tierMax": "Max Quantity",
+    "tierPrice": "Price",
+    "tierMinPlaceholder": "e.g., 100",
+    "tierMaxPlaceholder": "e.g., 500",
+    "tierPricePlaceholder": "e.g., 95.00",
+    "removeTier": "Remove Tier",
+    "leadTime": "Lead Time",
+    "addLeadTime": "Add Lead Time Range",
+    "leadTimeMin": "Min Quantity",
+    "leadTimeMax": "Max Quantity", 
+    "leadTimeDays": "Delivery Days",
+    "leadTimeMinPlaceholder": "e.g., 1",
+    "leadTimeMaxPlaceholder": "e.g., 100",
+    "leadTimeDaysPlaceholder": "e.g., 7",
+    "removeLeadTime": "Remove Lead Time",
+    "lastTierNote": "Leave max empty for unlimited quantity",
+    "lastLeadTimeNote": "Leave max empty for unlimited quantity"
+  },
+  "variations": {
+    "title": "Product Variations",
+    "addVariation": "Add Variation",
+    "variationField": "Variation Type",
+    "variationFieldPlaceholder": "e.g., Color, Size, Model",
+    "variationValues": "Values",
+    "addValue": "Add Value",
+    "removeValue": "Remove Value",
+    "removeVariation": "Remove Variation",
+    "customizableOptions": "Customizable Options",
+    "addCustomOption": "Add Custom Option",
+    "customOptionName": "Option Name",
+    "customOptionPlaceholder": "e.g., Custom Engraving, Logo Print",
+    "customOptionQuantity": "Quantity (Optional)",
+    "customOptionQuantityPlaceholder": "e.g., 1",
+    "removeCustomOption": "Remove Option",
+    "noVariations": "No variations added yet",
+    "addFirstVariation": "Add your first variation to get started",
+    "noCustomOptions": "No custom options added yet",
+    "addFirstCustomOption": "Add your first custom option"
+  },
+  "services": {
+    "title": "Additional Services",
+    "addService": "Add Service",
+    "servicePlaceholder": "e.g., Installation Support, Warranty Extension",
+    "serviceHint": "Additional services you provide with this product",
+    "removeService": "Remove Service",
+    "noServices": "No services added yet",
+    "addFirstService": "Add your first service to get started"
+  },
+  "description": {
+    "title": "Product Description",
+    "points": "Description Points",
+    "addPoint": "Add Description Point",
+    "pointPlaceholder": "Describe a key feature or benefit",
+    "removePoint": "Remove Point",
+    "attributes": "Additional Attributes",
+    "addAttribute": "Add Attribute",
+    "attributeField": "Attribute Name",
+    "attributeFieldPlaceholder": "e.g., Warranty, Certification",
+    "attributeValue": "Value",
+    "attributeValuePlaceholder": "e.g., 2 Years, ISO 9001",
+    "removeAttribute": "Remove Attribute",
+    "images": "Description Images",
+    "uploadImages": "Upload Additional Images",
+    "dragAndDrop": "Drag & drop images here or click to browse",
+    "supportedFormats": "Supported: JPG, PNG, WebP",
+    "currentImages": "Current Images",
+    "removeImage": "Remove Image",
+    "noPoints": "No description points added yet",
+    "addFirstPoint": "Add your first description point",
+    "noAttributes": "No attributes added yet", 
+    "addFirstAttribute": "Add your first attribute",
+    "noImages": "No images uploaded yet",
+    "uploadFirstImage": "Upload your first image"
+  },
+  "navigation": {
+    "previous": "Previous",
+    "next": "Next",
+    "save": "Save",
+    "saveAndNext": "Save & Next",
+    "finish": "Finish",
+    "cancel": "Cancel",
+    "backToProducts": "Back to Products"
+  },
+  "progress": {
+    "step": "Step",
+    "of": "of",
+    "completion": "Completion",
+    "complete": "Complete"
+  },
+  "validation": {
+    "required": "This field is required",
+    "minLength": "Minimum {min} characters required",
+    "maxLength": "Maximum {max} characters allowed",
+    "minPoints": "Add at least {min} points",
+    "maxPoints": "Maximum {max} points allowed",
+    "validUrl": "Please enter a valid URL",
+    "validNumber": "Please enter a valid number",
+    "minValue": "Value must be at least {min}",
+    "maxValue": "Value must be at most {max}",
+    "duplicateField": "Duplicate field names are not allowed",
+    "overlappingRanges": "Ranges should not overlap",
+    "invalidRange": "Min value cannot be greater than max value"
+  },
+  "messages": {
+    "saveSuccess": "Changes saved successfully",
+    "createSuccess": "Product created successfully",
+    "updateSuccess": "Product updated successfully",
+    "saveError": "Failed to save changes",
+    "loadError": "Failed to load product data",
+    "uploadSuccess": "Files uploaded successfully",
+    "uploadError": "Failed to upload files",
+    "confirmCancel": "Are you sure you want to cancel? Unsaved changes will be lost.",
+    "confirmDelete": "Are you sure you want to delete this item?",
+    "autoSave": "Changes saved automatically",
+    "unsavedChanges": "You have unsaved changes"
+  },
+  "empty": {
+    "noData": "No data available",
+    "addFirst": "Add your first item to get started"
+  }
+}

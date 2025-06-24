@@ -30,6 +30,7 @@ const useLogin = ()=>{
           customToast.success("Logged in successfully")
           dispatch(setIsLoggedIn(true))
           dispatch(setUser(loginData?.data?.response))
+          navigate(`/${lang}/${redirectUrl}`, { replace: true });
         }
       },[isSuccess])
     
@@ -103,8 +104,13 @@ const useLogin = ()=>{
       // Handle login
       const handleLogin = async () => {
         if (validateForm()) {
+          const isEmail = formState.uid.includes('@');
           // setIsLoading(true);
-          login(formState)
+          if(isEmail){
+            login({email:formState.uid,password:formState.password})
+          }else{
+            login({phoneNumber:formState.uid,password:formState.password})
+          }
         }
       }
       // Handle social login

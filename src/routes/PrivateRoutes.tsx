@@ -14,12 +14,12 @@ const PrivateRoutes = ({ children }: { children: React.ReactNode }) => {
     const preferredLang = localStorage.getItem("lang") || lang || "en";
     
     // If the user is not logged in, redirect to the login page
-    useEffect(() => {
-        if (!isLoggedIn) {
-            console.log("User is not logged in, redirecting to login page");
-            navigate(`/${preferredLang}/login?redirect=${currentPath}`, { replace: true });
-        }
-    }, [isLoggedIn]);
+    // useEffect(() => {
+    //     if (!isLoggedIn) {
+    //         console.log("User is not logged in, redirecting to login page");
+    //         navigate(`/${preferredLang}/login?redirect=${currentPath}`, { replace: true });
+    //     }
+    // }, [isLoggedIn]);
 
     // Handle sidebar navigation
     const handleSidebarItemClick = (item: any) => {
@@ -48,7 +48,7 @@ const PrivateRoutes = ({ children }: { children: React.ReactNode }) => {
                 <Sidebar onItemClick={handleSidebarItemClick} />
                 
                 {/* Scrollable Main Content Area */}
-                <main className="flex-1 h-[90dvh] bg-white lg:ml-64 xl:ml-72 overflow-y-auto">
+                <main className="flex-1 h-[90dvh] bg-white overflow-y-auto lg:ml-16 transition-all duration-300 ease-in-out">
                     <div className="p-1 sm:p-2 lg:p-3">
                         <div className="p-6 bg-gray-50 rounded-2xl">
                           {children}

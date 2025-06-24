@@ -32,7 +32,7 @@ const DynamicImage: React.FC<ImageProps> = ({
   objectFit = 'cover',
   rounded = false,
   lazyLoad = true,
-  fallbackSrc = '/api/placeholder/400/320',
+  fallbackSrc = '/fallback-image.png',
   loading = 'lazy',
   overlay,
   zoomable = false,
@@ -199,7 +199,7 @@ const DynamicImage: React.FC<ImageProps> = ({
         )}
 
         {/* Error state */}
-        {isError && (
+        {isError && fallbackSrc==="none" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-gray-200 p-2">
             <p className="md:text-xs text-xs text-gray-600 mb-2">Failed to load image</p>
             <button

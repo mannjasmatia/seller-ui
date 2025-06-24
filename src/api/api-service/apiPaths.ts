@@ -12,13 +12,11 @@ interface ApiPaths {
 export const apiPaths: ApiPaths = {
     auth:{
         login:"api/v1/auth/login",
-        verifyOtp:"api/v1/auth/send-otp",
-        signup:"api/v1/auth/signup",
-        logout:"api/v1/auth/logout",
-        verifyTokens:"api/v1/auth/verify-tokens",
-        emailVerificationLink:"api/v1/auth/email-verification-link",
-        verifyEmail:"api/v1/auth/verify-email",
-        changePassword:"api/v1/auth/change-password",
+
+        sendEmailVerification: "api/v1/auth/send-email-verification",
+        verifyEmailOtp: "api/v1/auth/verify-email-otp",
+        sendPhoneVerification: "api/v1/auth/send-phone-verification",
+        verifyPhoneOtp: "api/v1/auth/verify-phone-otp",
     },
     category:{
         all:"api/v1/category",
@@ -34,6 +32,36 @@ export const apiPaths: ApiPaths = {
         all:"api/v1/product",
         product:"api/v1/product",
         productById:"api/v1/product",
+    },
+    productInfo: {
+        create: "api/v1/product-info",
+        update: "api/v1/product-info",
+        get: "api/v1/product-info",
+    },
+    productAttributes: {
+        sync: "api/v1/product-attributes",
+        get: "api/v1/product-attributes",
+    },
+    productImages: {
+        sync: "api/v1/product-images",
+        get: "api/v1/product-images",
+    },
+    productPricing: {
+        sync: "api/v1/product-pricing",
+        get: "api/v1/product-pricing",
+    },
+    productVariations: {
+        sync: "api/v1/product-variations",
+        get: "api/v1/product-variations",
+    },
+    productServices: {
+        sync: "api/v1/product-services",
+        get: "api/v1/product-services",
+    },
+    productDescription: {
+        sync: "api/v1/product-description",
+        syncImages: "api/v1/product-description",
+        get: "api/v1/product-description",
     },
     productStats:{
         popular:"api/v1/product-stats/popular",
