@@ -1,11 +1,10 @@
-// src/pages/products/components/steps/ProductDescriptionStep.tsx
+// src/pages/EditProduct/components/ProductDescriptionStep.tsx
 import React, { useRef, useState } from 'react';
 import { Plus, X, FileText, Upload, Image as ImageIcon } from 'lucide-react';
-import { ProductDescription, ProductDescriptionAttribute, ValidationError } from '../types.add-edit-product';
+import { ProductDescription, ProductDescriptionAttribute, ValidationError } from '../types.edit-product';
 import Button from '../../../components/BasicComponents/Button';
 import Input from '../../../components/BasicComponents/Input';
 import DynamicImage from '../../../components/BasicComponents/Image';
-
 
 interface ProductDescriptionStepProps {
   data: ProductDescription;
@@ -152,7 +151,6 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
                     variant="outline"
                     size="xs"
                     onClick={() => removePoint(index)}
-                    // leftIcon={<X className="h-3 w-3" />}
                     ariaLabel={translations.description.removePoint}
                   >
                     <X className="h-3 w-3" />
@@ -308,7 +306,6 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {data.images.map((imageUrl, index) => (
-                // Replace the image display in description section:
                 <div key={index} className="relative group">
                   <div className="h-[200px] w-full flex rounded-2xl items-center justify-center p-2 pb-0">
                     <div className="w-[90%] h-full rounded-2xl flex items-center justify-center overflow-hidden">

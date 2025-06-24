@@ -1,37 +1,31 @@
-// src/pages/products/hooks/useAddEditProduct.ts
+// src/pages/EditProduct/useEditProduct.ts
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   ProductStep, 
   ProductFormData, 
-  ProductInfo,
-  ProductAttributeGroup,
-  ProductPricing,
-  ProductVariations,
-  ProductDescription,
   ValidationError
-} from '../types.add-edit-product';
+} from './types.edit-product';
 import {
-  useCreateProductApi,
-  useUpdateProductInfoApi,
   useGetProductInfoApi,
-  useSyncProductAttributesApi,
+  useUpdateProductInfoApi,
   useGetProductAttributesApi,
-  useSyncProductImagesApi,
+  useSyncProductAttributesApi,
   useGetProductImagesApi,
-  useSyncProductPricingApi,
+  useSyncProductImagesApi,
   useGetProductPricingApi,
-  useSyncProductVariationsApi,
+  useSyncProductPricingApi,
   useGetProductVariationsApi,
-  useSyncProductServicesApi,
+  useSyncProductVariationsApi,
   useGetProductServicesApi,
+  useSyncProductServicesApi,
+  useGetProductDescriptionApi,
   useSyncProductDescriptionApi,
   useSyncProductDescriptionImagesApi,
-  useGetProductDescriptionApi,
   useGetCategoriesApi
-} from '../../../api/api-hooks/useAddEditProduct';
-import { customToast } from '../../../toast-config/customToast';
-import translations from '../translations.json';
+} from '../../api/api-hooks/useEditProductApi';
+import { customToast } from '../../toast-config/customToast';
+import translations from './translations.json';
 
 const STEPS: ProductStep[] = [
   'productInfo',
@@ -53,10 +47,9 @@ const STEP_ROUTES = {
   'description': 'description'
 };
 
-export const useAddEditProduct = () => {
+export const useEditProduct = () => {
   const navigate = useNavigate();
   const { productId, step: stepParam, lang } = useParams();
-  const isEditMode = !!productId;
   
   // Convert step param to step index
   const currentStepIndex = useMemo(() => {
@@ -67,13 +60,15 @@ export const useAddEditProduct = () => {
     return stepKey ? STEPS.indexOf(stepKey) : 0;
   }, [stepParam]);
 
+  const currentStep = STEPS[currentStepIndex];
+
   // State
   const [formData, setFormData] = useState<ProductFormData>({
     productInfo: {
       name: '',
       categoryId: '',
       about: ['', ''],
-      moq: 1
+    //   moq: 1
     },
     attributes: [],
     images: [],
@@ -99,16 +94,38 @@ export const useAddEditProduct = () => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [pendingNavigationStep, setPendingNavigationStep] = useState<number | null>(null);
 
-
-  // API Hooks
-  const { data: categoriesData } = useGetCategoriesApi();
+  // API Hooks - Main product info (always loaded)
   const { data: productData, isLoading: isLoadingProduct } = useGetProductInfoApi(productId || '');
-  
-  // Product Info APIs
-  const { mutate: createProduct, isPending: isCreatingProduct } = useCreateProductApi();
+  const { data: categoriesData } = useGetCategoriesApi();
+
+  // Step-specific API hooks - only enabled when on that step
+  const { data: attributesData, isLoading: isLoadingAttributes } = useGetProductAttributesApi(
+    productId || '', 
+    currentStep === 'attributes'
+  );
+  const { data: imagesData, isLoading: isLoadingImages } = useGetProductImagesApi(
+    productId || '', 
+    currentStep === 'images'
+  );
+  const { data: pricingData, isLoading: isLoadingPricing } = useGetProductPricingApi(
+    productId || '', 
+    currentStep === 'pricing'
+  );
+  const { data: variationsData, isLoading: isLoadingVariations } = useGetProductVariationsApi(
+    productId || '', 
+    currentStep === 'variations'
+  );
+  const { data: servicesData, isLoading: isLoadingServices } = useGetProductServicesApi(
+    productId || '', 
+    currentStep === 'services'
+  );
+  const { data: descriptionData, isLoading: isLoadingDescription } = useGetProductDescriptionApi(
+    productId || '', 
+    currentStep === 'description'
+  );
+
+  // Mutation hooks
   const { mutate: updateProductInfo, isPending: isUpdatingProductInfo } = useUpdateProductInfoApi();
-  
-  // Step-specific APIs
   const { mutate: syncAttributes, isPending: isSyncingAttributes } = useSyncProductAttributesApi();
   const { mutate: syncImages, isPending: isSyncingImages } = useSyncProductImagesApi();
   const { mutate: syncPricing, isPending: isSyncingPricing } = useSyncProductPricingApi();
@@ -117,105 +134,93 @@ export const useAddEditProduct = () => {
   const { mutate: syncDescription, isPending: isSyncingDescription } = useSyncProductDescriptionApi();
   const { mutate: syncDescriptionImages, isPending: isSyncingDescriptionImages } = useSyncProductDescriptionImagesApi();
 
-  // Load existing data for each step when in edit mode
-  const { data: attributesData } = useGetProductAttributesApi(productId || '');
-  const { data: imagesData } = useGetProductImagesApi(productId || '');
-  const { data: pricingData } = useGetProductPricingApi(productId || '');
-  const { data: variationsData } = useGetProductVariationsApi(productId || '');
-  const { data: servicesData } = useGetProductServicesApi(productId || '');
-  const { data: descriptionData } = useGetProductDescriptionApi(productId || '');
-
-  // Initialize form data when loading existing product
+  // Initialize form data when loading product info
   useEffect(() => {
-    if (isEditMode && productData?.data?.response) {
-      const product = productData.data.response;
+    if (productData) {
       setFormData(prev => ({
         ...prev,
         productInfo: {
-          name: product.name || '',
-          categoryId: product.categoryId || '',
-          about: product.about || ['', ''],
-          moq: product.moq || 1
+          name: productData.name || '',
+          categoryId: productData.categoryId._id || '',
+          about: productData.about || ['', ''],
+        //   moq: productData.moq || 1
         }
       }));
       
       // Set completed steps based on product completion status
-      if (product.stepStatus) {
+      if (productData.stepStatus) {
         const completed = new Set<number>();
         STEPS.forEach((step, index) => {
-          if (product.stepStatus[step]) {
+          if (productData.stepStatus[step]) {
             completed.add(index);
           }
         });
         setCompletedSteps(completed);
       }
     }
-  }, [productData, isEditMode]);
+  }, [productData]);
 
-  // Load step-specific data
+  // Load step-specific data when available
   useEffect(() => {
-    if (attributesData?.data?.response) {
+    if (attributesData) {
       setFormData(prev => ({
         ...prev,
-        attributes: attributesData.data.response || []
+        attributes: attributesData || []
       }));
     }
   }, [attributesData]);
 
   useEffect(() => {
-    if (imagesData?.data?.response) {
+    if (imagesData) {
       setFormData(prev => ({
         ...prev,
-        images: imagesData.data.response || []
+        images: imagesData || []
       }));
     }
   }, [imagesData]);
 
   useEffect(() => {
-    if (pricingData?.data?.response) {
-      const pricing = pricingData.data.response;
+    if (pricingData) {
       setFormData(prev => ({
         ...prev,
         pricing: {
-          basePrice: pricing.basePrice || 0,
-          quantityPriceTiers: pricing.quantityPriceTiers || [],
-          leadTime: pricing.leadTime || []
+          basePrice: pricingData.basePrice || 0,
+          quantityPriceTiers: pricingData.quantityPriceTiers || [],
+          leadTime: pricingData.leadTime || []
         }
       }));
     }
   }, [pricingData]);
 
   useEffect(() => {
-    if (variationsData?.data?.response) {
-      const variations = variationsData.data.response;
+    if (variationsData) {
       setFormData(prev => ({
         ...prev,
         variations: {
-          variations: variations.variations || [],
-          customizableOptions: variations.customizableOptions || []
+          variations: variationsData.variations || [],
+          customizableOptions: variationsData.customizableOptions || []
         }
       }));
     }
   }, [variationsData]);
 
   useEffect(() => {
-    if (servicesData?.data?.response) {
+    if (servicesData) {
       setFormData(prev => ({
         ...prev,
-        services: servicesData.data.response || []
+        services: servicesData || []
       }));
     }
   }, [servicesData]);
 
   useEffect(() => {
-    if (descriptionData?.data?.response) {
-      const description = descriptionData.data.response;
+    if (descriptionData) {
       setFormData(prev => ({
         ...prev,
         description: {
-          points: description.points || [],
-          attributes: description.attributes || [],
-          images: description.images || []
+          points: descriptionData.points || [],
+          attributes: descriptionData.attributes || [],
+          images: descriptionData.images || []
         }
       }));
     }
@@ -225,35 +230,29 @@ export const useAddEditProduct = () => {
   const navigateToStep = useCallback((stepIndex: number, force = false) => {
     if (hasUnsavedChanges && !force) {
       setPendingNavigationStep(stepIndex);
-      return false; // Indicates navigation was blocked
+      return false;
     }
     
     const step = STEPS[stepIndex];
     const route = STEP_ROUTES[step];
-    if (isEditMode) {
-      navigate(`/${lang}/products/edit/${productId}/${route}`);
-    } else {
-      navigate(`/${lang}/products/add/${route}`);
-    }
+    navigate(`/${lang}/products/edit/${productId}/${route}`);
     return true;
-  }, [navigate, lang, productId, isEditMode, hasUnsavedChanges]);
+  }, [navigate, lang, productId, hasUnsavedChanges]);
 
   const handleNavigationConfirm = useCallback((saveFirst: boolean) => {
-  if (saveFirst && pendingNavigationStep !== null) {
-    // Save first, then navigate
-    saveCurrentStep().then(success => {
-      if (success && pendingNavigationStep !== null) {
-        navigateToStep(pendingNavigationStep, true);
-      }
+    if (saveFirst && pendingNavigationStep !== null) {
+      saveCurrentStep().then(success => {
+        if (success && pendingNavigationStep !== null) {
+          navigateToStep(pendingNavigationStep, true);
+        }
+        setPendingNavigationStep(null);
+      });
+    } else if (pendingNavigationStep !== null) {
+      setHasUnsavedChanges(false);
+      navigateToStep(pendingNavigationStep, true);
       setPendingNavigationStep(null);
-    });
-  } else if (pendingNavigationStep !== null) {
-    // Navigate without saving
-    setHasUnsavedChanges(false);
-    navigateToStep(pendingNavigationStep, true);
-    setPendingNavigationStep(null);
-  }
-}, [pendingNavigationStep, navigateToStep]);
+    }
+  }, [pendingNavigationStep, navigateToStep]);
 
   const goToNextStep = useCallback(() => {
     if (currentStepIndex < STEPS.length - 1) {
@@ -284,7 +283,6 @@ export const useAddEditProduct = () => {
   // Validation functions
   const validateCurrentStep = useCallback((): boolean => {
     const errors: ValidationError[] = [];
-    const currentStep = STEPS[currentStepIndex];
 
     switch (currentStep) {
       case 'productInfo':
@@ -311,7 +309,7 @@ export const useAddEditProduct = () => {
 
     setValidationErrors(errors);
     return errors.length === 0;
-  }, [currentStepIndex, formData]);
+  }, [currentStep, formData]);
 
   // Helper function to create FormData for file uploads
   const createFormDataForImages = (images: string[], files?: FileList) => {
@@ -339,38 +337,26 @@ export const useAddEditProduct = () => {
       return false;
     }
 
-    const currentStep = STEPS[currentStepIndex];
+    if (!productId) {
+      customToast.error('Product ID not found');
+      return false;
+    }
 
     try {
       switch (currentStep) {
         case 'productInfo':
-          if (isEditMode) {
-            await new Promise((resolve, reject) => {
-              updateProductInfo(
-                { productId: productId!, data: formData.productInfo },
-                {
-                  onSuccess: resolve,
-                  onError: reject
-                }
-              );
-            });
-          } else {
-            const result = await new Promise((resolve, reject) => {
-              createProduct(formData.productInfo, {
+          await new Promise((resolve, reject) => {
+            updateProductInfo(
+              { productId, data: formData.productInfo },
+              {
                 onSuccess: resolve,
                 onError: reject
-              });
-            });
-            // Navigate to edit mode with the new product ID
-            const newProductId = (result as any)?.data?.response?._id;
-            if (newProductId) {
-              navigate(`/${lang}/products/edit/${newProductId}/${STEP_ROUTES[currentStep]}`);
-            }
-          }
+              }
+            );
+          });
           break;
 
         case 'attributes':
-          if (!productId) return false;
           await new Promise((resolve, reject) => {
             syncAttributes(
               { productId, data: { attributes: formData.attributes } },
@@ -380,7 +366,6 @@ export const useAddEditProduct = () => {
           break;
 
         case 'images':
-          if (!productId) return false;
           const imageFormData = createFormDataForImages(formData.images);
           await new Promise((resolve, reject) => {
             syncImages(
@@ -391,7 +376,6 @@ export const useAddEditProduct = () => {
           break;
 
         case 'pricing':
-          if (!productId) return false;
           await new Promise((resolve, reject) => {
             syncPricing(
               { productId, data: formData.pricing },
@@ -401,7 +385,6 @@ export const useAddEditProduct = () => {
           break;
 
         case 'variations':
-          if (!productId) return false;
           await new Promise((resolve, reject) => {
             syncVariations(
               { productId, data: formData.variations },
@@ -411,7 +394,6 @@ export const useAddEditProduct = () => {
           break;
 
         case 'services':
-          if (!productId) return false;
           await new Promise((resolve, reject) => {
             syncServices(
               { productId, data: { services: formData.services } },
@@ -421,7 +403,6 @@ export const useAddEditProduct = () => {
           break;
 
         case 'description':
-          if (!productId) return false;
           await new Promise((resolve, reject) => {
             syncDescription(
               { 
@@ -435,7 +416,6 @@ export const useAddEditProduct = () => {
             );
           });
           
-          // Save description images separately if there are any
           if (formData.description.images.length > 0) {
             const descImageFormData = createFormDataForImages(formData.description.images);
             await new Promise((resolve, reject) => {
@@ -457,22 +437,19 @@ export const useAddEditProduct = () => {
       return false;
     }
   }, [
-    currentStepIndex, 
-    formData, 
-    isEditMode, 
-    productId, 
+    currentStep,
+    currentStepIndex,
+    formData,
+    productId,
     validateCurrentStep,
     updateProductInfo,
-    createProduct,
     syncAttributes,
     syncImages,
     syncPricing,
     syncVariations,
     syncServices,
     syncDescription,
-    syncDescriptionImages,
-    navigate,
-    lang
+    syncDescriptionImages
   ]);
 
   const saveAndNext = useCallback(async () => {
@@ -489,13 +466,11 @@ export const useAddEditProduct = () => {
     try {
       const formDataObj = new FormData();
       
-      // Add existing images from state
       const existingImages = section === 'images' ? formData.images : formData.description.images;
       existingImages.forEach((image, index) => {
         formDataObj.append(`images[${index}]`, image);
       });
       
-      // Add new files
       Array.from(files).forEach(file => {
         formDataObj.append('files', file);
       });
@@ -534,12 +509,33 @@ export const useAddEditProduct = () => {
     return completedSteps.has(stepIndex);
   }, [completedSteps]);
 
-  // Check if current step has pending operations
-  const isPending = useMemo(() => {
-    const currentStep = STEPS[currentStepIndex];
+  // Check current step loading state
+  const isCurrentStepLoading = useMemo(() => {
     switch (currentStep) {
       case 'productInfo':
-        return isCreatingProduct || isUpdatingProductInfo;
+        return isLoadingProduct;
+      case 'attributes':
+        return isLoadingAttributes;
+      case 'images':
+        return isLoadingImages;
+      case 'pricing':
+        return isLoadingPricing;
+      case 'variations':
+        return isLoadingVariations;
+      case 'services':
+        return isLoadingServices;
+      case 'description':
+        return isLoadingDescription;
+      default:
+        return false;
+    }
+  }, [currentStep, isLoadingProduct, isLoadingAttributes, isLoadingImages, isLoadingPricing, isLoadingVariations, isLoadingServices, isLoadingDescription]);
+
+  // Check if current step has pending operations
+  const isPending = useMemo(() => {
+    switch (currentStep) {
+      case 'productInfo':
+        return isUpdatingProductInfo;
       case 'attributes':
         return isSyncingAttributes;
       case 'images':
@@ -555,18 +551,7 @@ export const useAddEditProduct = () => {
       default:
         return false;
     }
-  }, [
-    currentStepIndex,
-    isCreatingProduct,
-    isUpdatingProductInfo,
-    isSyncingAttributes,
-    isSyncingImages,
-    isSyncingPricing,
-    isSyncingVariations,
-    isSyncingServices,
-    isSyncingDescription,
-    isSyncingDescriptionImages
-  ]);
+  }, [currentStep, isUpdatingProductInfo, isSyncingAttributes, isSyncingImages, isSyncingPricing, isSyncingVariations, isSyncingServices, isSyncingDescription, isSyncingDescriptionImages]);
 
   // Progress calculation
   const progressPercentage = useMemo(() => {
@@ -580,11 +565,12 @@ export const useAddEditProduct = () => {
     hasUnsavedChanges,
     completedSteps,
     currentStepIndex,
-    isEditMode,
+    currentStep,
     isPending,
-    isLoadingProduct,
+    isCurrentStepLoading,
     progressPercentage,
-
+    
+    // Pending navigation
     pendingNavigationStep,
     handleNavigationConfirm,
     setPendingNavigationStep,
@@ -614,4 +600,4 @@ export const useAddEditProduct = () => {
   };
 };
 
-export default useAddEditProduct;
+export default useEditProduct;

@@ -1,16 +1,14 @@
-// src/api/api-hooks/useProductApi.ts
+// src/api/api-hooks/useEditProductApi.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import * as productApi from '../api/addEditProduct';
+import * as editProductApi from '../api/editProduct';
 
 // Product Info Hooks
-export const useCreateProductApi = () => {
-    const queryClient = useQueryClient();
-    
-    return useMutation({
-        mutationFn: (data: any) => productApi.createProduct(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['products'] });
-        }
+export const useGetProductInfoApi = (productId: string) => {
+    return useQuery({
+        queryKey: ['product', productId, 'info'],
+        queryFn: () => editProductApi.getProductInfo(productId),
+        enabled: !!productId,
+        select: (data: any) => data?.data?.response
     });
 };
 
@@ -19,133 +17,139 @@ export const useUpdateProductInfoApi = () => {
     
     return useMutation({
         mutationFn: ({ productId, data }: { productId: string; data: any }) =>
-            productApi.updateProductInfo(productId, data),
+            editProductApi.updateProductInfo(productId, data),
         onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['product', variables.productId] });
+            queryClient.invalidateQueries({ queryKey: ['product', variables.productId, 'info'] });
         }
     });
 };
 
-export const useGetProductInfoApi = (productId: string) => {
+// Product Attributes Hooks
+export const useGetProductAttributesApi = (productId: string, enabled: boolean = false) => {
     return useQuery({
-        queryKey: ['product', productId, 'info'],
-        queryFn: () => productApi.getProductInfo(productId),
-        enabled: !!productId
+        queryKey: ['product', productId, 'attributes'],
+        queryFn: () => editProductApi.getProductAttributes(productId),
+        enabled: !!productId && enabled,
+        select: (data: any) => data?.data?.response
     });
 };
 
-// Product Attributes Hooks
 export const useSyncProductAttributesApi = () => {
     const queryClient = useQueryClient();
     
     return useMutation({
         mutationFn: ({ productId, data }: { productId: string; data: any }) =>
-            productApi.syncProductAttributes(productId, data),
+            editProductApi.syncProductAttributes(productId, data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['product', variables.productId, 'attributes'] });
         }
     });
 };
 
-export const useGetProductAttributesApi = (productId: string) => {
+// Product Images Hooks
+export const useGetProductImagesApi = (productId: string, enabled: boolean = false) => {
     return useQuery({
-        queryKey: ['product', productId, 'attributes'],
-        queryFn: () => productApi.getProductAttributes(productId),
-        enabled: !!productId
+        queryKey: ['product', productId, 'images'],
+        queryFn: () => editProductApi.getProductImages(productId),
+        enabled: !!productId && enabled,
+        select: (data: any) => data?.data?.response
     });
 };
 
-// Product Images Hooks
 export const useSyncProductImagesApi = () => {
     const queryClient = useQueryClient();
     
     return useMutation({
         mutationFn: ({ productId, formData }: { productId: string; formData: FormData }) =>
-            productApi.syncProductImages(productId, formData),
+            editProductApi.syncProductImages(productId, formData),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['product', variables.productId, 'images'] });
         }
     });
 };
 
-export const useGetProductImagesApi = (productId: string) => {
+// Product Pricing Hooks
+export const useGetProductPricingApi = (productId: string, enabled: boolean = false) => {
     return useQuery({
-        queryKey: ['product', productId, 'images'],
-        queryFn: () => productApi.getProductImages(productId),
-        enabled: !!productId
+        queryKey: ['product', productId, 'pricing'],
+        queryFn: () => editProductApi.getProductPricing(productId),
+        enabled: !!productId && enabled,
+        select: (data: any) => data?.data?.response
     });
 };
 
-// Product Pricing Hooks
 export const useSyncProductPricingApi = () => {
     const queryClient = useQueryClient();
     
     return useMutation({
         mutationFn: ({ productId, data }: { productId: string; data: any }) =>
-            productApi.syncProductPricing(productId, data),
+            editProductApi.syncProductPricing(productId, data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['product', variables.productId, 'pricing'] });
         }
     });
 };
 
-export const useGetProductPricingApi = (productId: string) => {
+// Product Variations Hooks
+export const useGetProductVariationsApi = (productId: string, enabled: boolean = false) => {
     return useQuery({
-        queryKey: ['product', productId, 'pricing'],
-        queryFn: () => productApi.getProductPricing(productId),
-        enabled: !!productId
+        queryKey: ['product', productId, 'variations'],
+        queryFn: () => editProductApi.getProductVariations(productId),
+        enabled: !!productId && enabled,
+        select: (data: any) => data?.data?.response
     });
 };
 
-// Product Variations Hooks
 export const useSyncProductVariationsApi = () => {
     const queryClient = useQueryClient();
     
     return useMutation({
         mutationFn: ({ productId, data }: { productId: string; data: any }) =>
-            productApi.syncProductVariations(productId, data),
+            editProductApi.syncProductVariations(productId, data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['product', variables.productId, 'variations'] });
         }
     });
 };
 
-export const useGetProductVariationsApi = (productId: string) => {
+// Product Services Hooks
+export const useGetProductServicesApi = (productId: string, enabled: boolean = false) => {
     return useQuery({
-        queryKey: ['product', productId, 'variations'],
-        queryFn: () => productApi.getProductVariations(productId),
-        enabled: !!productId
+        queryKey: ['product', productId, 'services'],
+        queryFn: () => editProductApi.getProductServices(productId),
+        enabled: !!productId && enabled,
+        select: (data: any) => data?.data?.response
     });
 };
 
-// Product Services Hooks
 export const useSyncProductServicesApi = () => {
     const queryClient = useQueryClient();
     
     return useMutation({
         mutationFn: ({ productId, data }: { productId: string; data: any }) =>
-            productApi.syncProductServices(productId, data),
+            editProductApi.syncProductServices(productId, data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['product', variables.productId, 'services'] });
         }
     });
 };
 
-export const useGetProductServicesApi = (productId: string) => {
+// Product Description Hooks
+export const useGetProductDescriptionApi = (productId: string, enabled: boolean = false) => {
     return useQuery({
-        queryKey: ['product', productId, 'services'],
-        queryFn: () => productApi.getProductServices(productId),
-        enabled: !!productId
+        queryKey: ['product', productId, 'description'],
+        queryFn: () => editProductApi.getProductDescription(productId),
+        enabled: !!productId && enabled,
+        select: (data: any) => data?.data?.response
     });
 };
 
-// Product Description Hooks
 export const useSyncProductDescriptionApi = () => {
     const queryClient = useQueryClient();
     
     return useMutation({
         mutationFn: ({ productId, data }: { productId: string; data: any }) =>
-            productApi.syncProductDescription(productId, data),
+            editProductApi.syncProductDescription(productId, data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['product', variables.productId, 'description'] });
         }
@@ -157,18 +161,10 @@ export const useSyncProductDescriptionImagesApi = () => {
     
     return useMutation({
         mutationFn: ({ productId, formData }: { productId: string; formData: FormData }) =>
-            productApi.syncProductDescriptionImages(productId, formData),
+            editProductApi.syncProductDescriptionImages(productId, formData),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['product', variables.productId, 'description'] });
         }
-    });
-};
-
-export const useGetProductDescriptionApi = (productId: string) => {
-    return useQuery({
-        queryKey: ['product', productId, 'description'],
-        queryFn: () => productApi.getProductDescription(productId),
-        enabled: !!productId
     });
 };
 
@@ -176,9 +172,9 @@ export const useGetProductDescriptionApi = (productId: string) => {
 export const useGetCategoriesApi = () => {
     return useQuery({
         queryKey: ['categories'],
-        queryFn: () => productApi.getCategories(),
+        queryFn: () => editProductApi.getCategories(),
         staleTime: 5 * 60 * 1000, // 5 minutes
-        select: (data:any) => {
+        select: (data: any) => {
             return data?.data?.response
         }
     });

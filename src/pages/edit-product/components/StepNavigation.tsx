@@ -1,7 +1,7 @@
-// src/pages/products/components/StepNavigation.tsx
+// src/pages/EditProduct/components/StepNavigation.tsx
 import React from 'react';
 import { Check, ChevronRight } from 'lucide-react';
-import { ProductStep } from '../types.add-edit-product';
+import { ProductStep } from '../types.edit-product';
 
 interface StepNavigationProps {
   steps: ProductStep[];
@@ -9,7 +9,6 @@ interface StepNavigationProps {
   completedSteps: Set<number>;
   onStepClick: (stepIndex: number) => void;
   translations: any;
-  isEditMode: boolean;
 }
 
 const StepNavigation: React.FC<StepNavigationProps> = ({
@@ -17,19 +16,16 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
   currentStep,
   completedSteps,
   onStepClick,
-  translations,
-  isEditMode
+  translations
 }) => {
   const getStepStatus = (stepIndex: number) => {
-  if (completedSteps.has(stepIndex)) return 'completed';
-  if (stepIndex === currentStep) return 'current';
-  // Allow access to all steps in both add and edit mode
-  return 'available';
-};
+    if (completedSteps.has(stepIndex)) return 'completed';
+    if (stepIndex === currentStep) return 'current';
+    return 'available';
+  };
 
   const getStepIcon = (stepIndex: number, status: string) => {
-  // Add incomplete step highlighting for edit mode
-    const isIncomplete = isEditMode && !completedSteps.has(stepIndex) && stepIndex !== currentStep;
+    const isIncomplete = !completedSteps.has(stepIndex) && stepIndex !== currentStep;
     
     if (status === 'completed') {
       return (
@@ -63,12 +59,8 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
   };
 
   const handleStepClick = (stepIndex: number) => {
-  const navigationResult = onStepClick(stepIndex);
-  // onStepClick now returns boolean indicating if navigation was blocked
-};
-
-// Update the clickable logic - make all steps clickable
-const isClickable = true; // All steps are now always clickable
+    onStepClick(stepIndex);
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
@@ -91,14 +83,13 @@ const isClickable = true; // All steps are now always clickable
         <nav className="space-y-4">
           {steps.map((step, index) => {
             const status = getStepStatus(index);
-            const isClickable = status === 'available' || status === 'completed' || status === 'current';
             
             return (
               <div key={step} className="flex items-start">
                 <div className="flex-shrink-0 mr-4">
                   <div 
                     onClick={() => handleStepClick(index)}
-                    className={isClickable ? 'cursor-pointer' : ''}
+                    className="cursor-pointer"
                   >
                     {getStepIcon(index, status)}
                   </div>
@@ -107,14 +98,12 @@ const isClickable = true; // All steps are now always clickable
                 <div className="flex-1 min-w-0">
                   <div 
                     className={`
-                      text-sm font-medium mb-1 transition-colors
+                      text-sm font-medium mb-1 transition-colors cursor-pointer
                       ${status === 'current' 
                         ? 'text-cb-red' 
                         : status === 'completed'
                         ? 'text-green-600'
-                        : status === 'available'
-                        ? 'text-gray-900 hover:text-cb-red cursor-pointer'
-                        : 'text-gray-500'
+                        : 'text-gray-900 hover:text-cb-red'
                       }
                     `}
                     onClick={() => handleStepClick(index)}

@@ -1,11 +1,9 @@
-// src/pages/products/AddEditProduct.tsx
-import React from 'react';
+// src/pages/EditProduct/EditProduct.tsx
+import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Save, CheckCircle } from 'lucide-react';
 import Button from '../../components/BasicComponents/Button';
 import ConfirmationModal from '../../modals/ConfirmationModal';
-import { useState } from 'react';
-import { customToast } from '../../toast-config/customToast';
-import useAddEditProduct from './components/useAddEditProduct';
+import { useEditProduct } from './useEditProduct';
 import ProductInfoStep from './components/ProductInfoStep';
 import ProductAttributesStep from './components/ProductAttributesStep';
 import ProductImagesStep from './components/ProductImagesStep';
@@ -15,16 +13,16 @@ import ProductServicesStep from './components/ProductServicesStep';
 import ProductDescriptionStep from './components/ProductDescriptionStep';
 import StepNavigation from './components/StepNavigation';
 
-const AddEditProduct: React.FC = () => {
+const EditProduct: React.FC = () => {
   const {
     formData,
     validationErrors,
     hasUnsavedChanges,
     completedSteps,
     currentStepIndex,
-    isEditMode,
+    currentStep,
     isPending,
-    isLoadingProduct,
+    isCurrentStepLoading,
     progressPercentage,
     categories,
     pendingNavigationStep,
@@ -34,33 +32,29 @@ const AddEditProduct: React.FC = () => {
     goToNextStep,
     goToPreviousStep,
     updateFormData,
-    validateCurrentStep,
     saveCurrentStep,
     saveAndNext,
     uploadImages,
     isStepCompleted,
     STEPS,
     translations
-  } = useAddEditProduct();
+  } = useEditProduct();
 
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [showNavigationModal, setShowNavigationModal] = useState(false);
 
-
-  // Loading state
-  if (isLoadingProduct) {
+  // Loading state for current step
+  if (isCurrentStepLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cb-red mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading product...</p>
+          <p className="text-gray-600">Loading step data...</p>
         </div>
       </div>
     );
   }
 
-  const currentStep = STEPS[currentStepIndex];
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === STEPS.length - 1;
 
@@ -74,8 +68,7 @@ const AddEditProduct: React.FC = () => {
   const handleNext = async () => {
     if (isLastStep) {
       await saveCurrentStep();
-      customToast.success(isEditMode ? translations.messages.updateSuccess : translations.messages.createSuccess);
-      // Navigate to products list or product detail
+      // Could navigate to products list or show completion message
       return;
     }
     await saveAndNext();
@@ -85,7 +78,6 @@ const AddEditProduct: React.FC = () => {
     if (hasUnsavedChanges) {
       setShowCancelModal(true);
     } else {
-      // Navigate back to products list
       window.history.back();
     }
   };
@@ -93,12 +85,6 @@ const AddEditProduct: React.FC = () => {
   const confirmCancel = () => {
     setShowCancelModal(false);
     window.history.back();
-  };
-
-  const confirmNavigation = () => {
-    setShowUnsavedModal(false);
-    // Proceed with navigation without saving
-    // This would need to be enhanced to remember the target step
   };
 
   const renderCurrentStep = () => {
@@ -123,7 +109,7 @@ const AddEditProduct: React.FC = () => {
           <ProductAttributesStep
             {...stepProps}
             data={formData.attributes}
-            onUpdate={(data) => updateFormData('attributes', { ...formData.attributes, ...data })}
+            onUpdate={(data) => updateFormData('attributes', data)}
           />
         );
       
@@ -187,25 +173,24 @@ const AddEditProduct: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                {isEditMode ? translations.editProduct.title : translations.addProduct.title}
+                {translations.editProduct.title}
               </h1>
               <p className="text-gray-600 mt-2">
-                {isEditMode ? translations.editProduct.subtitle : translations.addProduct.subtitle}
+                {translations.editProduct.subtitle}
               </p>
             </div>
             
             <div className="flex items-center gap-4">
-              {isEditMode && (
-                <div className="text-right">
-                  <p className="text-sm text-gray-600">{translations.progress.completion}</p>
-                  <p className="text-2xl font-bold text-cb-red">{progressPercentage}%</p>
-                </div>
-              )}
+              <div className="text-right">
+                <p className="text-sm text-gray-600">{translations.progress.completion}</p>
+                <p className="text-2xl font-bold text-cb-red">{progressPercentage}%</p>
+              </div>
               
               <Button
                 variant="outline"
                 onClick={handleCancel}
                 disabled={isPending}
+                leftIcon={<ArrowLeft className="h-4 w-4" />}
               >
                 {translations.navigation.cancel}
               </Button>
@@ -223,7 +208,6 @@ const AddEditProduct: React.FC = () => {
                 completedSteps={completedSteps}
                 onStepClick={handleNavigation}
                 translations={translations}
-                isEditMode={isEditMode}
               />
             </div>
           </div>
@@ -323,22 +307,12 @@ const AddEditProduct: React.FC = () => {
       {/* Confirmation Modals */}
       <ConfirmationModal
         open={showCancelModal}
-        title="Cancel Product Creation"
+        title="Cancel Product Editing"
         description={translations.messages.confirmCancel}
         confirmButtonText="Yes, Cancel"
         cancelButtonText="Continue Editing"
         onClose={() => setShowCancelModal(false)}
         onConfirm={confirmCancel}
-      />
-
-      <ConfirmationModal
-        open={showUnsavedModal}
-        title="Unsaved Changes"
-        description={translations.messages.unsavedChanges}
-        confirmButtonText="Continue Without Saving"
-        cancelButtonText="Stay Here"
-        onClose={() => setShowUnsavedModal(false)}
-        onConfirm={confirmNavigation}
       />
 
       <ConfirmationModal
@@ -356,11 +330,11 @@ const AddEditProduct: React.FC = () => {
         }}
         onConfirm={() => {
           setShowNavigationModal(false);
-          handleNavigationConfirm(true); // Save first
+          handleNavigationConfirm(true);
         }}
       />
     </div>
   );
 };
 
-export default AddEditProduct;
+export default EditProduct;

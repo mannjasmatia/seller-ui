@@ -1,7 +1,7 @@
-// src/pages/products/components/steps/ProductInfoStep.tsx
+// src/pages/EditProduct/components/ProductInfoStep.tsx
 import React from 'react';
 import { Plus, X, HelpCircle } from 'lucide-react';
-import { Category, ProductInfo, ValidationError } from '../types.add-edit-product';
+import { Category, ProductInfo, ValidationError } from '../types.edit-product';
 import Input from '../../../components/BasicComponents/Input';
 import Button from '../../../components/BasicComponents/Button';
 import CategorySearchDropdown from './CategorySearchDropdown';
@@ -31,6 +31,8 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({
     onUpdate({ about: newAbout });
   };
 
+  console.log("ProductInfoStep data:", data);
+
   const addAboutPoint = () => {
     if (data.about.length < 10) {
       onUpdate({ about: [...data.about, ''] });
@@ -43,11 +45,6 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({
       onUpdate({ about: newAbout });
     }
   };
-
-  const categoryOptions = categories.map(category => ({
-    value: category._id,
-    label: category.name
-  }));
 
   return (
     <div className="space-y-8">
@@ -141,18 +138,20 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({
       </div>
 
       {/* MOQ */}
-      <div>
-        <Input
-          type="number"
-          label={translations.productInfo.moq}
-          placeholder={translations.productInfo.moqPlaceholder}
-          value={data.moq}
-          onChange={(value) => onUpdate({ moq: Number(value) || 1 })}
-          hint={translations.productInfo.moqHint}
-          fullWidth
-          validation={{ required: true, min: 1 }}
-        />
-      </div>
+      {data && data?.moq && 
+        <div>
+            <Input
+            type="number"
+            label={translations.productInfo.moq}
+            placeholder={translations.productInfo.moqPlaceholder}
+            value={data.moq}
+            onChange={(value) => onUpdate({ moq: Number(value) || 1 })}
+            hint={translations.productInfo.moqHint}
+            fullWidth
+            validation={{ required: true, min: 1 }}
+            />
+        </div>
+        }
     </div>
   );
 };

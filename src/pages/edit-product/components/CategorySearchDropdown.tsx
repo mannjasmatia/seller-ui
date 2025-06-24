@@ -1,4 +1,4 @@
-// src/pages/products/components/CategorySearchDropdown.tsx
+// src/pages/EditProduct/components/CategorySearchDropdown.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, Search, Check } from 'lucide-react';
 import { useFetchAllCategoriesApi } from '../../../api/api-hooks/useCategoryApi';
@@ -73,7 +73,7 @@ const CategorySearchDropdown: React.FC<CategorySearchDropdownProps> = ({
   }, [isOpen]);
 
   const selectedCategory = allCategories.find(cat => cat._id === value);
-  const hasMore = categoriesData?.data?.response?.hasNext;
+  const hasMore = categoriesData?.hasNext;
 
   const handleLoadMore = () => {
     if (hasMore && !isLoading) {

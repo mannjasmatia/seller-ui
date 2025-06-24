@@ -1,8 +1,4 @@
 {
-  "addProduct": {
-    "title": "Add New Product",
-    "subtitle": "Create a comprehensive product listing to attract customers"
-  },
   "editProduct": {
     "title": "Edit Product",
     "subtitle": "Update your product information and details"
@@ -83,7 +79,7 @@
   "pricing": {
     "title": "Pricing & Lead Time",
     "basePrice": "Base Price",
-    "basePriceePlaceholder": "Enter base price",
+    "basePricePlaceholder": "Enter base price",
     "basePriceHint": "Starting price for your product",
     "quantityTiers": "Quantity Price Tiers",
     "addTier": "Add Price Tier",
@@ -193,7 +189,6 @@
   },
   "messages": {
     "saveSuccess": "Changes saved successfully",
-    "createSuccess": "Product created successfully",
     "updateSuccess": "Product updated successfully",
     "saveError": "Failed to save changes",
     "loadError": "Failed to load product data",

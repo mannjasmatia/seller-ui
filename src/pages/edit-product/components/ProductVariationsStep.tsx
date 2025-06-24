@@ -1,7 +1,7 @@
-// src/pages/products/components/steps/ProductVariationsStep.tsx
+// src/pages/EditProduct/components/ProductVariationsStep.tsx
 import React from 'react';
 import { Plus, X, Settings, Tag } from 'lucide-react';
-import { CustomizableOption, ProductVariation, ProductVariations, ValidationError } from '../types.add-edit-product';
+import { CustomizableOption, ProductVariation, ProductVariations, ValidationError } from '../types.edit-product';
 import Button from '../../../components/BasicComponents/Button';
 import Input from '../../../components/BasicComponents/Input';
 
@@ -135,7 +135,6 @@ const ProductVariationsStep: React.FC<ProductVariationsStepProps> = ({
                     variant="outline"
                     size="xs"
                     onClick={() => removeVariation(variationIndex)}
-                    // leftIcon={<X className="h-3 w-3" />}
                     ariaLabel={translations.variations.removeVariation}
                   >
                     <X className="h-3 w-3" />
@@ -179,12 +178,10 @@ const ProductVariationsStep: React.FC<ProductVariationsStepProps> = ({
                             variant="outline"
                             size="sm"
                             onClick={() => removeVariationValue(variationIndex, valueIndex)}
-                            // leftIcon={<X className="h-4 w-4" />}
                             ariaLabel={translations.variations.removeValue}
                           >
-                          <X className="h-4 w-4" />
-                        </Button>
-
+                            <X className="h-4 w-4" />
+                          </Button>
                         )}
                       </div>
                     ))}
@@ -247,7 +244,6 @@ const ProductVariationsStep: React.FC<ProductVariationsStepProps> = ({
                     variant="outline"
                     size="xs"
                     onClick={() => removeCustomOption(index)}
-                    // leftIcon={<X className="h-3 w-3" />}
                     ariaLabel={translations.variations.removeCustomOption}
                   >
                     <X className="h-3 w-3" />

@@ -1,7 +1,7 @@
-// src/pages/products/components/steps/ProductImagesStep.tsx
+// src/pages/EditProduct/components/ProductImagesStep.tsx
 import React, { useRef, useState } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
-import { ValidationError } from '../types.add-edit-product';
+import { ValidationError } from '../types.edit-product';
 import DynamicImage from '../../../components/BasicComponents/Image';
 import Button from '../../../components/BasicComponents/Button';
 
@@ -135,7 +135,6 @@ const ProductImagesStep: React.FC<ProductImagesStepProps> = ({
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {data.map((imageUrl, index) => (
-              // Replace the image display section in the map function:
               <div key={index} className="relative group">
                 <div className="h-[240px] w-full flex rounded-2xl items-center justify-center p-2 pb-0">
                   <div className="w-[90%] h-full rounded-2xl flex items-center justify-center overflow-hidden">
@@ -156,7 +155,6 @@ const ProductImagesStep: React.FC<ProductImagesStepProps> = ({
                   size="xs"
                   onClick={() => removeImage(index)}
                   className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600"
-                  // leftIcon={<X className="h-3 w-3" />}
                   ariaLabel={translations.images.removeImage}
                 >
                   <X className="h-3 w-3" />

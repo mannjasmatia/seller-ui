@@ -1,4 +1,4 @@
-// src/types/product.types.ts
+// src/pages/EditProduct/types.edit-product.ts
 
 export interface Category {
   _id: string;

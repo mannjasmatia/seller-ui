@@ -1,0 +1,45 @@
+{
+  "addProduct": {
+    "title": "Add New Product",
+    "subtitle": "Create a new product by providing basic information"
+  },
+  "productInfo": {
+    "title": "Product Information",
+    "description": "Provide basic details about your product",
+    "name": "Product Name",
+    "namePlaceholder": "Enter product name",
+    "nameHint": "Choose a clear, descriptive name for your product",
+    "category": "Category",
+    "categoryPlaceholder": "Select a category",
+    "categoryHint": "Choose the most relevant category",
+    "about": "About Product",
+    "aboutPlaceholder": "Describe key features of your product",
+    "aboutHint": "Add at least 2 points about your product (max 10)",
+    "addAboutPoint": "Add Point",
+    "removePoint": "Remove Point",
+    "moq": "Minimum Order Quantity",
+    "moqPlaceholder": "Enter minimum quantity",
+    "moqHint": "Minimum number of units customers must order"
+  },
+  "navigation": {
+    "save": "Save & Continue",
+    "cancel": "Cancel",
+    "backToProducts": "Back to Products"
+  },
+  "validation": {
+    "required": "This field is required",
+    "minLength": "Minimum {min} characters required",
+    "maxLength": "Maximum {max} characters allowed",
+    "minPoints": "Add at least {min} points",
+    "maxPoints": "Maximum {max} points allowed",
+    "validNumber": "Please enter a valid number",
+    "minValue": "Value must be at least {min}"
+  },
+  "messages": {
+    "saveSuccess": "Product created successfully! Redirecting to complete other details.",
+    "saveError": "Failed to create product. Please try again.",
+    "confirmCancel": "Are you sure you want to cancel? All entered information will be lost.",
+    "loadError": "Failed to load categories",
+    "autoSave": "Product information saved"
+  }
+}

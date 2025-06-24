@@ -1,16 +1,8 @@
-// src/api/api/product.ts
+// src/api/api/editProduct.ts
 import { apiPaths } from "../api-service/apiPaths"
 import ApiService from "../api-service/ApiService"
 
 // Product Info APIs
-export const createProduct = (data: any) => {
-    return ApiService({
-        method: 'POST',
-        endpoint: apiPaths.productInfo.create,
-        data
-    })
-}
-
 export const updateProductInfo = (productId: string, data: any) => {
     return ApiService({
         method: 'PUT',

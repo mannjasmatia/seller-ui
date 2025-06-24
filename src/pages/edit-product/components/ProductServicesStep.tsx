@@ -1,7 +1,7 @@
-// src/pages/products/components/steps/ProductServicesStep.tsx
+// src/pages/EditProduct/components/ProductServicesStep.tsx
 import React from 'react';
 import { Plus, X, Wrench } from 'lucide-react';
-import { ValidationError } from '../types.add-edit-product';
+import { ValidationError } from '../types.edit-product';
 import Button from '../../../components/BasicComponents/Button';
 import Input from '../../../components/BasicComponents/Input';
 
@@ -93,10 +93,9 @@ const ProductServicesStep: React.FC<ProductServicesStepProps> = ({
                   variant="outline"
                   size="xs"
                   onClick={() => removeService(index)}
-                //   leftIcon={<X className="h-3 w-3" />}
                   ariaLabel={translations.services.removeService}
                 >
-                    <X className="h-3 w-3" />
+                  <X className="h-3 w-3" />
                 </Button>
               </div>
 

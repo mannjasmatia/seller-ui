@@ -1,7 +1,7 @@
-// src/pages/products/components/steps/ProductPricingStep.tsx
+// src/pages/EditProduct/components/ProductPricingStep.tsx
 import React from 'react';
 import { Plus, X, DollarSign, Clock } from 'lucide-react';
-import { LeadTime, ProductPricing, QuantityPriceTier, ValidationError } from '../types.add-edit-product';
+import { LeadTime, ProductPricing, QuantityPriceTier, ValidationError } from '../types.edit-product';
 import Input from '../../../components/BasicComponents/Input';
 import Button from '../../../components/BasicComponents/Button';
 
@@ -129,7 +129,6 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
                     variant="outline"
                     size="xs"
                     onClick={() => removePriceTier(index)}
-                    // leftIcon={<X className="h-3 w-3" />}
                     ariaLabel={translations.pricing.removeTier}
                   >
                     <X className="h-3 w-3" />
@@ -205,7 +204,6 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
                     variant="outline"
                     size="xs"
                     onClick={() => removeLeadTime(index)}
-                    // leftIcon={<X className="h-3 w-3" />}
                     ariaLabel={translations.pricing.removeLeadTime}
                   >
                     <X className="h-3 w-3" />

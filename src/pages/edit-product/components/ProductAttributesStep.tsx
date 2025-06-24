@@ -1,7 +1,7 @@
-// src/pages/products/components/steps/ProductAttributesStep.tsx
+// src/pages/EditProduct/components/ProductAttributesStep.tsx
 import React from 'react';
 import { Plus, X, Trash2 } from 'lucide-react';
-import { ProductAttributeGroup, ValidationError } from '../types.add-edit-product';
+import { ProductAttributeGroup, ValidationError } from '../types.edit-product';
 import Button from '../../../components/BasicComponents/Button';
 import Input from '../../../components/BasicComponents/Input';
 

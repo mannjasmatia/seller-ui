@@ -10,7 +10,8 @@ import PrivateRoutes from "./routes/PrivateRoutes"
 import Dashboard from "./pages/dashboard/Dashboard"
 import Signup from "./pages/signup/Signup"
 import ProductsList from "./pages/products/ProductsList"
-import AddEditProduct from "./pages/AddEditProduct/AddEditProduct"
+import AddProduct from "./pages/add-product/AddProduct"
+import EditProduct from "./pages/edit-product/EditProduct"
 
 interface Route {
   path: string
@@ -26,8 +27,8 @@ const publicRoutes: Route[] = [
 const privateRoutes: Route[] = [
   {path:"/dashboard", element:<Dashboard/>},
   { path: "/products", element: <ProductsList /> },
-{ path: "/products/add/:step", element: <AddEditProduct /> },
-{ path: "/products/edit/:productId/:step", element: <AddEditProduct /> },
+  { path: "/products/add/:step", element: <AddProduct /> },
+  { path: "/products/edit/:productId/:step", element: <EditProduct /> },
 ]
 
 // Helper to get the current language from localStorage or default to "en"
@@ -135,7 +136,7 @@ function AppContent() {
       ))}
 
       {/* Redirect to the same language but with home route */}
-      <Route path="*" element={<Navigate to={`/${lang || getCurrentLanguage()}/${isLoggedIn ? 'dashboard' : 'login'}`} />} />
+      <Route path="*" element={<Navigate to={`/${lang || getCurrentLanguage()}/dashboard`} />} />
     </Routes>
   );
 }

@@ -179,6 +179,7 @@ const DynamicImage: React.FC<ImageProps> = ({
       >
         <img
           ref={imageRef}
+          crossOrigin='anonymous'
           src={currentSrc}
           alt={alt}
           loading={lazyLoad ? loading : undefined}
