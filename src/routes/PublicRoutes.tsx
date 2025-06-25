@@ -2,20 +2,24 @@ import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
-
-const PublicRoutes = ({ children,isVerifying }: { children: React.ReactNode, isVerifying : boolean }) => {
+const PublicRoutes = ({ children }: { children: React.ReactNode }) => {
   const isLoggedIn = useSelector((state: any) => state.user.isLoggedIn);
   const navigate = useNavigate();
-  const {lang} = useParams();
+  const { lang } = useParams();
  
-  // If the user is logged in, redirect to the dashboard or home page
+  // If the user is logged in, redirect to the dashboard
   useEffect(() => {
+    if (isLoggedIn) {
+      const preferredLang = lang || localStorage.getItem("lang") || "en";
+      console.log("User is logged in, redirecting to dashboard");
+      navigate(`/${preferredLang}/dashboard`, { replace: true });
+    }
+  }, [isLoggedIn, navigate, lang]);
+
+  // Don't render anything if user is logged in (will redirect)
   if (isLoggedIn) {
-    // Redirect to the dashboard or home page
-    const redirectUrl = `/${lang || localStorage.getItem("lang") || "en"}/`;
-    navigate(redirectUrl, { replace: true });
+    return null;
   }
-  },[isLoggedIn]);
 
   return (
     <div className="public-routes">

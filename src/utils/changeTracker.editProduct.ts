@@ -1,5 +1,5 @@
 // src/pages/edit-product/utils/changeTracking.ts
-import { ProductFormData } from '../pages/edit-product/types.edit-product';
+import { ProductFormData, ProductImagesData } from '../pages/edit-product/types.edit-product';
 
 export class ChangeTracker {
   
@@ -38,36 +38,43 @@ export class ChangeTracker {
 
   // Clean data for comparison (remove empty strings, null, undefined)
   private static cleanForComparison(data: any): any {
-    if (data === null || data === undefined) return undefined;
-    
-    if (typeof data === 'string') {
-      return data.trim() === '' ? undefined : data.trim();
-    }
-    
-    if (Array.isArray(data)) {
-      const cleaned = data
-        .map(item => this.cleanForComparison(item))
-        .filter(item => item !== undefined && item !== '');
-      return cleaned.length === 0 ? undefined : cleaned;
-    }
-    
-    if (typeof data === 'object') {
-      const cleaned: any = {};
-      for (const [key, value] of Object.entries(data)) {
-        const cleanedValue = this.cleanForComparison(value);
-        if (cleanedValue !== undefined) {
-          cleaned[key] = cleanedValue;
-        }
-      }
-      return Object.keys(cleaned).length === 0 ? undefined : cleaned;
-    }
-    
-    return data;
+  if (data === null || data === undefined) return undefined;
+  
+  if (typeof data === 'string') {
+    const trimmed = data?.trim?.() || '';
+    return trimmed === '' ? undefined : trimmed;
   }
+  
+  if (Array.isArray(data)) {
+    const cleaned = data
+      ?.map?.(item => this.cleanForComparison(item))
+      ?.filter?.(item => item !== undefined && item !== '') || [];
+    return cleaned?.length === 0 ? undefined : cleaned;
+  }
+  
+  if (typeof data === 'object') {
+    const cleaned: any = {};
+    for (const [key, value] of Object.entries(data || {})) {
+      const cleanedValue = this.cleanForComparison(value);
+      if (cleanedValue !== undefined) {
+        cleaned[key] = cleanedValue;
+      }
+    }
+    return Object.keys(cleaned)?.length === 0 ? undefined : cleaned;
+  }
+  
+  return data;
+}
 
   // Compare specific step data
   static hasStepChanged(step: string, originalData: ProductFormData, currentData: ProductFormData): boolean {
+
+    if (!originalData && !currentData) return false;
+  if (!originalData || !currentData) return true;
+
     const getStepData = (data: ProductFormData, stepName: string) => {
+      if (!data || typeof data !== 'object') return null;
+
       switch (stepName) {
         case 'productInfo':
           return data.productInfo;
@@ -87,6 +94,12 @@ export class ChangeTracker {
           return null;
       }
     };
+
+    if (step === 'images') {
+    const originalImages = originalData?.images;
+    const currentImages = currentData?.images;
+    return this.hasImagesChanged(originalImages, currentImages);
+  }
 
     const originalStepData = this.cleanForComparison(getStepData(originalData, step));
     const currentStepData = this.cleanForComparison(getStepData(currentData, step));
@@ -188,4 +201,36 @@ export class ChangeTracker {
     
     return !this.deepEqual(originalCleaned, currentCleaned);
   }
+
+  static hasImagesChanged(original: ProductImagesData, current: ProductImagesData): boolean {
+  // Safety checks
+  if (!original && !current) return false;
+  if (!original || !current) return true;
+  
+  // Safely extract arrays with defaults
+  const originalImages = original?.originalImages || [];
+  const currentImages = current?.images || [];
+  const currentNewFiles = current?.newFiles || [];
+  
+  // Check if any original images were removed
+  const removedImages = originalImages?.filter?.(img => 
+    img && !currentImages?.includes?.(img)
+  ) || [];
+  
+  // Check if new files were added
+  const hasNewFiles = (currentNewFiles?.length || 0) > 0;
+  
+  // Check if the order of existing images changed
+  const existingImagesInCurrent = currentImages?.filter?.(img => 
+    img && originalImages?.includes?.(img)
+  ) || [];
+  const originalImagesFiltered = originalImages?.filter?.(img => 
+    img && currentImages?.includes?.(img)
+  ) || [];
+  
+  const orderChanged = !this.deepEqual(existingImagesInCurrent, originalImagesFiltered);
+  
+  return removedImages.length > 0 || hasNewFiles || orderChanged;
+}
+
 }

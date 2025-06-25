@@ -5,6 +5,7 @@ import {
   ProductStep,
   ProductFormData,
   ValidationError,
+  ProductImagesData,
 } from "./types.edit-product";
 import {
   useGetProductInfoApi,
@@ -73,7 +74,11 @@ export const useEditProduct = () => {
       //   moq: 1
     },
     attributes: [],
-    images: [],
+    images: {
+        images: [],
+        originalImages: [],
+        newFiles: []
+    }, 
     pricing: {
       basePrice: 0,
       quantityPriceTiers: [],
@@ -99,7 +104,11 @@ export const useEditProduct = () => {
       about: ["", ""],
     },
     attributes: [],
-    images: [],
+    images: {
+        images: [],
+        originalImages: [],
+        newFiles: []
+    },
     pricing: {
       basePrice: 0,
       quantityPriceTiers: [],
@@ -135,6 +144,7 @@ export const useEditProduct = () => {
     useGetProductAttributesApi(productId || "", currentStep === "attributes");
   const { data: imagesData, isLoading: isLoadingImages } =
     useGetProductImagesApi(productId || "", currentStep === "images");
+    console.log("========>Images data:", imagesData);
   const { data: pricingData, isLoading: isLoadingPricing } =
     useGetProductPricingApi(productId || "", currentStep === "pricing");
   const { data: variationsData, isLoading: isLoadingVariations } =
@@ -212,17 +222,25 @@ export const useEditProduct = () => {
   }, [attributesData]);
 
   useEffect(() => {
-    if (imagesData) {
-      setFormData((prev) => ({
-        ...prev,
-        images: imagesData || [],
-      }));
-      setOriginalFormData((prev) => ({
-        ...prev,
-        images: imagesData || [],
-      }));
-    }
-  }, [imagesData]);
+    console.log("Images data effect triggered", imagesData);
+  if (imagesData) {
+    console.log("Images data loaded:", imagesData);
+    const imageData = {
+      images: imagesData || [],
+      originalImages: imagesData || [],
+      newFiles: []
+    };
+    
+    setFormData(prev => ({
+      ...prev,
+      images: imageData
+    }));
+    setOriginalFormData(prev => ({
+      ...prev,
+      images: imageData
+    }));
+  }
+}, [imagesData]);
 
   useEffect(() => {
     if (pricingData) {
@@ -290,37 +308,35 @@ export const useEditProduct = () => {
     }
   }, [descriptionData]);
 
+    const hasImagesChanged = useCallback((): boolean => {
+  const { images, originalImages, newFiles } = formData.images;
+  
+  // Check if any original images were removed
+  const removedImages = originalImages.filter(img => !images.includes(img));
+  
+  // Check if new files were added
+  const hasNewFiles = newFiles.length > 0;
+  
+  return removedImages.length > 0 || hasNewFiles;
+}, [formData.images]);
+
   // Check if current step has changes
   const hasCurrentStepChanged = useCallback((): boolean => {
-    switch (currentStep) {
-      case "productInfo":
-        return ChangeTracker.hasProductInfoChanged(
-          originalFormData.productInfo,
-          formData.productInfo
-        );
-      case "attributes":
-        return ChangeTracker.hasAttributesChanged(
-          originalFormData.attributes,
-          formData.attributes
-        );
-      case "services":
-        return ChangeTracker.hasServicesChanged(
-          originalFormData.services,
-          formData.services
-        );
-      case "description":
-        return ChangeTracker.hasDescriptionChanged(
-          originalFormData.description,
-          formData.description
-        );
-      default:
-        return ChangeTracker.hasStepChanged(
-          currentStep,
-          originalFormData,
-          formData
-        );
-    }
-  }, [currentStep, originalFormData, formData]);
+  switch (currentStep) {
+    case 'images':
+      return hasImagesChanged();
+    case 'productInfo':
+      return ChangeTracker.hasProductInfoChanged(originalFormData.productInfo, formData.productInfo);
+    case 'attributes':
+      return ChangeTracker.hasAttributesChanged(originalFormData.attributes, formData.attributes);
+    case 'services':
+      return ChangeTracker.hasServicesChanged(originalFormData.services, formData.services);
+    case 'description':
+      return ChangeTracker.hasDescriptionChanged(originalFormData.description, formData.description);
+    default:
+      return ChangeTracker.hasStepChanged(currentStep, originalFormData, formData);
+  }
+}, [currentStep, originalFormData, formData, hasImagesChanged]);
 
   const hasUnsavedChanges = useMemo(() => {
     return hasCurrentStepChanged();
@@ -390,31 +406,90 @@ export const useEditProduct = () => {
     []
   );
 
+    const validateImages = useCallback((imageData: ProductImagesData): ValidationError[] => {
+  const errors: ValidationError[] = [];
+  
+  // Check if there's at least one image (existing or new)
+  const existingCount = imageData.images.length;
+  const newFilesCount = imageData.newFiles.length;
+  
+  if (existingCount === 0 && newFilesCount === 0) {
+    errors.push({ 
+      field: 'images', 
+      message: 'You need to upload at least one image' 
+    });
+  }
+  
+  // Validate total count doesn't exceed 10
+  if (existingCount + newFilesCount > 10) {
+    errors.push({
+      field: 'images',
+      message: 'Maximum 10 images allowed'
+    });
+  }
+  
+  // Validate file types for new files
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  imageData.newFiles.forEach((file, index) => {
+    if (!validTypes.includes(file.type)) {
+      errors.push({
+        field: `images.newFiles.${index}`,
+        message: 'Only JPG, PNG, and WebP files are allowed'
+      });
+    }
+    
+    // Validate file size (e.g., max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      errors.push({
+        field: `images.newFiles.${index}`,
+        message: 'File size must be less than 5MB'
+      });
+    }
+  });
+  
+  return errors;
+}, []);
+
   // Validation functions
   const validateCurrentStep = useCallback((): boolean => {
-    const errors = ProductValidator.validateStep(currentStep, formData);
-    setValidationErrors(errors);
-    return errors.length === 0;
-  }, [currentStep, formData]);
+  let errors: ValidationError[] = [];
+  
+  switch (currentStep) {
+    case 'images':
+      errors = validateImages(formData.images);
+      break;
+    default:
+      errors = ProductValidator.validateStep(currentStep, formData);
+  }
+  
+  setValidationErrors(errors);
+  return errors.length === 0;
+}, [currentStep, formData, validateImages]);
 
   // Helper function to create FormData for file uploads
-  const createFormDataForImages = (images: string[], files?: FileList) => {
-    const formData = new FormData();
-
-    if (images) {
-      images.forEach((image, index) => {
-        formData.append(`images[${index}]`, image);
-      });
+const createFormDataForImages = (imageData: ProductImagesData) => {
+  const formDataObj = new FormData();
+  
+  if (!imageData) return formDataObj;
+  
+  const { images = [], newFiles = [] } = imageData;
+  
+  // Add existing images to keep
+  images?.forEach?.((image, index) => {
+    if (image && typeof image === 'string') {
+      formDataObj.append(`images[${index}]`, image);
     }
-
-    if (files) {
-      Array.from(files).forEach((file) => {
-        formData.append("files", file);
-      });
+  });
+  
+  // Add new files
+  newFiles?.forEach?.(file => {
+    if (file instanceof File) {
+      formDataObj.append('files', file);
     }
-
-    return formData;
-  };
+  });
+  
+  return formDataObj;
+}
 
   // Save functions
   const saveCurrentStep = useCallback(async () => {
@@ -452,14 +527,49 @@ export const useEditProduct = () => {
           break;
 
         case "images":
-          const imageFormData = createFormDataForImages(formData.images);
-          await new Promise((resolve, reject) => {
-            syncImages(
-              { productId, formData: imageFormData },
-              { onSuccess: resolve, onError: reject }
-            );
-          });
-          break;
+        // Create FormData for image upload
+        const formDataObj = new FormData();
+        
+        // Add existing images that should be kept
+        formData.images.images.forEach((image, index) => {
+          formDataObj.append(`images[${index}]`, image);
+        });
+        
+        // Add new files
+        formData.images.newFiles.forEach(file => {
+          formDataObj.append('files', file);
+        });
+        
+        await new Promise((resolve, reject) => {
+          syncImages(
+            { productId, formData: formDataObj },
+            {
+              onSuccess: (response) => {
+                // Update the form data to reflect the saved state
+                const newImageUrls = response?.data?.response || [];
+                const updatedImageData = {
+                  images: [...formData.images.images, ...newImageUrls],
+                  originalImages: [...formData.images.images, ...newImageUrls],
+                  newFiles: []
+                };
+                
+                setFormData(prev => ({
+                  ...prev,
+                  images: updatedImageData
+                }));
+                
+                setOriginalFormData(prev => ({
+                  ...prev,
+                  images: updatedImageData
+                }));
+                
+                resolve(response);
+              },
+              onError: reject
+            }
+          );
+        });
+        break;
 
         case "pricing":
           await new Promise((resolve, reject) => {
@@ -502,17 +612,17 @@ export const useEditProduct = () => {
             );
           });
 
-          if (formData.description.images.length > 0) {
-            const descImageFormData = createFormDataForImages(
-              formData.description.images
-            );
-            await new Promise((resolve, reject) => {
-              syncDescriptionImages(
-                { productId, formData: descImageFormData },
-                { onSuccess: resolve, onError: reject }
-              );
-            });
-          }
+        //   if (formData.description.images.length > 0) {
+        //     const descImageFormData = createFormDataForImages(
+        //       formData.description.images
+        //     );
+        //     await new Promise((resolve, reject) => {
+        //       syncDescriptionImages(
+        //         { productId, formData: descImageFormData },
+        //         { onSuccess: resolve, onError: reject }
+        //       );
+        //     });
+        //   }
           break;
       }
 
@@ -547,48 +657,7 @@ export const useEditProduct = () => {
   }, [saveCurrentStep, goToNextStep]);
 
   // File upload helpers
-  const uploadImages = useCallback(
-    async (files: FileList, section: "images" | "description") => {
-      if (!productId) return false;
 
-      try {
-        const formDataObj = new FormData();
-
-        const existingImages =
-          section === "images" ? formData.images : formData.description.images;
-        existingImages.forEach((image, index) => {
-          formDataObj.append(`images[${index}]`, image);
-        });
-
-        Array.from(files).forEach((file) => {
-          formDataObj.append("files", file);
-        });
-
-        if (section === "images") {
-          await new Promise((resolve, reject) => {
-            syncImages(
-              { productId, formData: formDataObj },
-              { onSuccess: resolve, onError: reject }
-            );
-          });
-        } else {
-          await new Promise((resolve, reject) => {
-            syncDescriptionImages(
-              { productId, formData: formDataObj },
-              { onSuccess: resolve, onError: reject }
-            );
-          });
-        }
-
-        customToast.success(translations.messages.uploadSuccess);
-        return true;
-      } catch (error) {
-        customToast.error(translations.messages.uploadError);
-        return false;
-      }
-    },
-    [productId, syncImages, syncDescriptionImages, formData]
-  );
 
   // Get categories for dropdown
   const categories = useMemo(() => {
@@ -705,7 +774,6 @@ export const useEditProduct = () => {
     validateCurrentStep,
     saveCurrentStep,
     saveAndNext,
-    uploadImages,
     isStepCompleted,
 
     // Constants

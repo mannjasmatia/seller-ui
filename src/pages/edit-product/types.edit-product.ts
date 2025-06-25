@@ -110,7 +110,7 @@ export interface ProductImagesData {
 export interface ProductFormData {
   productInfo: ProductInfo;
   attributes: ProductAttributeGroup[];
-  images: ProductImagesData[];
+  images: ProductImagesData;
   pricing: ProductPricing;
   variations: ProductVariations;
   services: string[];

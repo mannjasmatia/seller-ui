@@ -7,7 +7,8 @@ import {
   ProductVariation,
   CustomizableOption,
   ProductDescription,
-  ValidationError 
+  ValidationError, 
+  ProductImagesData
 } from '../pages/edit-product/types.edit-product';
 
 export class ProductValidator {
@@ -109,21 +110,95 @@ export class ProductValidator {
   }
 
   // Product Images Validation
-  static validateProductImages(data: string[]): ValidationError[] {
-    const errors: ValidationError[] = [];
+  static validateProductImages(data: ProductImagesData): ValidationError[] {
+  const errors: ValidationError[] = [];
 
-    if (!data || !Array.isArray(data)) {
-      return errors; // Images are optional
-    }
-
-    data.forEach((image, index) => {
-      if (image && typeof image !== 'string') {
-        errors.push({ field: `images.${index}`, message: 'Each image must be a string URL' });
-      }
+  // Safety check for data structure
+  if (!data || typeof data !== 'object') {
+    errors.push({ 
+      field: 'images', 
+      message: 'Image data is required' 
     });
-
     return errors;
   }
+
+  const { images = [], originalImages = [], newFiles = [] } = data;
+
+  // Check if there's at least one image (existing or new)
+  const existingCount = images?.filter?.(img => 
+    img && typeof img === 'string' && originalImages?.includes?.(img)
+  )?.length || 0;
+  const newFilesCount = newFiles?.length || 0;
+  
+  if (existingCount === 0 && newFilesCount === 0) {
+    errors.push({ 
+      field: 'images', 
+      message: 'You need to upload at least one image' 
+    });
+  }
+  
+  // Validate total count doesn't exceed 10
+  if (existingCount + newFilesCount > 10) {
+    errors.push({
+      field: 'images',
+      message: 'Maximum 10 images allowed'
+    });
+  }
+  
+  // Validate existing images are strings
+  if (Array.isArray(images)) {
+    images?.forEach?.((image, index) => {
+      if (!image || typeof image !== 'string' || !image?.trim?.()) {
+        errors.push({ 
+          field: `images.${index}`, 
+          message: 'Each image must be a non-empty string' 
+        });
+      }
+    });
+  }
+  
+  // Validate new files
+  if (Array.isArray(newFiles)) {
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    
+    newFiles?.forEach?.((file, index) => {
+      if (!file || !(file instanceof File)) {
+        errors.push({
+          field: `newFiles.${index}`,
+          message: 'Invalid file'
+        });
+        return;
+      }
+      
+      // Validate file type
+      if (!validTypes?.includes?.(file?.type)) {
+        errors.push({
+          field: `newFiles.${index}`,
+          message: 'Only JPG, PNG, and WebP files are allowed'
+        });
+      }
+      
+      // Validate file size
+      if ((file?.size || 0) > maxSize) {
+        errors.push({
+          field: `newFiles.${index}`,
+          message: 'File size must be less than 5MB'
+        });
+      }
+      
+      // Validate file name
+      if (!file?.name || !file?.name?.trim?.()) {
+        errors.push({
+          field: `newFiles.${index}`,
+          message: 'File must have a valid name'
+        });
+      }
+    });
+  }
+  
+  return errors;
+}
 
   // Product Pricing Validation
   static validateProductPricing(data: ProductFormData['pricing']): ValidationError[] {

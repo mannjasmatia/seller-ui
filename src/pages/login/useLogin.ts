@@ -1,6 +1,5 @@
 import { use, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { LoginModalProps } from "../../types/login";
 import { useLoginApi } from "../../api/api-hooks/useAuthApi";
 import { customToast } from "../../toast-config/customToast";
 import { setIsLoggedIn, setUser } from "../../store/userSlice";
@@ -35,11 +34,15 @@ const useLogin = ()=>{
         }
       },[isSuccess])
 
-      useEffect(()=>{
-        if(isSuccess && isLoggedIn){
-          navigate(`/${lang}${redirectUrl}`, { replace: true });
+      // Handle navigation after login success
+      useEffect(() => {
+        if (isSuccess && isLoggedIn) {
+            const preferredLang = lang || localStorage.getItem("lang") || "en";
+            const finalRedirectUrl = redirectUrl.startsWith('/') ? redirectUrl : `/${redirectUrl}`;
+            console.log("Login successful, redirecting to:", `/${preferredLang}${finalRedirectUrl}`);
+            navigate(`/${preferredLang}${finalRedirectUrl}`, { replace: true });
         }
-      }, [isSuccess, isLoggedIn]);
+    }, [isSuccess, isLoggedIn, lang, redirectUrl]);
     
       // Input field configurations
       const inputFields = [

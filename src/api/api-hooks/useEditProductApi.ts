@@ -52,7 +52,9 @@ export const useGetProductImagesApi = (productId: string, enabled: boolean = fal
         queryKey: ['product', productId, 'images'],
         queryFn: () => editProductApi.getProductImages(productId),
         enabled: !!productId && enabled,
-        select: (data: any) => data?.data?.response
+        select: (data: any) => {
+            return data?.data?.response;
+        }
     });
 };
 

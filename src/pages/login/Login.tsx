@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { LoginModalProps } from '../../types/login';
 import useLogin from './useLogin';
 import Input from '../../components/BasicComponents/Input';
 import Button from '../../components/BasicComponents/Button';

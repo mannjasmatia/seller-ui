@@ -5,22 +5,23 @@ import Header from "../components/header/Header";
 import Sidebar from "../components/sidebar/Sidebar";
 import { RootState } from "../store/appStore";
 
-const PrivateRoutes = ({ children,isVerifying }: { children: React.ReactNode, isVerifying : boolean }) => {
-    console.log("PrivateRoutes rendered");
+const PrivateRoutes = ({ children }: { children: React.ReactNode }) => {
     const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
     const navigate = useNavigate();
     const location = useLocation();
     const { lang } = useParams();
-    const currentPath = location.pathname.split('/').slice(3).join('/');
-    const preferredLang = localStorage.getItem("lang") || lang || "en";
+    
+    const preferredLang = lang || localStorage.getItem("lang") || "en";
     
     // If the user is not logged in, redirect to the login page
     useEffect(() => {
-        if (!isVerifying && !isLoggedIn) {
+        if (!isLoggedIn) {
             console.log("User is not logged in, redirecting to login page");
-            navigate(`/${preferredLang}/login?redirect=${currentPath}`, { replace: true });
+            const currentPath = location.pathname.split('/').slice(2).join('/');
+            const redirectParam = currentPath ? `?redirectUrl=/${currentPath}` : '';
+            navigate(`/${preferredLang}/login${redirectParam}`, { replace: true });
         }
-    }, [isLoggedIn,isVerifying]);
+    }, [isLoggedIn, navigate, location.pathname, preferredLang]);
 
     // Handle sidebar navigation
     const handleSidebarItemClick = (item: any) => {
@@ -36,6 +37,11 @@ const PrivateRoutes = ({ children,isVerifying }: { children: React.ReactNode, is
             navigate(routeMap[item.id]);
         }
     };
+
+    // Don't render anything if user is not logged in (will redirect)
+    if (!isLoggedIn) {
+        return null;
+    }
 
     // If the user is logged in, render the layout
     return (

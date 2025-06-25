@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { BrowserRouter as Router, Routes, Route, useParams, useLocation, Navigate } from "react-router-dom"
 import { useVerifyTokensApi } from "./api/api-hooks/useAuthApi"
 import { setLanguage } from "./store/languageSlice"
-import { setIsLoggedIn } from "./store/userSlice"
+import { resetAuthState, setIsLoggedIn } from "./store/userSlice"
 import Login from "./pages/login/Login"
 import PublicRoutes from "./routes/PublicRoutes"
 import PrivateRoutes from "./routes/PrivateRoutes"
@@ -37,6 +37,14 @@ function getCurrentLanguage() {
   return storedLang && availableLanguages.includes(storedLang) ? storedLang : "en";
 }
 
+// Loading component
+const LoadingScreen = () => (
+  <div className="flex justify-center items-center h-screen w-screen bg-white">
+    <img src="/logo.png" alt="Loading..." className="h-20 animate-pulse" />
+  </div>
+);
+
+
 // Main app wrapper to handle authentication state
 function AppContent() {
   const { lang } = useParams();
@@ -44,16 +52,13 @@ function AppContent() {
   const location = useLocation();
   const isLoggedIn = useSelector((state:any) => state.user.isLoggedIn);
   
-  // Reference to track initial page load
-  const isInitialMount = useRef(true);
-  
-  // Setup API verification with correct parameters
+  // Setup API verification
   const {
     isLoading: isVerifying,
     isSuccess: isVerifySuccess,
     isError: isVerifyError,
-    error: verifyError
-  } = useVerifyTokensApi(isInitialMount.current);
+    error: verifyError,
+  } = useVerifyTokensApi();
   
   // Set language from URL parameter
   useEffect(() => {
@@ -65,77 +70,73 @@ function AppContent() {
   
   // Handle authentication state changes
   useEffect(() => {
-    if (isVerifySuccess) {
-      dispatch(setIsLoggedIn(true));
-    } else if (isVerifyError) {
-      // Only show toast if we had previously been logged in
-      if (isLoggedIn && !isInitialMount.current) {
-        // customToast.error("Session expired, please login again");
-      }
-      dispatch(setIsLoggedIn(false));
-    }
-    
-    // Update initial mount reference after first verification
-    if (isInitialMount.current && (isVerifySuccess || isVerifyError)) {
-      isInitialMount.current = false;
-    }
-  }, [isVerifySuccess, isVerifyError, dispatch, isLoggedIn]);
 
-  // Show loading screen only on initial render
+    if (isVerifySuccess) {
+      // Successful token verification - user is authenticated
+      console.log("Token verification successful, setting user as logged in");
+      dispatch(setIsLoggedIn(true));
+      // dispatch(setUser(verifyData.data.response));
+    } else if (isVerifyError) {
+      // Token verification failed - user is not authenticated
+      console.log("Token verification failed, setting user as logged out");
+      dispatch(resetAuthState());
+    }
+  }, [isVerifySuccess, isVerifyError]);
+
+  // Show loading screen while verifying tokens on initial load
   if (isVerifying) {
     console.log("Verifying tokens...");
-    return (
-      <div className="flex justify-center items-center h-screen w-screen">
-        <img src="/logo.png" alt="Loading..." className="h-20" />
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   // Handle invalid language in URL
   if (lang && !availableLanguages.includes(lang)) {
     const preferredLang = getCurrentLanguage();
-    console.log("Preferred Language path name: ", location.pathname)
-    
-    const currentPath = location.pathname.split('/').slice(3).join('/');
+    const currentPath = location.pathname.split('/').slice(2).join('/');
     return <Navigate to={`/${preferredLang}/${currentPath}`} replace />;
   }
 
+  // Ensure we have a valid language
+  const currentLang = lang || getCurrentLanguage();
+
   return (
     <Routes>
-      {/* Public routes */}
+      {/* Public routes - only show when user is NOT logged in */}
       {!isLoggedIn && publicRoutes.map((route, index) => (
         <Route 
           key={index} 
           path={route.path} 
           element={
-              <PublicRoutes isVerifying={isVerifying}>
-                {route.element}
-              </PublicRoutes>
+            <PublicRoutes>
+              {route.element}
+            </PublicRoutes>
           } 
         />
       ))}
 
-      {/* Private routes - conditionally render based on auth state */}
-      {isLoggedIn && privateRoutes.map((route, index) => (
+      {/* Private routes - only show when user IS logged in */}
+      {privateRoutes.map((route, index) => (
         <Route 
           key={index + publicRoutes.length} 
           path={route.path} 
           element={
-            // isLoggedIn ? (
-              <PrivateRoutes isVerifying={isVerifying}>
-                {route.element}
-              </PrivateRoutes>
-            // ) : (
-            //     <PublicRoutes>
-            //       <Login />
-            //     </PublicRoutes>
-            // )
+            <PrivateRoutes>
+              {route.element}
+            </PrivateRoutes>
           } 
         />
       ))}
 
-      {/* Redirect to the same language but with home route */}
-      <Route path="*" element={<Navigate to={`/${lang || getCurrentLanguage()}/dashboard`} />} />
+      {/* Default redirect based on authentication status */}
+      {/* <Route 
+        path="*" 
+        element={
+          <Navigate 
+            to={`/${currentLang}/${isLoggedIn ? 'dashboard' : 'login'}`} 
+            replace 
+          />
+        } 
+      /> */}
     </Routes>
   );
 }
