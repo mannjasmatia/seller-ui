@@ -1,10 +1,14 @@
 // src/pages/EditProduct/components/ProductDescriptionStep.tsx
-import React, { useRef, useState } from 'react';
-import { Plus, X, FileText, Upload, Image as ImageIcon } from 'lucide-react';
-import { ProductDescription, ProductDescriptionAttribute, ValidationError } from '../types.edit-product';
-import Button from '../../../components/BasicComponents/Button';
-import Input from '../../../components/BasicComponents/Input';
-import DynamicImage from '../../../components/BasicComponents/Image';
+import React, { useRef, useState } from "react";
+import { Plus, X, FileText, Upload, Image as ImageIcon } from "lucide-react";
+import {
+  ProductDescription,
+  ProductDescriptionAttribute,
+  ValidationError,
+} from "../types.edit-product";
+import Button from "../../../components/BasicComponents/Button";
+import Input from "../../../components/BasicComponents/Input";
+import DynamicImage from "../../../components/BasicComponents/Image";
 
 interface ProductDescriptionStepProps {
   data: ProductDescription;
@@ -19,19 +23,19 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
   validationErrors,
   onUpdate,
   onUploadImages,
-  translations
+  translations,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
   const getError = (field: string) => {
-    return validationErrors.find(error => error.field === field)?.message;
+    return validationErrors.find((error) => error.field === field)?.message;
   };
 
   // Description Points Functions
   const addPoint = () => {
-    onUpdate({ points: [...data.points, ''] });
+    onUpdate({ points: [...data.points, ""] });
   };
 
   const removePoint = (index: number) => {
@@ -40,6 +44,11 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
   };
 
   const updatePoint = (index: number, value: string) => {
+    // Validate length before updating
+    if (value.length > 500) {
+      return; // Don't update if exceeding limit
+    }
+
     const newPoints = [...data.points];
     newPoints[index] = value;
     onUpdate({ points: newPoints });
@@ -47,7 +56,7 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
 
   // Attributes Functions
   const addAttribute = () => {
-    const newAttribute: ProductDescriptionAttribute = { field: '', value: '' };
+    const newAttribute: ProductDescriptionAttribute = { field: "", value: "" };
     onUpdate({ attributes: [...data.attributes, newAttribute] });
   };
 
@@ -56,7 +65,17 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
     onUpdate({ attributes: newAttributes });
   };
 
-  const updateAttribute = (index: number, field: 'field' | 'value', value: string) => {
+  const updateAttribute = (
+    index: number,
+    field: "field" | "value",
+    value: string
+  ) => {
+    // Validate lengths based on field type
+    const maxLength = field === "field" ? 100 : 500;
+    if (value.length > maxLength) {
+      return; // Don't update if exceeding limit
+    }
+
     const newAttributes = [...data.attributes];
     newAttributes[index][field] = value;
     onUpdate({ attributes: newAttributes });
@@ -65,21 +84,23 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
   // Image Functions
   const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    const invalidFiles = Array.from(files).filter(file => !validTypes.includes(file.type));
-    
+
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const invalidFiles = Array.from(files).filter(
+      (file) => !validTypes.includes(file.type)
+    );
+
     if (invalidFiles.length > 0) {
-      alert('Please select only JPG, PNG, or WebP files.');
+      alert("Please select only JPG, PNG, or WebP files.");
       return;
     }
 
     setIsUploading(true);
     const success = await onUploadImages(files);
     setIsUploading(false);
-    
+
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -142,7 +163,10 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
         ) : (
           <div className="space-y-4">
             {data.points.map((point, index) => (
-              <div key={index} className="bg-white rounded-lg p-4 border border-gray-200">
+              <div
+                key={index}
+                className="bg-white rounded-lg p-4 border border-gray-200"
+              >
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-medium text-gray-700">
                     Point {index + 1}
@@ -164,7 +188,17 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
                   onChange={(value) => updatePoint(index, value)}
                   rows={3}
                   fullWidth
-                  validation={{ required: true, minLength: 1, maxLength: 500 }}
+                  validation={{
+                    required: true,
+                    minLength: 1,
+                    maxLength: 500,
+                    errorMessages: {
+                      required: "Description point is required",
+                      minLength: "Description point cannot be empty",
+                      maxLength: "Each point must be at most 500 characters",
+                    },
+                  }}
+                  error={getError(`description.points.${index}`)}
                 />
               </div>
             ))}
@@ -203,7 +237,10 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
         ) : (
           <div className="space-y-4">
             {data.attributes.map((attribute, index) => (
-              <div key={index} className="bg-white rounded-lg p-4 border border-gray-200">
+              <div
+                key={index}
+                className="bg-white rounded-lg p-4 border border-gray-200"
+              >
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-medium text-gray-700">
                     Attribute {index + 1}
@@ -223,21 +260,43 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
                   <Input
                     type="text"
                     label={translations.description.attributeField}
-                    placeholder={translations.description.attributeFieldPlaceholder}
+                    placeholder={
+                      translations.description.attributeFieldPlaceholder
+                    }
                     value={attribute.field}
-                    onChange={(value) => updateAttribute(index, 'field', value)}
+                    onChange={(value) => updateAttribute(index, "field", value)}
                     fullWidth
-                    validation={{ required: true, maxLength: 100 }}
+                    validation={{
+                      required: true,
+                      maxLength: 100,
+                      errorMessages: {
+                        required: "Attribute field is required",
+                        maxLength:
+                          "Attribute field must be at most 100 characters",
+                      },
+                    }}
+                    error={getError(`description.attributes.${index}.field`)}
                   />
-                  
+
                   <Input
                     type="text"
                     label={translations.description.attributeValue}
-                    placeholder={translations.description.attributeValuePlaceholder}
+                    placeholder={
+                      translations.description.attributeValuePlaceholder
+                    }
                     value={attribute.value}
-                    onChange={(value) => updateAttribute(index, 'value', value)}
+                    onChange={(value) => updateAttribute(index, "value", value)}
                     fullWidth
-                    validation={{ required: true, maxLength: 500 }}
+                    validation={{
+                      required: true,
+                      maxLength: 500,
+                      errorMessages: {
+                        required: "Attribute value is required",
+                        maxLength:
+                          "Attribute value must be at most 500 characters",
+                      },
+                    }}
+                    error={getError(`description.attributes.${index}.value`)}
                   />
                 </div>
               </div>
@@ -259,18 +318,23 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
         <div
           className={`
             border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer mb-6
-            ${isDragging 
-              ? 'border-cb-red bg-red-50' 
-              : 'border-gray-300 hover:border-cb-red hover:bg-gray-50'
+            ${
+              isDragging
+                ? "border-cb-red bg-red-50"
+                : "border-gray-300 hover:border-cb-red hover:bg-gray-50"
             }
-            ${isUploading ? 'opacity-50 pointer-events-none' : ''}
+            ${isUploading ? "opacity-50 pointer-events-none" : ""}
           `}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={openFileDialog}
         >
-          <Upload className={`h-8 w-8 mb-3 mx-auto ${isDragging ? 'text-cb-red' : 'text-gray-400'}`} />
+          <Upload
+            className={`h-8 w-8 mb-3 mx-auto ${
+              isDragging ? "text-cb-red" : "text-gray-400"
+            }`}
+          />
           <h4 className="text-md font-medium text-gray-900 mb-1">
             {translations.description.uploadImages}
           </h4>
@@ -280,7 +344,7 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
           <p className="text-sm text-gray-400">
             {translations.description.supportedFormats}
           </p>
-          
+
           {isUploading && (
             <div className="mt-3">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-cb-red mx-auto"></div>
@@ -303,7 +367,7 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
             <h4 className="text-md font-medium text-gray-900 mb-4">
               {translations.description.currentImages} ({data.images.length})
             </h4>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {data.images.map((imageUrl, index) => (
                 <div key={index} className="relative group">
@@ -320,7 +384,7 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
                       />
                     </div>
                   </div>
-                  
+
                   <Button
                     variant="solid"
                     size="xs"
@@ -348,8 +412,8 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
         )}
       </div>
 
-      {getError('description') && (
-        <p className="text-sm text-red-600">{getError('description')}</p>
+      {getError("description") && (
+        <p className="text-sm text-red-600">{getError("description")}</p>
       )}
     </div>
   );

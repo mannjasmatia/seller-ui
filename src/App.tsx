@@ -66,10 +66,8 @@ function AppContent() {
   // Handle authentication state changes
   useEffect(() => {
     if (isVerifySuccess) {
-      console.log(" =======> Token Verification successful");
       dispatch(setIsLoggedIn(true));
     } else if (isVerifyError) {
-      console.error(" =======> Token Verification failed:", verifyError);
       // Only show toast if we had previously been logged in
       if (isLoggedIn && !isInitialMount.current) {
         // customToast.error("Session expired, please login again");
@@ -84,7 +82,8 @@ function AppContent() {
   }, [isVerifySuccess, isVerifyError, dispatch, isLoggedIn]);
 
   // Show loading screen only on initial render
-  if (isInitialMount.current && isVerifying) {
+  if (isVerifying) {
+    console.log("Verifying tokens...");
     return (
       <div className="flex justify-center items-center h-screen w-screen">
         <img src="/logo.png" alt="Loading..." className="h-20" />
@@ -104,12 +103,12 @@ function AppContent() {
   return (
     <Routes>
       {/* Public routes */}
-      {publicRoutes.map((route, index) => (
+      {!isLoggedIn && publicRoutes.map((route, index) => (
         <Route 
           key={index} 
           path={route.path} 
           element={
-              <PublicRoutes>
+              <PublicRoutes isVerifying={isVerifying}>
                 {route.element}
               </PublicRoutes>
           } 
@@ -117,13 +116,13 @@ function AppContent() {
       ))}
 
       {/* Private routes - conditionally render based on auth state */}
-      {privateRoutes.map((route, index) => (
+      {isLoggedIn && privateRoutes.map((route, index) => (
         <Route 
           key={index + publicRoutes.length} 
           path={route.path} 
           element={
             // isLoggedIn ? (
-              <PrivateRoutes>
+              <PrivateRoutes isVerifying={isVerifying}>
                 {route.element}
               </PrivateRoutes>
             // ) : (

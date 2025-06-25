@@ -1,9 +1,14 @@
 // src/pages/EditProduct/components/ProductPricingStep.tsx
-import React from 'react';
-import { Plus, X, DollarSign, Clock } from 'lucide-react';
-import { LeadTime, ProductPricing, QuantityPriceTier, ValidationError } from '../types.edit-product';
-import Input from '../../../components/BasicComponents/Input';
-import Button from '../../../components/BasicComponents/Button';
+import React from "react";
+import { Plus, X, DollarSign, Clock } from "lucide-react";
+import {
+  LeadTime,
+  ProductPricing,
+  QuantityPriceTier,
+  ValidationError,
+} from "../types.edit-product";
+import Input from "../../../components/BasicComponents/Input";
+import Button from "../../../components/BasicComponents/Button";
 
 interface ProductPricingStepProps {
   data: ProductPricing;
@@ -16,23 +21,48 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
   data,
   validationErrors,
   onUpdate,
-  translations
+  translations,
 }) => {
   const getError = (field: string) => {
-    return validationErrors.find(error => error.field === field)?.message;
+    return validationErrors.find((error) => error.field === field)?.message;
   };
 
   // Price Tier Functions
+  const updatePriceTier = (
+    index: number,
+    field: keyof QuantityPriceTier,
+    value: number | undefined
+  ) => {
+    const newTiers = [...data.quantityPriceTiers];
+    newTiers[index] = { ...newTiers[index], [field]: value };
+
+    // Auto-adjust next tier's min value when current max changes
+    if (field === "max" && value && index < newTiers.length - 1) {
+      if (newTiers[index + 1].min <= value) {
+        newTiers[index + 1].min = value + 1;
+      }
+    }
+
+    onUpdate({ quantityPriceTiers: newTiers });
+  };
+
   const addPriceTier = () => {
+    const lastTier =
+      data.quantityPriceTiers[data.quantityPriceTiers.length - 1];
     const newTier: QuantityPriceTier = {
-      min: data.quantityPriceTiers.length > 0 
-        ? (data.quantityPriceTiers[data.quantityPriceTiers.length - 1].max || 0) + 1
-        : 1,
+      min: lastTier?.max ? lastTier.max + 1 : (lastTier?.min || 0) + 1,
       max: undefined,
-      price: 0
+      price: 0,
     };
+
+    // Remove max from previous tier since it's no longer the last
+    if (lastTier && data.quantityPriceTiers.length > 0) {
+      const newTiers = [...data.quantityPriceTiers];
+      // Don't remove max from last tier, just add new tier
+    }
+
     onUpdate({
-      quantityPriceTiers: [...data.quantityPriceTiers, newTier]
+      quantityPriceTiers: [...data.quantityPriceTiers, newTier],
     });
   };
 
@@ -41,23 +71,18 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
     onUpdate({ quantityPriceTiers: newTiers });
   };
 
-  const updatePriceTier = (index: number, field: keyof QuantityPriceTier, value: number | undefined) => {
-    const newTiers = [...data.quantityPriceTiers];
-    newTiers[index] = { ...newTiers[index], [field]: value };
-    onUpdate({ quantityPriceTiers: newTiers });
-  };
-
   // Lead Time Functions
   const addLeadTime = () => {
     const newLeadTime: LeadTime = {
-      min: data.leadTime.length > 0 
-        ? (data.leadTime[data.leadTime.length - 1].max || 0) + 1
-        : 1,
+      min:
+        data.leadTime.length > 0
+          ? (data.leadTime[data.leadTime.length - 1].max || 0) + 1
+          : 1,
       max: undefined,
-      days: 1
+      days: 1,
     };
     onUpdate({
-      leadTime: [...data.leadTime, newLeadTime]
+      leadTime: [...data.leadTime, newLeadTime],
     });
   };
 
@@ -68,9 +93,21 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
     }
   };
 
-  const updateLeadTime = (index: number, field: keyof LeadTime, value: number | undefined) => {
+  const updateLeadTime = (
+    index: number,
+    field: keyof LeadTime,
+    value: number | undefined
+  ) => {
     const newLeadTimes = [...data.leadTime];
     newLeadTimes[index] = { ...newLeadTimes[index], [field]: value };
+
+    // Auto-adjust next lead time's min value when current max changes
+    if (field === "max" && value && index < newLeadTimes.length - 1) {
+      if (newLeadTimes[index + 1].min <= value) {
+        newLeadTimes[index + 1].min = value + 1;
+      }
+    }
+
     onUpdate({ leadTime: newLeadTimes });
   };
 
@@ -82,14 +119,14 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
           <DollarSign className="h-5 w-5 text-cb-red mr-2" />
           <h3 className="text-lg font-medium text-gray-900">Base Pricing</h3>
         </div>
-        
+
         <Input
           type="number"
           label={translations.pricing.basePrice}
           placeholder={translations.pricing.basePricePlaceholder}
           value={data.basePrice}
           onChange={(value) => onUpdate({ basePrice: Number(value) || 0 })}
-          error={getError('basePrice')}
+          error={getError("basePrice")}
           hint={translations.pricing.basePriceHint}
           fullWidth
           validation={{ required: true, min: 1 }}
@@ -120,7 +157,10 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
         ) : (
           <div className="space-y-4">
             {data.quantityPriceTiers.map((tier, index) => (
-              <div key={index} className="bg-white rounded-lg p-4 border border-gray-200">
+              <div
+                key={index}
+                className="bg-white rounded-lg p-4 border border-gray-200"
+              >
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-medium text-gray-700">
                     Tier {index + 1}
@@ -134,37 +174,74 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
                     <X className="h-3 w-3" />
                   </Button>
                 </div>
-                
+
                 <div className="grid grid-cols-3 gap-3">
                   <Input
                     type="number"
                     label={translations.pricing.tierMin}
                     placeholder={translations.pricing.tierMinPlaceholder}
                     value={tier.min}
-                    onChange={(value) => updatePriceTier(index, 'min', Number(value) || 1)}
+                    onChange={(value) =>
+                      updatePriceTier(index, "min", Number(value) || 1)
+                    }
                     fullWidth
-                    validation={{ required: true, min: 1 }}
+                    validation={{
+                      required: true,
+                      min: 1,
+                      errorMessages: {
+                        required: "Tier minimum is required",
+                        min: "Tier minimum must be at least 1",
+                      },
+                    }}
+                    error={getError(`quantityPriceTiers.${index}.min`)}
                   />
-                  
+
                   <Input
                     type="number"
                     label={translations.pricing.tierMax}
                     placeholder={translations.pricing.tierMaxPlaceholder}
-                    value={tier.max || ''}
-                    onChange={(value) => updatePriceTier(index, 'max', value ? Number(value) : undefined)}
+                    value={tier.max || ""}
+                    onChange={(value) =>
+                      updatePriceTier(
+                        index,
+                        "max",
+                        value ? Number(value) : undefined
+                      )
+                    }
                     fullWidth
-                    hint={index === data.quantityPriceTiers.length - 1 ? translations.pricing.lastTierNote : ''}
+                    validation={{
+                      min: tier.min + 1,
+                      errorMessages: {
+                        min: `Max quantity must be greater than ${tier.min}`,
+                      },
+                    }}
+                    hint={
+                      index === data.quantityPriceTiers.length - 1
+                        ? translations.pricing.lastTierNote
+                        : ""
+                    }
+                    error={getError(`quantityPriceTiers.${index}.max`)}
                   />
-                  
+
                   <Input
                     type="number"
                     label={translations.pricing.tierPrice}
                     placeholder={translations.pricing.tierPricePlaceholder}
                     value={tier.price}
-                    onChange={(value) => updatePriceTier(index, 'price', Number(value) || 0)}
+                    onChange={(value) =>
+                      updatePriceTier(index, "price", Number(value) || 0)
+                    }
                     fullWidth
-                    validation={{ required: true, min: 0 }}
+                    validation={{
+                      required: true,
+                      min: 0,
+                      errorMessages: {
+                        required: "Tier price is required",
+                        min: "Tier price cannot be negative",
+                      },
+                    }}
                     leftIcon={<DollarSign className="h-4 w-4" />}
+                    error={getError(`quantityPriceTiers.${index}.price`)}
                   />
                 </div>
               </div>
@@ -194,7 +271,10 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
 
         <div className="space-y-4">
           {data.leadTime.map((leadTime, index) => (
-            <div key={index} className="bg-white rounded-lg p-4 border border-gray-200">
+            <div
+              key={index}
+              className="bg-white rounded-lg p-4 border border-gray-200"
+            >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-700">
                   Lead Time {index + 1}
@@ -210,44 +290,81 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
                   </Button>
                 )}
               </div>
-              
+
               <div className="grid grid-cols-3 gap-3">
                 <Input
                   type="number"
                   label={translations.pricing.leadTimeMin}
                   placeholder={translations.pricing.leadTimeMinPlaceholder}
                   value={leadTime.min}
-                  onChange={(value) => updateLeadTime(index, 'min', Number(value) || 1)}
+                  onChange={(value) =>
+                    updateLeadTime(index, "min", Number(value) || 1)
+                  }
                   fullWidth
-                  validation={{ required: true, min: 1 }}
+                  validation={{
+                    required: true,
+                    min: 1,
+                    errorMessages: {
+                      required: "Lead time minimum is required",
+                      min: "Lead time minimum must be at least 1",
+                    },
+                  }}
+                  error={getError(`leadTime.${index}.min`)}
                 />
-                
+
                 <Input
                   type="number"
                   label={translations.pricing.leadTimeMax}
                   placeholder={translations.pricing.leadTimeMaxPlaceholder}
-                  value={leadTime.max || ''}
-                  onChange={(value) => updateLeadTime(index, 'max', value ? Number(value) : undefined)}
+                  value={leadTime.max || ""}
+                  onChange={(value) =>
+                    updateLeadTime(
+                      index,
+                      "max",
+                      value ? Number(value) : undefined
+                    )
+                  }
                   fullWidth
-                  hint={index === data.leadTime.length - 1 ? translations.pricing.lastLeadTimeNote : ''}
+                  validation={{
+                    min: leadTime.min + 1,
+                    errorMessages: {
+                      min: `Max quantity must be greater than ${leadTime.min}`,
+                    },
+                  }}
+                  hint={
+                    index === data.leadTime.length - 1
+                      ? translations.pricing.lastLeadTimeNote
+                      : ""
+                  }
+                  error={getError(`leadTime.${index}.max`)}
                 />
-                
+
                 <Input
                   type="number"
                   label={translations.pricing.leadTimeDays}
                   placeholder={translations.pricing.leadTimeDaysPlaceholder}
                   value={leadTime.days}
-                  onChange={(value) => updateLeadTime(index, 'days', Number(value) || 1)}
+                  onChange={(value) =>
+                    updateLeadTime(index, "days", Number(value) || 1)
+                  }
                   fullWidth
-                  validation={{ required: true, min: 1 }}
+                  validation={{
+                    required: true,
+                    min: 1,
+                    errorMessages: {
+                      required: "Lead time days is required",
+                      min: "Lead time days must be at least 1",
+                    },
+                  }}
+                  error={getError(`leadTime.${index}.days`)}
                 />
               </div>
             </div>
           ))}
         </div>
 
-        {getError('leadTime') && (
-          <p className="mt-2 text-sm text-red-600">{getError('leadTime')}</p>
+        {getError("leadTime") && (
+          <p className="mt-2 text-sm text-red-600">{getError("leadTime")}</p>
         )}
       </div>
     </div>

@@ -82,14 +82,14 @@ export interface Product {
   updatedAt?: string;
 }
 
-export type ProductStep = 
-  | 'productInfo' 
-  | 'attributes' 
-  | 'images' 
-  | 'pricing' 
-  | 'variations' 
-  | 'services' 
-  | 'description';
+export type ProductStep =
+  | "productInfo"
+  | "attributes"
+  | "images"
+  | "pricing"
+  | "variations"
+  | "services"
+  | "description";
 
 export interface StepStatus {
   productInfo: boolean;
@@ -101,10 +101,16 @@ export interface StepStatus {
   description: boolean;
 }
 
+export interface ProductImagesData {
+  images: string[]; // Current images (existing ones to keep)
+  originalImages: string[]; // Original images from backend
+  newFiles: File[]; // New files to be uploaded
+}
+
 export interface ProductFormData {
   productInfo: ProductInfo;
   attributes: ProductAttributeGroup[];
-  images: string[];
+  images: ProductImagesData[];
   pricing: ProductPricing;
   variations: ProductVariations;
   services: string[];
@@ -135,3 +141,4 @@ export interface ValidationError {
   field: string;
   message: string;
 }
+

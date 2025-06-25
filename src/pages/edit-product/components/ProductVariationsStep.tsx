@@ -1,9 +1,14 @@
 // src/pages/EditProduct/components/ProductVariationsStep.tsx
-import React from 'react';
-import { Plus, X, Settings, Tag } from 'lucide-react';
-import { CustomizableOption, ProductVariation, ProductVariations, ValidationError } from '../types.edit-product';
-import Button from '../../../components/BasicComponents/Button';
-import Input from '../../../components/BasicComponents/Input';
+import React from "react";
+import { Plus, X, Settings, Tag } from "lucide-react";
+import {
+  CustomizableOption,
+  ProductVariation,
+  ProductVariations,
+  ValidationError,
+} from "../types.edit-product";
+import Button from "../../../components/BasicComponents/Button";
+import Input from "../../../components/BasicComponents/Input";
 
 interface ProductVariationsStepProps {
   data: ProductVariations;
@@ -16,20 +21,20 @@ const ProductVariationsStep: React.FC<ProductVariationsStepProps> = ({
   data,
   validationErrors,
   onUpdate,
-  translations
+  translations,
 }) => {
   const getError = (field: string) => {
-    return validationErrors.find(error => error.field === field)?.message;
+    return validationErrors.find((error) => error.field === field)?.message;
   };
 
   // Variation Functions
   const addVariation = () => {
     const newVariation: ProductVariation = {
-      field: '',
-      values: ['']
+      field: "",
+      values: [""],
     };
     onUpdate({
-      variations: [...data.variations, newVariation]
+      variations: [...data.variations, newVariation],
     });
   };
 
@@ -46,21 +51,25 @@ const ProductVariationsStep: React.FC<ProductVariationsStepProps> = ({
 
   const addVariationValue = (variationIndex: number) => {
     const newVariations = [...data.variations];
-    newVariations[variationIndex].values.push('');
+    newVariations[variationIndex].values.push("");
     onUpdate({ variations: newVariations });
   };
 
   const removeVariationValue = (variationIndex: number, valueIndex: number) => {
     const newVariations = [...data.variations];
     if (newVariations[variationIndex].values.length > 1) {
-      newVariations[variationIndex].values = newVariations[variationIndex].values.filter(
-        (_, i) => i !== valueIndex
-      );
+      newVariations[variationIndex].values = newVariations[
+        variationIndex
+      ].values.filter((_, i) => i !== valueIndex);
       onUpdate({ variations: newVariations });
     }
   };
 
-  const updateVariationValue = (variationIndex: number, valueIndex: number, value: string) => {
+  const updateVariationValue = (
+    variationIndex: number,
+    valueIndex: number,
+    value: string
+  ) => {
     const newVariations = [...data.variations];
     newVariations[variationIndex].values[valueIndex] = value;
     onUpdate({ variations: newVariations });
@@ -69,11 +78,11 @@ const ProductVariationsStep: React.FC<ProductVariationsStepProps> = ({
   // Customizable Options Functions
   const addCustomOption = () => {
     const newOption: CustomizableOption = {
-      option: '',
-      quantity: undefined
+      option: "",
+      quantity: undefined,
     };
     onUpdate({
-      customizableOptions: [...data.customizableOptions, newOption]
+      customizableOptions: [...data.customizableOptions, newOption],
     });
   };
 
@@ -82,9 +91,13 @@ const ProductVariationsStep: React.FC<ProductVariationsStepProps> = ({
     onUpdate({ customizableOptions: newOptions });
   };
 
-  const updateCustomOption = (index: number, field: 'option' | 'quantity', value: string | number) => {
+  const updateCustomOption = (
+    index: number,
+    field: "option" | "quantity",
+    value: string | number
+  ) => {
     const newOptions = [...data.customizableOptions];
-    if (field === 'quantity') {
+    if (field === "quantity") {
       newOptions[index].quantity = value as number;
     } else {
       newOptions[index].option = value as string;
@@ -126,7 +139,10 @@ const ProductVariationsStep: React.FC<ProductVariationsStepProps> = ({
         ) : (
           <div className="space-y-6">
             {data.variations.map((variation, variationIndex) => (
-              <div key={variationIndex} className="bg-white rounded-lg p-4 border border-gray-200">
+              <div
+                key={variationIndex}
+                className="bg-white rounded-lg p-4 border border-gray-200"
+              >
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-sm font-medium text-gray-700">
                     Variation {variationIndex + 1}
@@ -146,11 +162,24 @@ const ProductVariationsStep: React.FC<ProductVariationsStepProps> = ({
                   <Input
                     type="text"
                     label={translations.variations.variationField}
-                    placeholder={translations.variations.variationFieldPlaceholder}
+                    placeholder={
+                      translations.variations.variationFieldPlaceholder
+                    }
                     value={variation.field}
-                    onChange={(value) => updateVariationField(variationIndex, value)}
+                    onChange={(value) =>
+                      updateVariationField(variationIndex, value)
+                    }
                     fullWidth
-                    validation={{ required: true, maxLength: 50 }}
+                    validation={{
+                      required: true,
+                      maxLength: 50,
+                      errorMessages: {
+                        required: "Variation field is required",
+                        maxLength:
+                          "Variation field must be at most 50 characters",
+                      },
+                    }}
+                    error={getError(`variations.${variationIndex}.field`)}
                   />
                 </div>
 
@@ -159,7 +188,7 @@ const ProductVariationsStep: React.FC<ProductVariationsStepProps> = ({
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {translations.variations.variationValues}
                   </label>
-                  
+
                   <div className="space-y-2">
                     {variation.values.map((value, valueIndex) => (
                       <div key={valueIndex} className="flex gap-2 items-center">
@@ -168,16 +197,35 @@ const ProductVariationsStep: React.FC<ProductVariationsStepProps> = ({
                             type="text"
                             placeholder={`Value ${valueIndex + 1}`}
                             value={value}
-                            onChange={(newValue) => updateVariationValue(variationIndex, valueIndex, newValue)}
+                            onChange={(newValue) =>
+                              updateVariationValue(
+                                variationIndex,
+                                valueIndex,
+                                newValue
+                              )
+                            }
                             fullWidth
-                            validation={{ required: true, maxLength: 100 }}
+                            validation={{
+                              required: true,
+                              maxLength: 100,
+                              errorMessages: {
+                                required: "Variation value is required",
+                                maxLength:
+                                  "Each variation value must be at most 100 characters",
+                              },
+                            }}
+                            error={getError(
+                              `variations.${variationIndex}.values.${valueIndex}`
+                            )}
                           />
                         </div>
                         {variation.values.length > 1 && (
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => removeVariationValue(variationIndex, valueIndex)}
+                            onClick={() =>
+                              removeVariationValue(variationIndex, valueIndex)
+                            }
                             ariaLabel={translations.variations.removeValue}
                           >
                             <X className="h-4 w-4" />
@@ -235,7 +283,10 @@ const ProductVariationsStep: React.FC<ProductVariationsStepProps> = ({
         ) : (
           <div className="space-y-4">
             {data.customizableOptions.map((option, index) => (
-              <div key={index} className="bg-white rounded-lg p-4 border border-gray-200">
+              <div
+                key={index}
+                className="bg-white rounded-lg p-4 border border-gray-200"
+              >
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-medium text-gray-700">
                     Custom Option {index + 1}
@@ -254,21 +305,44 @@ const ProductVariationsStep: React.FC<ProductVariationsStepProps> = ({
                   <Input
                     type="text"
                     label={translations.variations.customOptionName}
-                    placeholder={translations.variations.customOptionPlaceholder}
+                    placeholder={
+                      translations.variations.customOptionPlaceholder
+                    }
                     value={option.option}
-                    onChange={(value) => updateCustomOption(index, 'option', value)}
+                    onChange={(value) =>
+                      updateCustomOption(index, "option", value)
+                    }
                     fullWidth
-                    validation={{ required: true, maxLength: 100 }}
+                    validation={{
+                      required: true,
+                      maxLength: 100,
+                      errorMessages: {
+                        required: "Customizable option name is required",
+                        maxLength:
+                          "Customizable option must be at most 100 characters",
+                      },
+                    }}
+                    error={getError(`customizableOptions.${index}.option`)}
                   />
-                  
+
                   <Input
                     type="number"
                     label={translations.variations.customOptionQuantity}
-                    placeholder={translations.variations.customOptionQuantityPlaceholder}
-                    value={option.quantity || ''}
-                    onChange={(value) => updateCustomOption(index, 'quantity', Number(value) || 0)}
+                    placeholder={
+                      translations.variations.customOptionQuantityPlaceholder
+                    }
+                    value={option.quantity || ""}
+                    onChange={(value) =>
+                      updateCustomOption(index, "quantity", Number(value) || 0)
+                    }
                     fullWidth
-                    validation={{ min: 0 }}
+                    validation={{
+                      min: 0,
+                      errorMessages: {
+                        min: "Customizable option quantity must be a non-negative integer",
+                      },
+                    }}
+                    error={getError(`customizableOptions.${index}.quantity`)}
                   />
                 </div>
               </div>
@@ -277,8 +351,8 @@ const ProductVariationsStep: React.FC<ProductVariationsStepProps> = ({
         )}
       </div>
 
-      {getError('variations') && (
-        <p className="text-sm text-red-600">{getError('variations')}</p>
+      {getError("variations") && (
+        <p className="text-sm text-red-600">{getError("variations")}</p>
       )}
     </div>
   );

@@ -1,23 +1,22 @@
 // src/pages/EditProduct/EditProduct.tsx
-import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, Save, CheckCircle } from 'lucide-react';
-import Button from '../../components/BasicComponents/Button';
-import ConfirmationModal from '../../modals/ConfirmationModal';
-import { useEditProduct } from './useEditProduct';
-import ProductInfoStep from './components/ProductInfoStep';
-import ProductAttributesStep from './components/ProductAttributesStep';
-import ProductImagesStep from './components/ProductImagesStep';
-import ProductPricingStep from './components/ProductPricingStep';
-import ProductVariationsStep from './components/ProductVariationsStep';
-import ProductServicesStep from './components/ProductServicesStep';
-import ProductDescriptionStep from './components/ProductDescriptionStep';
-import StepNavigation from './components/StepNavigation';
+import React, { useState } from "react";
+import { ArrowLeft, ArrowRight, Save, CheckCircle } from "lucide-react";
+import Button from "../../components/BasicComponents/Button";
+import ConfirmationModal from "../../modals/ConfirmationModal";
+import { useEditProduct } from "./useEditProduct";
+import ProductInfoStep from "./components/ProductInfoStep";
+import ProductAttributesStep from "./components/ProductAttributesStep";
+import ProductImagesStep from "./components/ProductImagesStep";
+import ProductPricingStep from "./components/ProductPricingStep";
+import ProductVariationsStep from "./components/ProductVariationsStep";
+import ProductServicesStep from "./components/ProductServicesStep";
+import ProductDescriptionStep from "./components/ProductDescriptionStep";
+import StepNavigation from "./components/StepNavigation";
 
 const EditProduct: React.FC = () => {
   const {
     formData,
     validationErrors,
-    hasUnsavedChanges,
     completedSteps,
     currentStepIndex,
     currentStep,
@@ -26,6 +25,8 @@ const EditProduct: React.FC = () => {
     progressPercentage,
     categories,
     pendingNavigationStep,
+    hasUnsavedChanges, // Now uses change tracking
+    hasCurrentStepChanged, // New function
     handleNavigationConfirm,
     setPendingNavigationStep,
     navigateToStep,
@@ -37,7 +38,7 @@ const EditProduct: React.FC = () => {
     uploadImages,
     isStepCompleted,
     STEPS,
-    translations
+    translations,
   } = useEditProduct();
 
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -58,24 +59,39 @@ const EditProduct: React.FC = () => {
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === STEPS.length - 1;
 
+  // Update the navigation handling to not block when there are no changes:
   const handleNavigation = (stepIndex: number) => {
+    if (!hasCurrentStepChanged()) {
+      // No changes, navigate directly
+      navigateToStep(stepIndex, true);
+      return;
+    }
+
     const blocked = !navigateToStep(stepIndex);
     if (blocked) {
       setShowNavigationModal(true);
     }
   };
 
+  // Update the handleNext function:
   const handleNext = async () => {
     if (isLastStep) {
-      await saveCurrentStep();
+      if (hasCurrentStepChanged()) {
+        await saveCurrentStep();
+      }
       // Could navigate to products list or show completion message
       return;
     }
-    await saveAndNext();
+
+    if (hasCurrentStepChanged()) {
+      await saveAndNext();
+    } else {
+      goToNextStep();
+    }
   };
 
   const handleCancel = () => {
-    if (hasUnsavedChanges) {
+    if (hasCurrentStepChanged()) {
       setShowCancelModal(true);
     } else {
       window.history.back();
@@ -90,76 +106,76 @@ const EditProduct: React.FC = () => {
   const renderCurrentStep = () => {
     const stepProps = {
       validationErrors,
-      translations
+      translations,
     };
 
     switch (currentStep) {
-      case 'productInfo':
+      case "productInfo":
         return (
           <ProductInfoStep
             {...stepProps}
             data={formData.productInfo}
             categories={categories}
-            onUpdate={(data) => updateFormData('productInfo', data)}
+            onUpdate={(data) => updateFormData("productInfo", data)}
           />
         );
-      
-      case 'attributes':
+
+      case "attributes":
         return (
           <ProductAttributesStep
             {...stepProps}
             data={formData.attributes}
-            onUpdate={(data) => updateFormData('attributes', data)}
+            onUpdate={(data) => updateFormData("attributes", data)}
           />
         );
-      
-      case 'images':
+
+      case "images":
         return (
           <ProductImagesStep
             {...stepProps}
             data={formData.images}
-            onUpdate={(data) => updateFormData('images', data)}
-            onUpload={(files) => uploadImages(files, 'images')}
+            onUpdate={(data) => updateFormData("images", data)}
+            onUpload={(files) => uploadImages(files, "images")}
           />
         );
-      
-      case 'pricing':
+
+      case "pricing":
         return (
           <ProductPricingStep
             {...stepProps}
             data={formData.pricing}
-            onUpdate={(data) => updateFormData('pricing', data)}
+            onUpdate={(data) => updateFormData("pricing", data)}
           />
         );
-      
-      case 'variations':
+
+      case "variations":
         return (
           <ProductVariationsStep
             {...stepProps}
             data={formData.variations}
-            onUpdate={(data) => updateFormData('variations', data)}
+            onUpdate={(data) => updateFormData("variations", data)}
           />
         );
-      
-      case 'services':
+
+      case "services":
         return (
           <ProductServicesStep
             {...stepProps}
             data={formData.services}
-            onUpdate={(data) => updateFormData('services', data)}
+            onUpdate={(data) => updateFormData("services", data)}
           />
         );
-      
-      case 'description':
+
+      case "description":
         return (
           <ProductDescriptionStep
             {...stepProps}
             data={formData.description}
-            onUpdate={(data) => updateFormData('description', data)}
-            onUploadImages={(files) => uploadImages(files, 'description')}
+            onUpdate={(data) => updateFormData("description", data)}
+            onUploadImages={(files) => uploadImages(files, "description")}
           />
         );
-      
+
       default:
         return <div>Invalid step</div>;
     }
@@ -179,13 +195,17 @@ const EditProduct: React.FC = () => {
                 {translations.editProduct.subtitle}
               </p>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-sm text-gray-600">{translations.progress.completion}</p>
-                <p className="text-2xl font-bold text-cb-red">{progressPercentage}%</p>
+                <p className="text-sm text-gray-600">
+                  {translations.progress.completion}
+                </p>
+                <p className="text-2xl font-bold text-cb-red">
+                  {progressPercentage}%
+                </p>
               </div>
-              
+
               <Button
                 variant="outline"
                 onClick={handleCancel}
@@ -226,7 +246,7 @@ const EditProduct: React.FC = () => {
                       {translations.steps[currentStep]?.description}
                     </p>
                   </div>
-                  
+
                   {isStepCompleted(currentStepIndex) && (
                     <div className="flex items-center text-green-600">
                       <CheckCircle className="h-5 w-5 mr-1" />
@@ -237,9 +257,7 @@ const EditProduct: React.FC = () => {
               </div>
 
               {/* Step Content */}
-              <div className="px-8 py-8">
-                {renderCurrentStep()}
-              </div>
+              <div className="px-8 py-8">{renderCurrentStep()}</div>
 
               {/* Step Footer */}
               <div className="px-8 py-6 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
@@ -257,39 +275,55 @@ const EditProduct: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={saveCurrentStep}
-                    disabled={isPending}
-                    isLoading={isPending}
-                    leftIcon={<Save className="h-4 w-4" />}
-                  >
-                    {translations.navigation.save}
-                  </Button>
+                  {/* Only show save button when there are changes */}
+                  {hasCurrentStepChanged() && (
+                    <Button
+                      variant="outline"
+                      onClick={saveCurrentStep}
+                      disabled={isPending}
+                      isLoading={isPending}
+                      leftIcon={<Save className="h-4 w-4" />}
+                    >
+                      {translations.navigation.save}
+                    </Button>
+                  )}
 
                   <Button
                     variant="solid"
                     onClick={handleNext}
                     disabled={isPending}
                     isLoading={isPending}
-                    rightIcon={!isLastStep ? <ArrowRight className="h-4 w-4" /> : undefined}
-                  >
-                    {isLastStep 
-                      ? translations.navigation.finish
-                      : translations.navigation.saveAndNext
+                    rightIcon={
+                      !isLastStep ? (
+                        <ArrowRight className="h-4 w-4" />
+                      ) : undefined
                     }
+                  >
+                    {isLastStep
+                      ? translations.navigation.finish
+                      : hasCurrentStepChanged()
+                      ? translations.navigation.saveAndNext
+                      : translations.navigation.next}
                   </Button>
                 </div>
               </div>
             </div>
 
             {/* Unsaved Changes Warning */}
-            {hasUnsavedChanges && (
+            {hasCurrentStepChanged() && (
               <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    <svg
+                      className="h-5 w-5 text-yellow-400"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                   </div>
                   <div className="ml-3">
@@ -321,8 +355,8 @@ const EditProduct: React.FC = () => {
         description="You have unsaved changes. What would you like to do?"
         confirmButtonText="Save & Continue"
         cancelButtonText="Continue Without Saving"
-        confirmButtonClassName='text-sm'
-        cancelButtonClassName='text-sm'
+        confirmButtonClassName="text-sm"
+        cancelButtonClassName="text-sm"
         onClose={() => {
           setShowNavigationModal(false);
           handleNavigationConfirm(false);

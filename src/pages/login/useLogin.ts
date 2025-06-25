@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { LoginModalProps } from "../../types/login";
 import { useLoginApi } from "../../api/api-hooks/useAuthApi";
@@ -30,9 +30,16 @@ const useLogin = ()=>{
           customToast.success("Logged in successfully")
           dispatch(setIsLoggedIn(true))
           dispatch(setUser(loginData?.data?.response))
-          navigate(`/${lang}/${redirectUrl}`, { replace: true });
+          console.log("redirectUrl : ",`/${lang}${redirectUrl}`)
+          // navigate(`/${lang}/${redirectUrl}`, { replace: true });
         }
       },[isSuccess])
+
+      useEffect(()=>{
+        if(isSuccess && isLoggedIn){
+          navigate(`/${lang}${redirectUrl}`, { replace: true });
+        }
+      }, [isSuccess, isLoggedIn]);
     
       // Input field configurations
       const inputFields = [

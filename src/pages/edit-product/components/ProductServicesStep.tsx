@@ -1,9 +1,9 @@
 // src/pages/EditProduct/components/ProductServicesStep.tsx
-import React from 'react';
-import { Plus, X, Wrench } from 'lucide-react';
-import { ValidationError } from '../types.edit-product';
-import Button from '../../../components/BasicComponents/Button';
-import Input from '../../../components/BasicComponents/Input';
+import React from "react";
+import { Plus, X, Wrench } from "lucide-react";
+import { ValidationError } from "../types.edit-product";
+import Button from "../../../components/BasicComponents/Button";
+import Input from "../../../components/BasicComponents/Input";
 
 interface ProductServicesStepProps {
   data: string[];
@@ -16,14 +16,14 @@ const ProductServicesStep: React.FC<ProductServicesStepProps> = ({
   data,
   validationErrors,
   onUpdate,
-  translations
+  translations,
 }) => {
   const getError = (field: string) => {
-    return validationErrors.find(error => error.field === field)?.message;
+    return validationErrors.find((error) => error.field === field)?.message;
   };
 
   const addService = () => {
-    onUpdate([...data, '']);
+    onUpdate([...data, ""]);
   };
 
   const removeService = (index: number) => {
@@ -32,6 +32,11 @@ const ProductServicesStep: React.FC<ProductServicesStepProps> = ({
   };
 
   const updateService = (index: number, value: string) => {
+    // Validate length before updating
+    if (value.length > 200) {
+      return; // Don't update if exceeding limit
+    }
+
     const newServices = [...data];
     newServices[index] = value;
     onUpdate(newServices);
@@ -84,7 +89,10 @@ const ProductServicesStep: React.FC<ProductServicesStepProps> = ({
 
         <div className="space-y-4">
           {data.map((service, index) => (
-            <div key={index} className="bg-white rounded-lg p-4 border border-gray-200">
+            <div
+              key={index}
+              className="bg-white rounded-lg p-4 border border-gray-200"
+            >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-700">
                   Service {index + 1}
@@ -107,14 +115,24 @@ const ProductServicesStep: React.FC<ProductServicesStepProps> = ({
                 hint={translations.services.serviceHint}
                 rows={2}
                 fullWidth
-                validation={{ required: true, minLength: 1, maxLength: 200 }}
+                validation={{
+                  required: true,
+                  minLength: 1,
+                  maxLength: 200,
+                  errorMessages: {
+                    required: "Service description is required",
+                    minLength: "Service must be at least 1 character",
+                    maxLength: "Each service must be at most 200 characters",
+                  },
+                }}
+                error={getError(`services.${index}`)}
               />
             </div>
           ))}
         </div>
 
-        {getError('services') && (
-          <p className="mt-4 text-sm text-red-600">{getError('services')}</p>
+        {getError("services") && (
+          <p className="mt-4 text-sm text-red-600">{getError("services")}</p>
         )}
       </div>
     </div>

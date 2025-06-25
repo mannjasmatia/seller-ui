@@ -3,10 +3,11 @@ import { useSelector } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Header from "../components/header/Header";
 import Sidebar from "../components/sidebar/Sidebar";
+import { RootState } from "../store/appStore";
 
-const PrivateRoutes = ({ children }: { children: React.ReactNode }) => {
+const PrivateRoutes = ({ children,isVerifying }: { children: React.ReactNode, isVerifying : boolean }) => {
     console.log("PrivateRoutes rendered");
-    const isLoggedIn = useSelector((state: any) => state.user.isLoggedIn);
+    const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
     const navigate = useNavigate();
     const location = useLocation();
     const { lang } = useParams();
@@ -14,12 +15,12 @@ const PrivateRoutes = ({ children }: { children: React.ReactNode }) => {
     const preferredLang = localStorage.getItem("lang") || lang || "en";
     
     // If the user is not logged in, redirect to the login page
-    // useEffect(() => {
-    //     if (!isLoggedIn) {
-    //         console.log("User is not logged in, redirecting to login page");
-    //         navigate(`/${preferredLang}/login?redirect=${currentPath}`, { replace: true });
-    //     }
-    // }, [isLoggedIn]);
+    useEffect(() => {
+        if (!isVerifying && !isLoggedIn) {
+            console.log("User is not logged in, redirecting to login page");
+            navigate(`/${preferredLang}/login?redirect=${currentPath}`, { replace: true });
+        }
+    }, [isLoggedIn,isVerifying]);
 
     // Handle sidebar navigation
     const handleSidebarItemClick = (item: any) => {

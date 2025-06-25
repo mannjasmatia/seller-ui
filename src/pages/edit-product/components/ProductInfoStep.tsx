@@ -1,10 +1,10 @@
 // src/pages/EditProduct/components/ProductInfoStep.tsx
-import React from 'react';
-import { Plus, X, HelpCircle } from 'lucide-react';
-import { Category, ProductInfo, ValidationError } from '../types.edit-product';
-import Input from '../../../components/BasicComponents/Input';
-import Button from '../../../components/BasicComponents/Button';
-import CategorySearchDropdown from './CategorySearchDropdown';
+import React from "react";
+import { Plus, X, HelpCircle } from "lucide-react";
+import { Category, ProductInfo, ValidationError } from "../types.edit-product";
+import Input from "../../../components/BasicComponents/Input";
+import Button from "../../../components/BasicComponents/Button";
+import CategorySearchDropdown from "./CategorySearchDropdown";
 
 interface ProductInfoStepProps {
   data: ProductInfo;
@@ -19,15 +19,22 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({
   categories,
   validationErrors,
   onUpdate,
-  translations
+  translations,
 }) => {
   const getError = (field: string) => {
-    return validationErrors.find(error => error.field === field)?.message;
+    return validationErrors.find((error) => error.field === field)?.message;
   };
 
   const handleAboutChange = (index: number, value: string) => {
     const newAbout = [...data.about];
     newAbout[index] = value;
+
+    // Validate length
+    if (value.trim().length > 500) {
+      // Don't update if exceeding limit
+      return;
+    }
+
     onUpdate({ about: newAbout });
   };
 
@@ -35,12 +42,17 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({
 
   const addAboutPoint = () => {
     if (data.about.length < 10) {
-      onUpdate({ about: [...data.about, ''] });
+      onUpdate({ about: [...data.about, ""] });
     }
   };
 
   const removeAboutPoint = (index: number) => {
-    if (data.about.length > 2) {
+    // Ensure at least 2 points remain (considering non-empty ones)
+    const nonEmptyPoints = data.about.filter((point) => point.trim()).length;
+    if (
+      nonEmptyPoints > 2 ||
+      (nonEmptyPoints === 2 && !data.about[index].trim())
+    ) {
       const newAbout = data.about.filter((_, i) => i !== index);
       onUpdate({ about: newAbout });
     }
@@ -57,7 +69,7 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({
             placeholder={translations.productInfo.namePlaceholder}
             value={data.name}
             onChange={(value) => onUpdate({ name: value })}
-            error={getError('name')}
+            error={getError("name")}
             hint={translations.productInfo.nameHint}
             fullWidth
             validation={{ required: true, minLength: 3, maxLength: 200 }}
@@ -77,7 +89,7 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({
           value={data.categoryId}
           onChange={(categoryId) => onUpdate({ categoryId })}
           placeholder={translations.productInfo.categoryPlaceholder}
-          error={getError('categoryId')}
+          error={getError("categoryId")}
           label={translations.productInfo.category}
         />
       </div>
@@ -88,8 +100,10 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({
           {translations.productInfo.about}
           <span className="text-red-500 ml-1">*</span>
         </label>
-        <p className="text-sm text-gray-500 mb-4">{translations.productInfo.aboutHint}</p>
-        
+        <p className="text-sm text-gray-500 mb-4">
+          {translations.productInfo.aboutHint}
+        </p>
+
         <div className="space-y-3">
           {data.about.map((point, index) => (
             <div key={index} className="flex gap-3 items-start">
@@ -101,7 +115,14 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({
                   onChange={(value) => handleAboutChange(index, value)}
                   rows={2}
                   fullWidth
-                  validation={{ maxLength: 500 }}
+                  validation={{
+                    maxLength: 500,
+                    errorMessages: {
+                      maxLength:
+                        "Each about point must be at most 500 characters",
+                    },
+                  }}
+                  error={getError(`about.${index}`)}
                 />
               </div>
               {data.about.length > 2 && (
@@ -112,6 +133,10 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({
                   leftIcon={<X className="h-4 w-4" />}
                   ariaLabel={translations.productInfo.removePoint}
                   className="mt-1"
+                  disabled={
+                    data.about.filter((p) => p.trim()).length <= 2 &&
+                    !!point.trim()
+                  }
                 >
                   {translations.productInfo.removePoint}
                 </Button>
@@ -132,15 +157,15 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({
           </Button>
         )}
 
-        {getError('about') && (
-          <p className="mt-2 text-sm text-red-600">{getError('about')}</p>
+        {getError("about") && (
+          <p className="mt-2 text-sm text-red-600">{getError("about")}</p>
         )}
       </div>
 
       {/* MOQ */}
-      {data && data?.moq && 
+      {data && data?.moq && (
         <div>
-            <Input
+          <Input
             type="number"
             label={translations.productInfo.moq}
             placeholder={translations.productInfo.moqPlaceholder}
@@ -149,9 +174,9 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({
             hint={translations.productInfo.moqHint}
             fullWidth
             validation={{ required: true, min: 1 }}
-            />
+          />
         </div>
-        }
+      )}
     </div>
   );
 };

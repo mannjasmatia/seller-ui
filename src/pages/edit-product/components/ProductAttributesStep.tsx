@@ -1,9 +1,9 @@
 // src/pages/EditProduct/components/ProductAttributesStep.tsx
-import React from 'react';
-import { Plus, X, Trash2 } from 'lucide-react';
-import { ProductAttributeGroup, ValidationError } from '../types.edit-product';
-import Button from '../../../components/BasicComponents/Button';
-import Input from '../../../components/BasicComponents/Input';
+import React from "react";
+import { Plus, X, Trash2 } from "lucide-react";
+import { ProductAttributeGroup, ValidationError } from "../types.edit-product";
+import Button from "../../../components/BasicComponents/Button";
+import Input from "../../../components/BasicComponents/Input";
 
 interface ProductAttributesStepProps {
   data: ProductAttributeGroup[];
@@ -16,16 +16,16 @@ const ProductAttributesStep: React.FC<ProductAttributesStepProps> = ({
   data,
   validationErrors,
   onUpdate,
-  translations
+  translations,
 }) => {
   const getError = (field: string) => {
-    return validationErrors.find(error => error.field === field)?.message;
+    return validationErrors.find((error) => error.field === field)?.message;
   };
 
   const addAttributeGroup = () => {
     const newGroup: ProductAttributeGroup = {
-      name: '',
-      attributes: [{ field: '', value: '' }]
+      name: "",
+      attributes: [{ field: "", value: "" }],
     };
     onUpdate([...data, newGroup]);
   };
@@ -36,6 +36,17 @@ const ProductAttributesStep: React.FC<ProductAttributesStepProps> = ({
   };
 
   const updateGroupName = (groupIndex: number, name: string) => {
+    // Check for duplicate names
+    const otherGroups = data.filter((_, index) => index !== groupIndex);
+    const isDuplicate = otherGroups.some(
+      (group) => group.name.toLowerCase().trim() === name.toLowerCase().trim()
+    );
+
+    if (isDuplicate && name.trim()) {
+      // Could show a warning or prevent update
+      console.warn("Duplicate attribute group name");
+    }
+
     const newData = [...data];
     newData[groupIndex].name = name;
     onUpdate(newData);
@@ -43,7 +54,7 @@ const ProductAttributesStep: React.FC<ProductAttributesStepProps> = ({
 
   const addAttribute = (groupIndex: number) => {
     const newData = [...data];
-    newData[groupIndex].attributes.push({ field: '', value: '' });
+    newData[groupIndex].attributes.push({ field: "", value: "" });
     onUpdate(newData);
   };
 
@@ -58,12 +69,29 @@ const ProductAttributesStep: React.FC<ProductAttributesStepProps> = ({
   };
 
   const updateAttribute = (
-    groupIndex: number, 
-    attributeIndex: number, 
-    field: 'field' | 'value', 
+    groupIndex: number,
+    attributeIndex: number,
+    field: "field" | "value",
     value: string
   ) => {
     const newData = [...data];
+
+    if (field === "field") {
+      // Check for duplicate field names within the same group
+      const currentGroup = newData[groupIndex];
+      const otherAttributes = currentGroup.attributes.filter(
+        (_, index) => index !== attributeIndex
+      );
+      const isDuplicate = otherAttributes.some(
+        (attr) => attr.field.toLowerCase().trim() === value.toLowerCase().trim()
+      );
+
+      if (isDuplicate && value.trim()) {
+        console.warn("Duplicate field name within attribute group");
+        return; // Prevent duplicate
+      }
+    }
+
     newData[groupIndex].attributes[attributeIndex][field] = value;
     onUpdate(newData);
   };
@@ -95,87 +123,144 @@ const ProductAttributesStep: React.FC<ProductAttributesStepProps> = ({
 
   return (
     <div className="space-y-8">
-      {data && Array.isArray(data) && data?.map((group, groupIndex) => (
-        <div key={groupIndex} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-          {/* Group Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex-1 mr-4">
-              <Input
-                type="text"
-                label={translations.attributes.attributeGroupName}
-                placeholder={translations.attributes.attributeGroupPlaceholder}
-                value={group.name}
-                onChange={(value) => updateGroupName(groupIndex, value)}
-                fullWidth
-                validation={{ required: true, maxLength: 100 }}
-              />
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => removeAttributeGroup(groupIndex)}
-              leftIcon={<Trash2 className="h-4 w-4" />}
-              ariaLabel={translations.attributes.removeGroup}
-              className="mt-6"
-            >
-              {translations.attributes.removeGroup}
-            </Button>
-          </div>
-
-          {/* Attributes */}
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Attributes
-            </label>
-            
-            {group.attributes.map((attribute, attributeIndex) => (
-              <div key={attributeIndex} className="flex gap-3 items-start">
-                <div className="flex-1">
-                  <Input
-                    type="text"
-                    placeholder={translations.attributes.attributeFieldPlaceholder}
-                    value={attribute.field}
-                    onChange={(value) => updateAttribute(groupIndex, attributeIndex, 'field', value)}
-                    fullWidth
-                    validation={{ required: true, maxLength: 50 }}
-                  />
-                </div>
-                <div className="flex-1">
-                  <Input
-                    type="text"
-                    placeholder={translations.attributes.attributeValuePlaceholder}
-                    value={attribute.value}
-                    onChange={(value) => updateAttribute(groupIndex, attributeIndex, 'value', value)}
-                    fullWidth
-                    validation={{ required: true, maxLength: 255 }}
-                  />
-                </div>
-                {group.attributes.length > 1 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeAttribute(groupIndex, attributeIndex)}
-                    leftIcon={<X className="h-4 w-4" />}
-                    ariaLabel={translations.attributes.removeAttribute}
-                  >
-                    {translations.attributes.removeAttribute}
-                  </Button>
-                )}
+      {data &&
+        Array.isArray(data) &&
+        data?.map((group, groupIndex) => (
+          <div
+            key={groupIndex}
+            className="bg-gray-50 rounded-lg p-6 border border-gray-200"
+          >
+            {/* Group Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex-1 mr-4">
+                <Input
+                  type="text"
+                  label={translations.attributes.attributeGroupName}
+                  placeholder={
+                    translations.attributes.attributeGroupPlaceholder
+                  }
+                  value={group.name}
+                  onChange={(value) => updateGroupName(groupIndex, value)}
+                  fullWidth
+                  validation={{
+                    required: true,
+                    maxLength: 100,
+                    errorMessages: {
+                      required: "Attribute group name is required",
+                      maxLength:
+                        "Attribute group name must be at most 100 characters",
+                    },
+                  }}
+                  error={getError(`attributes.${groupIndex}.name`)}
+                />
               </div>
-            ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => removeAttributeGroup(groupIndex)}
+                leftIcon={<Trash2 className="h-4 w-4" />}
+                ariaLabel={translations.attributes.removeGroup}
+                className="mt-6"
+              >
+                {translations.attributes.removeGroup}
+              </Button>
+            </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => addAttribute(groupIndex)}
-              leftIcon={<Plus className="h-4 w-4" />}
-              className="mt-2"
-            >
-              {translations.attributes.addAttribute}
-            </Button>
+            {/* Attributes */}
+            <div className="space-y-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Attributes
+              </label>
+
+              {group.attributes.map((attribute, attributeIndex) => (
+                <div key={attributeIndex} className="flex gap-3 items-start">
+                  <div className="flex-1">
+                    <Input
+                      type="text"
+                      placeholder={
+                        translations.attributes.attributeFieldPlaceholder
+                      }
+                      value={attribute.field}
+                      onChange={(value) =>
+                        updateAttribute(
+                          groupIndex,
+                          attributeIndex,
+                          "field",
+                          value
+                        )
+                      }
+                      fullWidth
+                      validation={{
+                        required: true,
+                        maxLength: 50,
+                        errorMessages: {
+                          required: "Field name is required",
+                          maxLength: "Field name must be at most 50 characters",
+                        },
+                      }}
+                      error={getError(
+                        `attributes.${groupIndex}.attributes.${attributeIndex}.field`
+                      )}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      type="text"
+                      placeholder={
+                        translations.attributes.attributeValuePlaceholder
+                      }
+                      value={attribute.value}
+                      onChange={(value) =>
+                        updateAttribute(
+                          groupIndex,
+                          attributeIndex,
+                          "value",
+                          value
+                        )
+                      }
+                      fullWidth
+                      validation={{
+                        required: true,
+                        maxLength: 255,
+                        errorMessages: {
+                          required: "Field value is required",
+                          maxLength:
+                            "Field value must be at most 255 characters",
+                        },
+                      }}
+                      error={getError(
+                        `attributes.${groupIndex}.attributes.${attributeIndex}.value`
+                      )}
+                    />
+                  </div>
+                  {group.attributes.length > 1 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        removeAttribute(groupIndex, attributeIndex)
+                      }
+                      leftIcon={<X className="h-4 w-4" />}
+                      ariaLabel={translations.attributes.removeAttribute}
+                    >
+                      {translations.attributes.removeAttribute}
+                    </Button>
+                  )}
+                </div>
+              ))}
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => addAttribute(groupIndex)}
+                leftIcon={<Plus className="h-4 w-4" />}
+                className="mt-2"
+              >
+                {translations.attributes.addAttribute}
+              </Button>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
 
       {/* Add New Group Button */}
       <div className="flex justify-center">
@@ -188,8 +273,8 @@ const ProductAttributesStep: React.FC<ProductAttributesStepProps> = ({
         </Button>
       </div>
 
-      {getError('attributes') && (
-        <p className="text-sm text-red-600">{getError('attributes')}</p>
+      {getError("attributes") && (
+        <p className="text-sm text-red-600">{getError("attributes")}</p>
       )}
     </div>
   );
