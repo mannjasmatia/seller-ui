@@ -38,7 +38,6 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({
     onUpdate({ about: newAbout });
   };
 
-  console.log("ProductInfoStep data:", data);
 
   const addAboutPoint = () => {
     if (data.about.length < 10) {

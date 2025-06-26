@@ -249,7 +249,7 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
                     variant="outline"
                     size="xs"
                     onClick={() => removeAttribute(index)}
-                    leftIcon={<X className="h-3 w-3" />}
+                    // leftIcon={<X className="h-3 w-3" />}
                     ariaLabel={translations.description.removeAttribute}
                   >
                     <X className="h-3 w-3" />
@@ -390,7 +390,7 @@ const ProductDescriptionStep: React.FC<ProductDescriptionStepProps> = ({
                     size="xs"
                     onClick={() => removeImage(index)}
                     className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600"
-                    leftIcon={<X className="h-3 w-3" />}
+                    // leftIcon={<X className="h-3 w-3" />}
                     ariaLabel={translations.description.removeImage}
                   >
                     <X className="h-3 w-3" />

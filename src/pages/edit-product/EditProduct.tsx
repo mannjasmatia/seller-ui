@@ -29,6 +29,7 @@ const EditProduct: React.FC = () => {
     hasCurrentStepChanged, // New function
     handleNavigationConfirm,
     setPendingNavigationStep,
+    removeImage,
     navigateToStep,
     goToNextStep,
     goToPreviousStep,
@@ -129,14 +130,16 @@ const EditProduct: React.FC = () => {
           />
         );
 
-      case "images":
+      case 'images':
         return (
-          <ProductImagesStep
-            {...stepProps}
+            <ProductImagesStep
             data={formData.images}
-            onUpdate={(data) => updateFormData("images", data)}
-            onUpload={(files) => uploadImages(files, "images")}
-          />
+            validationErrors={validationErrors}
+            onUpdate={(data) => updateFormData('images', data)}
+            onUpload={(files) => uploadImages(files, 'images')}
+            onRemove={(index) => removeImage(index, 'images')}
+            translations={translations}
+            />
         );
 
       case "pricing":
@@ -360,7 +363,7 @@ const EditProduct: React.FC = () => {
         onClose={() => {
           setShowNavigationModal(false);
           handleNavigationConfirm(false);
-          setPendingNavigationStep(null);
+        //   setPendingNavigationStep(null);
         }}
         onConfirm={() => {
           setShowNavigationModal(false);

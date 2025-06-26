@@ -358,7 +358,7 @@ export const MediaModal: React.FC<MediaModalProps> = ({
         
         {/* Title */}
         {(currentFile.title || title) && (
-          <div className="px-4 py-2 bg-white/90 absolute top-0 left-0 right-0 z-10 border-b border-gray-200">
+          <div className="px-4 py-2 bg-white/30 absolute top-0 left-0 right-0 z-10">
             <h3 className="text-lg font-semibold text-gray-900 truncate">
               {currentFile.title || title}
             </h3>

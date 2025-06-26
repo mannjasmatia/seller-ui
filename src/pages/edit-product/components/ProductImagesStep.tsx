@@ -1,84 +1,67 @@
 // src/pages/edit-product/components/ProductImagesStep.tsx
-import React, { useRef, useState, useEffect } from 'react';
-import { Upload, X, Image as ImageIcon, AlertCircle, Undo2, Info, CheckCircle, Clock, Trash2 } from 'lucide-react';
-import { ProductImagesData, ValidationError } from '../types.edit-product';
+import React, { useRef, useState } from 'react';
+import { Upload, X, Image as ImageIcon, AlertCircle, Eye } from 'lucide-react';
+import { ValidationError, ProductImagesData } from '../types.edit-product';
 import DynamicImage from '../../../components/BasicComponents/Image';
 import Button from '../../../components/BasicComponents/Button';
+import ConfirmationModal from '../../../modals/ConfirmationModal';
+import MediaModal from '../../../modals/MediaModal';
+import { MediaFile } from '../../../components/BasicComponents/types';
+
+const MEDIA_URL = import.meta.env.VITE_MEDIA_URL;
 
 interface ProductImagesStepProps {
-  data: ProductImagesData; // Current images (existing + new file previews)
-  originalImages: string[]; // Original images from backend
-  newFiles: File[]; // New files to be uploaded
+  data: ProductImagesData;
   validationErrors: ValidationError[];
-  onUpdate: (data: { images: string[]; newFiles: File[] }) => void;
+  onUpdate: (data: ProductImagesData) => void;
+  onUpload: (files: FileList) => Promise<boolean>;
+  onRemove: (index: number) => void;
   translations: any;
 }
 
+interface ImageItem {
+  type: 'existing' | 'new';
+  url?: string;
+  file?: File;
+  index: number;
+}
+
 const ProductImagesStep: React.FC<ProductImagesStepProps> = ({
-  data = { images: [], newFiles: [], originalImages: [] },
-  originalImages = [],
-  newFiles = [],
-  validationErrors = [],
+  data,
+  validationErrors,
   onUpdate,
+  onUpload,
+  onRemove,
   translations
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [filePreviewUrls, setFilePreviewUrls] = useState<string[]>([]);
-  const [showUndo, setShowUndo] = useState(false);
-
-  // Cleanup preview URLs on unmount
-  useEffect(() => {
-    return () => {
-      filePreviewUrls?.forEach(url => {
-        if (url?.startsWith('blob:')) {
-          URL.revokeObjectURL(url);
-        }
-      });
-    };
-  }, []);
-
-  // Check if changes were made compared to original
-  useEffect(() => {
-    const hasChanges = hasAnyChanges();
-    setShowUndo(hasChanges);
-  }, [data, newFiles, originalImages]);
+  const [isUploading, setIsUploading] = useState(false);
+  
+  // Modal states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ index: number; isNewFile: boolean } | null>(null);
+  const [showMediaModal, setShowMediaModal] = useState(false);
+  const [mediaUrls, setMediaUrls] = useState<MediaFile[]>([]);
+  const [initialMediaIndex, setInitialMediaIndex] = useState(0);
 
   const getError = (field: string) => {
-    return validationErrors?.find(error => error?.field === field)?.message;
+    return validationErrors.find(error => error.field === field)?.message;
   };
 
-  // Check if we have at least one image (existing or new)
-  const hasAtLeastOneImage = () => {
-    const existingCount = data?.images?.filter(img => originalImages?.includes(img))?.length || 0;
-    const newFilesCount = newFiles?.length || 0;
-    return existingCount + newFilesCount >= 1;
-  };
+  // Get total count of images (existing + new files)
+  const totalImageCount = (data?.images?.length || 0) + (data?.newFiles?.length || 0);
+  const canUploadMore = totalImageCount < 10;
 
-  // Get total image count
-  const getTotalImageCount = () => {
-    const existingCount = data?.images?.filter(img => originalImages?.includes(img))?.length || 0;
-    const newFilesCount = newFiles?.length || 0;
-    return existingCount + newFilesCount;
-  };
-
-  // Check if any changes were made
-  const hasAnyChanges = () => {
-    // Check if any original images were removed
-    const removedImages = originalImages?.filter(img => !data?.images?.includes(img)) || [];
-    // Check if new files were added
-    const hasNewFiles = (newFiles?.length || 0) > 0;
-    return removedImages.length > 0 || hasNewFiles;
-  };
-
-  // Get removed images count
-  const getRemovedImagesCount = () => {
-    return originalImages?.filter(img => !data?.images?.includes(img))?.length || 0;
-  };
-
-  // Get existing images that are kept
-  const getKeptImages = () => {
-    return data?.images?.filter(img => originalImages?.includes(img)) || [];
+  // Create all items array for consistent handling
+  const getAllItems = (): ImageItem[] => {
+    const existingImages = data?.images || [];
+    const newFiles = data?.newFiles || [];
+    
+    return [
+      ...existingImages.map((url, index) => ({ type: 'existing' as const, url, index })),
+      ...newFiles.map((file, index) => ({ type: 'new' as const, file, index }))
+    ];
   };
 
   const handleFileSelect = async (files: FileList | null) => {
@@ -86,46 +69,40 @@ const ProductImagesStep: React.FC<ProductImagesStepProps> = ({
     
     // Validate file types
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    const invalidFiles = Array.from(files)?.filter(file => !validTypes?.includes(file?.type)) || [];
+    const invalidFiles = Array.from(files).filter(file => !validTypes.includes(file.type));
     
-    if (invalidFiles?.length > 0) {
-      alert(`Invalid file types detected. Please select only JPG, PNG, or WebP files.`);
+    if (invalidFiles.length > 0) {
+      alert(translations.images?.invalidFileType || 'Please select only JPG, PNG, or WebP files.');
       return;
     }
 
-    // Check file sizes (max 5MB each)
-    const oversizedFiles = Array.from(files)?.filter(file => file?.size > 5 * 1024 * 1024) || [];
-    if (oversizedFiles?.length > 0) {
-      alert(`Some files are too large. Maximum file size is 5MB.`);
+    // Check total number of images
+    if (totalImageCount + files.length > 10) {
+      alert(translations.images?.maxImagesExceeded || 'Maximum 10 images allowed');
       return;
     }
 
-    // Check total count limit
-    const currentTotal = getTotalImageCount();
-    if (currentTotal + files.length > 10) {
-      const canAdd = Math.max(0, 10 - currentTotal);
-      alert(`Maximum 10 images allowed. You can add ${canAdd} more image${canAdd !== 1 ? 's' : ''}.`);
+    // Validate file sizes (5MB per file)
+    const oversizedFiles = Array.from(files).filter(file => file.size > 5 * 1024 * 1024);
+    if (oversizedFiles.length > 0) {
+      alert(translations.images?.fileSizeExceeded || 'Each file must be less than 5MB');
       return;
     }
 
-    // Add new files
-    const newFilesList = [...(newFiles || []), ...Array.from(files)];
-    
-    // Create preview URLs for new files
-    const newPreviewUrls = [...(filePreviewUrls || [])];
-    Array.from(files)?.forEach(file => {
-      newPreviewUrls.push(URL.createObjectURL(file));
-    });
-    
-    setFilePreviewUrls(newPreviewUrls);
-    
-    onUpdate({ 
-      images: data.images || [], 
-      newFiles: newFilesList 
-    });
-    
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    setIsUploading(true);
+    try {
+      const success = await onUpload(files);
+      if (!success) {
+        console.error('Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+    } finally {
+      setIsUploading(false);
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -142,333 +119,314 @@ const ProductImagesStep: React.FC<ProductImagesStepProps> = ({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    handleFileSelect(e.dataTransfer?.files);
+    handleFileSelect(e.dataTransfer.files);
   };
 
-  const removeExistingImage = (imageUrl: string) => {
-    const newImages = data?.images?.filter(img => img !== imageUrl) || [];
-    onUpdate({ 
-      images: newImages, 
-      newFiles: newFiles || [] 
-    });
+  const initiateDelete = (index: number, isNewFile: boolean) => {
+    setDeleteTarget({ index, isNewFile });
+    setShowDeleteModal(true);
   };
 
-  const removeNewFile = (index: number) => {
-    const newFilesList = newFiles?.filter((_, i) => i !== index) || [];
-    const newPreviewUrls = filePreviewUrls?.filter((_, i) => i !== index) || [];
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
     
-    // Revoke the object URL to prevent memory leaks
-    if (filePreviewUrls?.[index]?.startsWith('blob:')) {
-      URL.revokeObjectURL(filePreviewUrls[index]);
+    const { index, isNewFile } = deleteTarget;
+    
+    if (isNewFile) {
+      // Remove from newFiles array
+      const newFiles = [...(data.newFiles || [])];
+      newFiles.splice(index, 1);
+      onUpdate({
+        ...data,
+        newFiles
+      });
+    } else {
+      // Remove from existing images
+      onRemove(index);
     }
     
-    setFilePreviewUrls(newPreviewUrls);
-    onUpdate({ 
-      images: data?.images || [], 
-      newFiles: newFilesList 
-    });
+    setShowDeleteModal(false);
+    setDeleteTarget(null);
   };
 
-  const handleUndo = () => {
-    // Reset to original state
-    onUpdate({
-      images: [...(originalImages || [])],
-      newFiles: []
-    });
-    
-    // Clear preview URLs
-    filePreviewUrls?.forEach(url => {
-      if (url?.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
-      }
-    });
-    setFilePreviewUrls([]);
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setDeleteTarget(null);
   };
 
   const openFileDialog = () => {
     fileInputRef.current?.click();
   };
 
-  // Check if we can add more images
-  const canAddMore = getTotalImageCount() < 10;
-  const totalImages = getTotalImageCount();
-  const keptImages = getKeptImages();
-  const removedCount = getRemovedImagesCount();
+  // Create preview URLs for new files
+  const getPreviewUrl = (file: File): string => {
+    return URL.createObjectURL(file);
+  };
 
-  return (
-    <div className="space-y-6">
-      {/* Header Section with Statistics */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
-            <ImageIcon className="h-6 w-6 text-blue-600 mr-3" />
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Product Images</h3>
-              <p className="text-sm text-gray-600">Manage your product images (minimum 1 required, maximum 10 allowed)</p>
-            </div>
-          </div>
-          
-          {showUndo && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleUndo}
-              leftIcon={<Undo2 className="h-4 w-4" />}
-              className="border-orange-300 text-orange-700 hover:bg-orange-50"
-            >
-              Undo All Changes
-            </Button>
-          )}
-        </div>
+  // Handle image click for media modal
+  const handleImageClick = (clickedIndex: number) => {
+    const allItems = getAllItems();
+    
+    // Create cyclic array starting from clicked image
+    const cyclicUrls: string[] = [];
+    
+    for (let i = 0; i < allItems.length; i++) {
+      const actualIndex = (clickedIndex + i) % allItems.length;
+      const item = allItems[actualIndex];
+      
+      if (item.type === 'existing') {
+        cyclicUrls.push(`${MEDIA_URL}/${item.url}`);
+      } else if (item.file) {
+        cyclicUrls.push(getPreviewUrl(item.file));
+      }
+    }
 
-        {/* Statistics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg p-3 border border-blue-100">
-            <div className="text-2xl font-bold text-blue-600">{totalImages}</div>
-            <div className="text-xs text-gray-600">Total Images</div>
-          </div>
-          <div className="bg-white rounded-lg p-3 border border-green-100">
-            <div className="text-2xl font-bold text-green-600">{keptImages?.length || 0}</div>
-            <div className="text-xs text-gray-600">Existing Kept</div>
-          </div>
-          <div className="bg-white rounded-lg p-3 border border-orange-100">
-            <div className="text-2xl font-bold text-orange-600">{newFiles?.length || 0}</div>
-            <div className="text-xs text-gray-600">New to Upload</div>
-          </div>
-          <div className="bg-white rounded-lg p-3 border border-red-100">
-            <div className="text-2xl font-bold text-red-600">{removedCount}</div>
-            <div className="text-xs text-gray-600">Removed</div>
-          </div>
-        </div>
-      </div>
+    // Convert to MediaFile format
+    const mediaFiles: MediaFile[] = cyclicUrls.map((url, index) => ({
+      src: url,
+      type: 'image',
+      alt: `Product image ${((clickedIndex + index) % allItems.length) + 1}`,
+      title: `Image ${((clickedIndex + index) % allItems.length) + 1}`,
+    }));
+    
+    setMediaUrls(mediaFiles);
+    setInitialMediaIndex(0); // Always start with the clicked image (which is now at index 0)
+    setShowMediaModal(true);
+  };
 
-      {/* Validation Messages */}
-      {!hasAtLeastOneImage() && (
-        <div className="p-4 bg-red-50 border-l-4 border-red-400 rounded-lg">
-          <div className="flex items-center">
-            <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-            <div>
-              <p className="text-sm font-medium text-red-800">At least one image is required</p>
-              <p className="text-xs text-red-700 mt-1">Upload new images or keep existing ones to proceed</p>
-            </div>
-          </div>
-        </div>
-      )}
+  const renderImageGrid = () => {
+    const allItems = getAllItems();
 
-      {hasAnyChanges() && hasAtLeastOneImage() && (
-        <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
-          <div className="flex items-center">
-            <Clock className="h-5 w-5 text-yellow-500 mr-2" />
-            <div>
-              <p className="text-sm font-medium text-yellow-800">You have unsaved image changes</p>
-              <p className="text-xs text-yellow-700 mt-1">
-                {removedCount > 0 && `${removedCount} image${removedCount !== 1 ? 's' : ''} will be removed`}
-                {removedCount > 0 && (newFiles?.length || 0) > 0 && ', '}
-                {(newFiles?.length || 0) > 0 && `${newFiles.length} new image${newFiles.length !== 1 ? 's' : ''} will be uploaded`}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Upload Section */}
-      {canAddMore && (
-        <div className="bg-white rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors">
-          <div
-            className={`
-              p-8 text-center cursor-pointer transition-all duration-200
-              ${isDragging 
-                ? 'border-blue-500 bg-blue-50' 
-                : 'hover:bg-gray-50'
-              }
-            `}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={openFileDialog}
-          >
-            <Upload className={`h-12 w-12 mx-auto mb-4 ${isDragging ? 'text-blue-500' : 'text-gray-400'}`} />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {isDragging ? 'Drop images here' : 'Upload Images'}
-            </h3>
-            <p className="text-gray-500 mb-2">
-              Drag & drop images here or click to browse
-            </p>
-            <p className="text-sm text-gray-400 mb-3">
-              Supported: JPG, PNG, WebP • Max 5MB each
-            </p>
-            <div className="flex items-center justify-center space-x-4 text-sm text-gray-600">
-              <span>📁 {totalImages}/10 images</span>
-              <span>•</span>
-              <span>➕ {10 - totalImages} slots remaining</span>
-            </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept="image/jpeg,image/jpg,image/png,image/webp"
-              onChange={(e) => handleFileSelect(e.target.files)}
-              className="hidden"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Image limit reached */}
-      {!canAddMore && totalImages === 10 && (
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-center">
-            <Info className="h-5 w-5 text-blue-500 mr-2" />
-            <p className="text-sm text-blue-700">
-              Maximum of 10 images reached. Remove some images to add new ones.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Existing Images Section */}
-      {(keptImages?.length || 0) > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-              <h3 className="text-lg font-medium text-gray-900">
-                Existing Images ({keptImages.length})
-              </h3>
-            </div>
-            <span className="text-sm text-gray-500">These images are already saved</span>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {keptImages?.map((imageUrl, index) => (
-              <div key={`existing-${imageUrl}-${index}`} className="relative group">
-                <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-green-200">
-                  <DynamicImage
-                    src={imageUrl}
-                    alt={`Existing image ${index + 1}`}
-                    objectFit="cover"
-                    width="w-full"
-                    height="h-full"
-                    rounded="sm"
-                  />
-                </div>
-                
-                <Button
-                  variant="solid"
-                  size="xs"
-                  onClick={() => removeExistingImage(imageUrl)}
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 shadow-lg"
-                  ariaLabel="Remove existing image"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-                
-                <div className="absolute bottom-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full shadow">
-                  ✓ Saved
-                </div>
-              </div>
-            )) || []}
-          </div>
-        </div>
-      )}
-
-      {/* New Images Section */}
-      {(newFiles?.length || 0) > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <Clock className="h-5 w-5 text-orange-500 mr-2" />
-              <h3 className="text-lg font-medium text-gray-900">
-                New Images to Upload ({newFiles.length})
-              </h3>
-            </div>
-            <span className="text-sm text-gray-500">Will be uploaded when you save</span>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {newFiles?.map((file, index) => (
-              <div key={`new-${file.name}-${index}`} className="relative group">
-                <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-orange-200">
-                  <DynamicImage
-                    src={filePreviewUrls?.[index] || URL.createObjectURL(file)}
-                    alt={`New image ${index + 1}`}
-                    objectFit="cover"
-                    width="w-full"
-                    height="h-full"
-                    rounded="sm"
-                  />
-                </div>
-                
-                <Button
-                  variant="solid"
-                  size="xs"
-                  onClick={() => removeNewFile(index)}
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 shadow-lg"
-                  ariaLabel="Remove new image"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-                
-                <div className="absolute bottom-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded-full shadow">
-                  📤 To Upload
-                </div>
-                
-                <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded shadow">
-                  {((file?.size || 0) / 1024 / 1024).toFixed(1)}MB
-                </div>
-              </div>
-            )) || []}
-          </div>
-        </div>
-      )}
-
-      {/* Removed Images Info */}
-      {removedCount > 0 && (
-        <div className="bg-red-50 rounded-lg border border-red-200 p-4">
-          <div className="flex items-center">
-            <Trash2 className="h-5 w-5 text-red-500 mr-2" />
-            <div>
-              <p className="text-sm font-medium text-red-800">
-                {removedCount} image{removedCount !== 1 ? 's' : ''} will be removed when you save
-              </p>
-              <p className="text-xs text-red-700 mt-1">
-                Click "Undo All Changes" to restore them
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Empty State */}
-      {totalImages === 0 && (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+    if (allItems.length === 0) {
+      return (
+        <div className="text-center py-12">
           <ImageIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-xl font-medium text-gray-900 mb-2">
-            No images uploaded yet
+            {translations.images?.noImages || 'No images uploaded yet'}
           </h3>
           <p className="text-gray-500 mb-6">
-            Upload your first image to get started. At least one image is required.
+            {translations.images?.uploadFirst || 'Upload your first image to get started'}
           </p>
           <Button
             variant="solid"
             onClick={openFileDialog}
             leftIcon={<Upload className="h-4 w-4" />}
+            disabled={isUploading}
           >
-            Upload Your First Image
+            {translations.images?.uploadImages || 'Upload Images'}
           </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-medium text-gray-900">
+            {translations.images?.currentImages || 'Images'} ({totalImageCount}/10)
+          </h3>
+          {totalImageCount >= 10 && (
+            <p className="text-sm text-yellow-600 flex items-center">
+              <AlertCircle className="h-4 w-4 mr-1" />
+              {translations.images?.maxLimitReached || 'Maximum limit reached'}
+            </p>
+          )}
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {allItems.map((item, globalIndex) => {
+            const isNewFile = item.type === 'new';
+            const imageUrl = isNewFile
+              ? getPreviewUrl((item as { file: File }).file)
+              : (item as { url: string }).url;
+            const actualIndex = item.index;
+            
+            return (
+              <div key={`${item.type}-${actualIndex}-${globalIndex}`} className="w-full relative group">
+                  {/* Delete Button - Top Right Corner */}
+                  <div className="w-full relative flex items-end justify-end">
+                  <Button
+                    variant="solid"
+                    size="xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      initiateDelete(actualIndex, isNewFile);
+                    }}
+                    className="absolute !px-2 !py-2 !top-3 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 text-white shadow-lg"
+                    ariaLabel={translations.images?.removeImage || 'Remove Image'}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                  </div>
+                <div className="aspect-square w-full relative rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200 hover:border-cb-red transition-colors">
+                  
+                  {/* Image */}
+                  <div 
+                    className="w-full h-full cursor-pointer"
+                    onClick={() => handleImageClick(globalIndex)}
+                  >
+                    <DynamicImage
+                      key={`${item.type}-${actualIndex}`}
+                      src={!isNewFile ? `${MEDIA_URL}/${imageUrl}` : imageUrl}
+                      alt={`Product image ${globalIndex + 1}`}
+                      objectFit="cover"
+                      width="w-full"
+                      height="h-full"
+                      className="transition-transform duration-300 group-hover:scale-105"
+                      rounded="lg"
+                    />
+                  </div>
+                  
+                  {/* New file indicator */}
+                  {isNewFile && (
+                    <div className="absolute bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded shadow-lg">
+                      {translations.images?.newFileLabel || 'New'}
+                    </div>
+                  )}
+
+                  {/* Image index indicator */}
+                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded shadow-lg">
+                    {globalIndex + 1}
+                  </div>
+
+                  {/* Hover overlay */}
+                  <div onClick={() => handleImageClick(globalIndex) } className="absolute inset-0 bg-transparent bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Eye className="h-8 w-8 text-white drop-shadow-lg" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Upload Area */}
+      {canUploadMore && (
+        <div
+          className={`
+            border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer
+            ${isDragging 
+              ? 'border-cb-red bg-red-50' 
+              : 'border-gray-300 hover:border-cb-red hover:bg-gray-50'
+            }
+            ${isUploading ? 'opacity-50 pointer-events-none' : ''}
+          `}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={openFileDialog}
+        >
+          <div className="flex flex-col items-center">
+            <Upload className={`h-12 w-12 mb-4 ${isDragging ? 'text-cb-red' : 'text-gray-400'}`} />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {translations.images?.uploadImages || 'Upload Images'}
+            </h3>
+            <p className="text-gray-500 mb-4">
+              {translations.images?.dragAndDrop || 'Drag & drop images here or click to browse'}
+            </p>
+            <p className="text-sm text-gray-400">
+              {translations.images?.supportedFormats || 'Supported: JPG, PNG, WebP (Max 10 images, 5MB each)'}
+            </p>
+            
+            {isUploading && (
+              <div className="mt-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-cb-red"></div>
+                <p className="text-sm text-gray-600 mt-2">
+                  {translations.images?.uploadingMessage || 'Adding images...'}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/jpeg,image/jpg,image/png,image/webp"
+            onChange={(e) => handleFileSelect(e.target.files)}
+            className="hidden"
+          />
         </div>
       )}
 
-      {/* General error display */}
-      {getError('images') && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <div className="flex items-center">
-            <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-            <p className="text-sm text-red-700">{getError('images')}</p>
+      {/* Images Grid */}
+      {renderImageGrid()}
+
+      {/* New Files Notice */}
+      {data?.newFiles && data.newFiles.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+            <div>
+              <h4 className="text-sm font-medium text-blue-900 mb-1">
+                {translations.images?.newFilesNotice?.title?.replace('{count}', data.newFiles.length.toString()) || 
+                 `${data.newFiles.length} new file(s) ready to upload`}
+              </h4>
+              <p className="text-sm text-blue-800">
+                {translations.images?.newFilesNotice?.description || 
+                 'These files will be uploaded when you save this step. You can remove them before saving if needed.'}
+              </p>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Upload Instructions */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h4 className="text-sm font-medium text-blue-900 mb-2">
+          {translations.images?.guidelines?.title || 'Image Guidelines'}
+        </h4>
+        <ul className="text-sm text-blue-800 space-y-1">
+          <li>• {translations.images?.guidelines?.quality || 'Use high-quality images (minimum 800x600 pixels)'}</li>
+          <li>• {translations.images?.guidelines?.angles || 'Show different angles and details of your product'}</li>
+          <li>• {translations.images?.guidelines?.mainImage || 'First image will be used as the main product image'}</li>
+          <li>• {translations.images?.guidelines?.formats || 'Supported formats: JPG, PNG, WebP'}</li>
+          <li>• {translations.images?.guidelines?.fileSize || 'Maximum file size: 5MB per image'}</li>
+          <li>• {translations.images?.guidelines?.maxCount || 'Maximum 10 images per product'}</li>
+        </ul>
+      </div>
+
+      {getError('images') && (
+        <p className="text-sm text-red-600 flex items-center">
+          <AlertCircle className="h-4 w-4 mr-1" />
+          {getError('images')}
+        </p>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        open={showDeleteModal}
+        title={translations.images?.deleteModal?.title || 'Delete Image'}
+        description={translations.images?.deleteModal?.description || 'Are you sure you want to delete this image? This action cannot be undone.'}
+        confirmButtonText={translations.images?.deleteModal?.confirmText || 'Delete'}
+        cancelButtonText={translations.images?.deleteModal?.cancelText || 'Cancel'}
+        onClose={cancelDelete}
+        onConfirm={confirmDelete}
+        theme={['cb-red', 'white']}
+      />
+
+      {/* Media Modal for Image Viewing */}
+      <MediaModal
+        open={showMediaModal}
+        onClose={() => setShowMediaModal(false)}
+        files={mediaUrls}
+        initialIndex={initialMediaIndex}
+        title={translations.images?.mediaModal?.title || 'Product Images'}
+        download={true}
+        downloadText={translations.images?.mediaModal?.downloadText || 'Download'}
+        closeOnClickOutside={true}
+        closeOnEscape={true}
+        height="88dvh"
+        width="80dvw"
+        animation="fade"
+        objectFit="contain"
+      />
     </div>
   );
 };

@@ -115,7 +115,7 @@ function AppContent() {
       ))}
 
       {/* Private routes - only show when user IS logged in */}
-      {privateRoutes.map((route, index) => (
+      {isLoggedIn && privateRoutes.map((route, index) => (
         <Route 
           key={index + publicRoutes.length} 
           path={route.path} 
@@ -128,7 +128,7 @@ function AppContent() {
       ))}
 
       {/* Default redirect based on authentication status */}
-      {/* <Route 
+      <Route 
         path="*" 
         element={
           <Navigate 
@@ -136,7 +136,7 @@ function AppContent() {
             replace 
           />
         } 
-      /> */}
+      />
     </Routes>
   );
 }
