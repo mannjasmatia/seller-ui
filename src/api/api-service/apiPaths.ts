@@ -30,8 +30,7 @@ export const apiPaths: ApiPaths = {
         trackView:"api/v1/category-stats/track-view",
     },
     product:{
-        all:"api/v1/product",
-        product:"api/v1/product",
+        all:"api/v1/products",
         productById:"api/v1/product",
     },
     productInfo: {

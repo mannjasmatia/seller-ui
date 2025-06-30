@@ -37,6 +37,8 @@ const EditProduct: React.FC = () => {
     saveCurrentStep,
     saveAndNext,
     uploadImages,
+    handleDescriptionImagesUpload,
+    handleDescriptionImageRemove,
     isStepCompleted,
     STEPS,
     translations,
@@ -134,11 +136,10 @@ const EditProduct: React.FC = () => {
         return (
             <ProductImagesStep
             data={formData.images}
-            validationErrors={validationErrors}
+            {...stepProps}
             onUpdate={(data) => updateFormData('images', data)}
             onUpload={(files) => uploadImages(files, 'images')}
             onRemove={(index) => removeImage(index, 'images')}
-            translations={translations}
             />
         );
 
@@ -175,7 +176,8 @@ const EditProduct: React.FC = () => {
             {...stepProps}
             data={formData.description}
             onUpdate={(data) => updateFormData("description", data)}
-            onUploadImages={(files) => uploadImages(files, "description")}
+            onUpload={handleDescriptionImagesUpload}
+            onRemove={handleDescriptionImageRemove}
           />
         );
 

@@ -19,9 +19,9 @@ const languageSlice = createSlice({
                 }
             default:
                 return {
-                        label:"en",
-                        value:en,
-                      }
+                    label:"en",
+                    value:en,
+                  }
         }
     },
   },

@@ -356,38 +356,206 @@ export class ProductValidator {
 
   // Product Description Validation
   static validateProductDescription(data: ProductDescription): ValidationError[] {
-    const errors: ValidationError[] = [];
+  const errors: ValidationError[] = [];
 
-    // Points validation (optional)
-    if (data.points && Array.isArray(data.points)) {
-      data.points.forEach((point, index) => {
-        if (point?.trim() && point.trim().length > 500) {
-          errors.push({ field: `description.points.${index}`, message: 'Each point must be at most 500 characters' });
-        }
-      });
-    }
-
-    // Attributes validation (optional)
-    if (data.attributes && Array.isArray(data.attributes)) {
-      data.attributes.forEach((attr, index) => {
-        // Field validation
-        if (!attr.field?.trim()) {
-          errors.push({ field: `description.attributes.${index}.field`, message: 'Attribute field is required' });
-        } else if (attr.field.trim().length > 100) {
-          errors.push({ field: `description.attributes.${index}.field`, message: 'Attribute field must be at most 100 characters' });
-        }
-
-        // Value validation
-        if (!attr.value?.trim()) {
-          errors.push({ field: `description.attributes.${index}.value`, message: 'Attribute value is required' });
-        } else if (attr.value.trim().length > 500) {
-          errors.push({ field: `description.attributes.${index}.value`, message: 'Attribute value must be at most 500 characters' });
-        }
-      });
-    }
-
+  // Safety check for data structure
+  if (!data || typeof data !== 'object') {
+    errors.push({ 
+      field: 'description', 
+      message: 'Description data is required' 
+    });
     return errors;
   }
+
+  const { points = [], attributes = [], images = [], newFiles = [] } = data;
+
+  // Points validation
+  if (!Array.isArray(points) || points.length === 0) {
+    errors.push({ 
+      field: 'description.points', 
+      message: 'At least one description point is required' 
+    });
+  } else {
+    // Check if at least one point has content
+    const validPoints = points.filter(point => point && typeof point === 'string' && point.trim().length > 0);
+    if (validPoints.length === 0) {
+      errors.push({ 
+        field: 'description.points', 
+        message: 'At least one description point must have content' 
+      });
+    }
+
+    // Validate individual points
+    points.forEach((point, index) => {
+      if (point && typeof point === 'string') {
+        if (point.trim().length === 0) {
+          errors.push({
+            field: `description.points.${index}`,
+            message: 'Description point cannot be empty'
+          });
+        } else if (point.length > 500) {
+          errors.push({
+            field: `description.points.${index}`,
+            message: 'Description point must be at most 500 characters'
+          });
+        }
+      } else if (point !== '') {
+        errors.push({
+          field: `description.points.${index}`,
+          message: 'Description point must be a string'
+        });
+      }
+    });
+
+    // Check maximum points limit
+    if (points.length > 10) {
+      errors.push({
+        field: 'description.points',
+        message: 'Maximum 10 description points allowed'
+      });
+    }
+  }
+
+  // Attributes validation
+  if (Array.isArray(attributes)) {
+    const fieldNames = new Set<string>();
+    
+    attributes.forEach((attribute, index) => {
+      if (!attribute || typeof attribute !== 'object') {
+        errors.push({
+          field: `description.attributes.${index}`,
+          message: 'Invalid attribute structure'
+        });
+        return;
+      }
+
+      // Field validation
+      if (!attribute.field || typeof attribute.field !== 'string') {
+        errors.push({
+          field: `description.attributes.${index}.field`,
+          message: 'Attribute field is required'
+        });
+      } else {
+        const trimmedField = attribute.field.trim();
+        if (trimmedField.length === 0) {
+          errors.push({
+            field: `description.attributes.${index}.field`,
+            message: 'Attribute field cannot be empty'
+          });
+        } else if (trimmedField.length > 50) {
+          errors.push({
+            field: `description.attributes.${index}.field`,
+            message: 'Attribute field must be at most 50 characters'
+          });
+        } else {
+          // Check for duplicate field names (case insensitive)
+          const lowerField = trimmedField.toLowerCase();
+          if (fieldNames.has(lowerField)) {
+            errors.push({
+              field: `description.attributes.${index}.field`,
+              message: 'Duplicate attribute field names are not allowed'
+            });
+          } else {
+            fieldNames.add(lowerField);
+          }
+        }
+      }
+
+      // Value validation
+      if (!attribute.value || typeof attribute.value !== 'string') {
+        errors.push({
+          field: `description.attributes.${index}.value`,
+          message: 'Attribute value is required'
+        });
+      } else {
+        const trimmedValue = attribute.value.trim();
+        if (trimmedValue.length === 0) {
+          errors.push({
+            field: `description.attributes.${index}.value`,
+            message: 'Attribute value cannot be empty'
+          });
+        } else if (trimmedValue.length > 500) {
+          errors.push({
+            field: `description.attributes.${index}.value`,
+            message: 'Attribute value must be at most 500 characters'
+          });
+        }
+      }
+    });
+
+    // Check maximum attributes limit
+    if (attributes.length > 20) {
+      errors.push({
+        field: 'description.attributes',
+        message: 'Maximum 20 attributes allowed'
+      });
+    }
+  }
+
+  // Images validation (optional but if present, must be valid)
+  if (Array.isArray(images)) {
+    // Validate existing images are strings
+    images.forEach((image, index) => {
+      if (!image || typeof image !== 'string' || !image.trim()) {
+        errors.push({ 
+          field: `description.images.${index}`, 
+          message: 'Each image must be a non-empty string' 
+        });
+      }
+    });
+
+    // Check maximum images count (including new files)
+    const totalImageCount = images.length + (newFiles?.length || 0);
+    if (totalImageCount > 10) {
+      errors.push({
+        field: 'description.images',
+        message: 'Maximum 10 description images allowed'
+      });
+    }
+  }
+  
+  // New files validation (if present)
+  if (Array.isArray(newFiles)) {
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    
+    newFiles.forEach((file, index) => {
+      if (!file || !(file instanceof File)) {
+        errors.push({
+          field: `description.newFiles.${index}`,
+          message: 'Invalid file'
+        });
+        return;
+      }
+      
+      // Validate file type
+      if (!validTypes.includes(file.type)) {
+        errors.push({
+          field: `description.newFiles.${index}`,
+          message: 'Only JPG, PNG, and WebP files are allowed'
+        });
+      }
+      
+      // Validate file size
+      if (file.size > maxSize) {
+        errors.push({
+          field: `description.newFiles.${index}`,
+          message: 'File size must be less than 5MB'
+        });
+      }
+      
+      // Validate file name length
+      if (file.name && file.name.length > 255) {
+        errors.push({
+          field: `description.newFiles.${index}`,
+          message: 'File name is too long'
+        });
+      }
+    });
+  }
+
+  return errors;
+}
 
   // Main validation function for each step
   static validateStep(step: string, formData: ProductFormData): ValidationError[] {

@@ -92,6 +92,8 @@ const ProductAttributesStep: React.FC<ProductAttributesStepProps> = ({
       }
     }
 
+    console.log("Updated attribute:", newData);
+
     newData[groupIndex].attributes[attributeIndex][field] = value;
     onUpdate(newData);
   };

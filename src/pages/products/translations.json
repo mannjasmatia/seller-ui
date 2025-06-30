@@ -1,0 +1,105 @@
+{
+  "title": "Products",
+  "subtitle": "Manage your product catalog and listings",
+  "noImage": "No image available",
+  
+  "actions": {
+    "addProduct": "Add Product",
+    "edit": "Edit",
+    "view": "View",
+    "delete": "Delete",
+    "completeNow": "Complete Now",
+    "retry": "Try Again",
+    "cancel": "Cancel"
+  },
+  
+  "search": {
+    "placeholder": "Search products by name..."
+  },
+  
+  "filters": {
+    "title": "Filters",
+    "active": "Active filters",
+    "categories": "Categories",
+    "selectCategories": "Select categories",
+    "verified": "Verified only",
+    "incomplete": "Incomplete only",
+    "sortBy": "Sort by",
+    "clearAll": "Clear all",
+    "reset": "Reset Filters",
+    "apply": "Apply Filters",
+    "status": "Status",
+    "showVerifiedOnly": "Show verified products only",
+    "showIncompleteOnly": "Show incomplete products only",
+    "dateOrder": "Date Order",
+    "newestFirst": "Newest first",
+    "oldestFirst": "Oldest first",
+    "sortOptions": {
+      "default": "Default (Date created)",
+      "mostViewed": "Most viewed",
+      "mostQuoted": "Most quoted",
+      "mostAccepted": "Most accepted quotations",
+      "mostRejected": "Most rejected quotations",
+      "mostPopular": "Most popular",
+      "bestseller": "Bestseller"
+    }
+  },
+  
+  "status": {
+    "complete": "Complete",
+    "nearlyComplete": "Nearly Complete",
+    "incomplete": "Incomplete",
+    "verified": "Verified"
+  },
+  
+  "details": {
+    "category": "Category",
+    "rating": "Rating",
+    "moq": "MOQ",
+    "delivery": "Delivery",
+    "days": "days",
+    "priceRange": "Price Range",
+    "customizable": "Customizable",
+    "created": "Created"
+  },
+  
+  "steps": {
+    "productInfo": "Product Info",
+    "attributes": "Attributes",
+    "images": "Images",
+    "pricing": "Pricing",
+    "variations": "Variations",
+    "services": "Services",
+    "description": "Description"
+  },
+  
+  "incompleteSteps": {
+    "title": "Incomplete steps",
+    "more": "more"
+  },
+  
+  "emptyState": {
+    "title": "No products yet",
+    "description": "Get started by adding your first product to showcase your offerings to potential customers.",
+    "addFirstProduct": "Add Your First Product"
+  },
+  
+  "pagination": {
+    "showing": "Showing page",
+    "of": "of",
+    "pages": "pages",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  
+  "errors": {
+    "loadingFailed": "Failed to load products. Please try again."
+  },
+  
+  "messages": {
+    "productAlreadyComplete": "This product is already complete!",
+    "deleteConfirmation": "Are you sure you want to delete this product? This action cannot be undone.",
+    "deleteSuccess": "Product deleted successfully",
+    "deleteError": "Failed to delete product"
+  }
+}

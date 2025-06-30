@@ -6,6 +6,7 @@ import {
   ProductFormData,
   ValidationError,
   ProductImagesData,
+  ProductDescription,
 } from "./types.edit-product";
 import {
   useGetProductInfoApi,
@@ -287,22 +288,27 @@ export const useEditProduct = () => {
   }, [servicesData]);
 
   useEffect(() => {
-    if (descriptionData) {
-      const description = {
-        points: descriptionData.points || [],
-        attributes: descriptionData.attributes || [],
-        images: descriptionData.images || [],
-      };
-      setFormData((prev) => ({
-        ...prev,
-        description,
-      }));
-      setOriginalFormData((prev) => ({
-        ...prev,
-        description,
-      }));
-    }
-  }, [descriptionData]);
+  if (descriptionData) {
+    const description = {
+      points: descriptionData.points || [''],
+      attributes: descriptionData.attributes || [],
+      images: descriptionData.images || [],
+      originalImages: descriptionData.images || [], // Track original images
+      newFiles: [], // Initialize empty new files array
+    };
+
+    setFormData(prev => ({
+      ...prev,
+      description,
+    }));
+
+    setOriginalFormData(prev => ({
+      ...prev,
+      description,
+    }));
+  }
+}, [descriptionData]);
+
 
   const hasImagesChanged = useCallback((): boolean => {
     const { images, originalImages, newFiles } = formData.images;
@@ -315,6 +321,73 @@ export const useEditProduct = () => {
     
     return removedImages.length > 0 || hasNewFiles;
   }, [formData.images]);
+
+  const handleDescriptionImagesUpload = useCallback(async (files: FileList): Promise<boolean> => {
+  try {
+    if (currentStep === 'description') {
+      // For description step, store files temporarily and upload immediately
+      const formDataObj = new FormData();
+      
+      // Add existing description images to keep
+      formData.description.images.forEach((image, index) => {
+        formDataObj.append(`images[${index}]`, image);
+      });
+      
+      // Add new files
+      Array.from(files).forEach(file => {
+        formDataObj.append('files', file);
+      });
+
+      await new Promise((resolve, reject) => {
+        syncDescriptionImages(
+          { productId: productId || "", formData: formDataObj } ,
+          { 
+            onSuccess: (response) => {
+              refetchDescription().then(() => {
+                customToast.success(translations.messages.uploadSuccess);
+                resolve(response);
+              });
+            }, 
+            onError: (error) => {
+              customToast.error(translations.messages.uploadError);
+              reject(error);
+            }
+          }
+        );
+      });
+
+      return true;
+    } else {
+      // For other contexts, store files temporarily
+      const currentNewFiles = formData.description.newFiles || [];
+      const newFiles = [...currentNewFiles, ...Array.from(files)];
+      
+      updateFormData('description', {
+        ...formData.description,
+        newFiles
+      });
+      
+      customToast.info(`${files.length} file(s) added. Save to upload to server.`);
+      return true;
+    }
+  } catch (error) {
+    console.error('Upload error:', error);
+    customToast.error(translations.messages.uploadError);
+    return false;
+  }
+}, [productId, formData, currentStep]);
+
+const handleDescriptionImageRemove = useCallback((index: number) => {
+  const currentImages = [...formData.description.images];
+  currentImages.splice(index, 1);
+  
+  updateFormData('description', {
+    ...formData.description,
+    images: currentImages
+  });
+  
+  customToast.success(translations.messages.removeSuccess || 'Image removed successfully');
+}, [formData, translations]);
 
   // Check if current step has changes
   const hasCurrentStepChanged = useCallback((): boolean => {
@@ -489,6 +562,30 @@ export const useEditProduct = () => {
     return formDataObj;
   };
 
+  const createFormDataForDescriptionImages = useCallback((descriptionData: ProductDescription) => {
+  const formDataObj = new FormData();
+  
+  if (!descriptionData) return formDataObj;
+  
+  const { images = [], newFiles = [] } = descriptionData;
+  
+  // Add existing images to keep (same format as ProductImagesStep)
+  images?.forEach?.((image, index) => {
+    if (image && typeof image === 'string') {
+      formDataObj.append(`images[${index}]`, image);
+    }
+  });
+  
+  // Add new files
+  newFiles?.forEach?.(file => {
+    if (file instanceof File) {
+      formDataObj.append('files', file);
+    }
+  });
+  
+  return formDataObj;
+}, []);
+
   // Image upload helper function
   const uploadImages = useCallback(async (files: FileList, section: 'images' | 'description' = 'images') => {
     if (!productId) {
@@ -595,6 +692,36 @@ export const useEditProduct = () => {
       });
     }
   }, [formData, updateFormData]);
+
+  // Handle description image removal (for existing images)
+const removeDescriptionImage = useCallback((index: number) => {
+  const currentImages = [...formData.description.images];
+  currentImages.splice(index, 1);
+  
+  updateFormData('description', {
+    ...formData.description,
+    images: currentImages
+  });
+}, [formData, updateFormData]);
+
+// Upload images function for description (follows ProductImagesStep pattern)
+const uploadDescriptionImages = useCallback(async (files: FileList): Promise<boolean> => {
+  try {
+    // Store files temporarily in newFiles array (same as ProductImagesStep)
+    const currentNewFiles = formData.description.newFiles || [];
+    const newFiles = [...currentNewFiles, ...Array.from(files)];
+    
+    updateFormData('description', {
+      ...formData.description,
+      newFiles
+    });
+    
+    return true;
+  } catch (error) {
+    console.error('Upload error:', error);
+    return false;
+  }
+}, [formData, updateFormData]);
 
   // Save functions
   const saveCurrentStep = useCallback(async () => {
@@ -748,31 +875,33 @@ export const useEditProduct = () => {
           }));
           break;
 
-        case "description":
+        case 'description':
+        // Save description points and attributes first
+        await new Promise((resolve, reject) => {
+          syncDescription(
+            { 
+              productId, 
+              data: { 
+                points: formData.description.points,
+                attributes: formData.description.attributes 
+              } 
+            },
+            { onSuccess: resolve, onError: reject }
+          );
+        });
+        
+        // If there are new files to upload or image changes, handle images separately
+        if ((formData.description.newFiles && formData.description.newFiles.length > 0) || 
+            JSON.stringify(formData.description.images) !== JSON.stringify(formData.description.originalImages)) {
+          const descriptionImageFormData = createFormDataForDescriptionImages(formData.description);
           await new Promise((resolve, reject) => {
-            syncDescription(
-              {
-                productId,
-                data: {
-                  points: formData.description.points,
-                  attributes: formData.description.attributes,
-                },
-              },
-              { 
-                onSuccess: (response) => {
-                  refetchDescription();
-                  resolve(response);
-                }, 
-                onError: reject 
-              }
+            syncDescriptionImages(
+              { productId, formData: descriptionImageFormData },
+              { onSuccess: resolve, onError: reject }
             );
           });
-          
-          setOriginalFormData(prev => ({
-            ...prev,
-            description: formData.description
-          }));
-          break;
+        }
+        break;
       }
 
       setCompletedSteps((prev) => new Set([...prev, currentStepIndex]));
@@ -934,6 +1063,9 @@ export const useEditProduct = () => {
     // Image specific helpers
     uploadImages,
     removeImage,
+
+    handleDescriptionImagesUpload,
+    handleDescriptionImageRemove,
 
     // Constants
     STEPS,

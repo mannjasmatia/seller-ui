@@ -58,12 +58,15 @@ export interface ProductVariations {
 export interface ProductDescriptionAttribute {
   field: string;
   value: string;
+  _id?: string;
 }
 
 export interface ProductDescription {
   points: string[];
   attributes: ProductDescriptionAttribute[];
-  images: string[];
+  images: string[]; // Existing images (file names)
+  newFiles?: File[]; // New files to be uploaded
+  originalImages?: string[]; // Track original images for comparison
 }
 
 export interface Product {
