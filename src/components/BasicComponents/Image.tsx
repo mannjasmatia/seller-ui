@@ -170,9 +170,9 @@ const DynamicImage: React.FC<ImageProps> = ({
       };
 
   return (
-    <div className="relative" onClick={onClick} ref={containerRef}>
+    <div className="h-full relative" onClick={onClick} ref={containerRef}>
       <div
-        className={`relative overflow-hidden ${roundedClass} ${
+        className={`h-full relative overflow-hidden ${roundedClass} ${
           aspectRatio ? 'w-full' : ''
         }`}
         style={aspectRatio ? { aspectRatio } : {}}
@@ -194,7 +194,7 @@ const DynamicImage: React.FC<ImageProps> = ({
 
         {/* Loading state */}
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+          <div className="absolute h-full inset-0 flex items-center justify-center bg-gray-100">
             <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
           </div>
         )}

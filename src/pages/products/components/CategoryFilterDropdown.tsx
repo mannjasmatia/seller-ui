@@ -18,7 +18,7 @@ interface CategoryFilterDropdownProps {
 const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
   selectedCategories,
   onChange,
-  placeholder = "Select categories"
+  placeholder = "Select categories",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,7 +28,7 @@ const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const limit = 20;
+  const limit = 10;
 
   // Debounce search term
   useEffect(() => {
@@ -133,7 +133,7 @@ const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
   };
 
   const hasMore = categoriesData?.hasNext;
-  const totalCategories = categoriesData?.total || 0;
+  const totalCategories = categoriesData?.totalDocs || 0;
   const isAllSelected = allCategories.length > 0 && allCategories.every(cat => selectedCategories.includes(cat._id));
 
   return (
@@ -180,7 +180,7 @@ const CategoryFilterDropdown: React.FC<CategoryFilterDropdownProps> = ({
           {getSelectedCategoryNames().slice(0, 4).map((name, index) => (
             <span
               key={selectedCategories[index]}
-              className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-cb-red bg-opacity-10 text-cb-red border border-cb-red/20"
+              className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-cb-red bg-opacity-10 text-white border border-cb-red/20"
             >
               {name}
               <button

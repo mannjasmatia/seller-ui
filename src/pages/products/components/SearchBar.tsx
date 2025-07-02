@@ -1,6 +1,6 @@
 // src/pages/products/components/SearchBar.tsx
-import React, { useState, useEffect } from 'react';
-import { Search, Filter, X, Loader2, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Filter, X, Loader2, TrendingUp, Zap, } from 'lucide-react';
 import Button from '../../../components/BasicComponents/Button';
 import { ProductFilters } from '../types.products';
 
@@ -22,21 +22,19 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 
-  // Simulate search loading state
-  useEffect(() => {
-    if (searchTerm) {
-      setIsSearching(true);
-      const timer = setTimeout(() => {
-        setIsSearching(false);
-      }, 800);
-      return () => clearTimeout(timer);
-    } else {
-      setIsSearching(false);
-    }
-  }, [searchTerm]);
+  const initialRender = useRef(true)
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(()=>{
+    inputRef?.current?.focus();
+  },[])
 
   const popularSearches = [
-    'Electronics', 'Clothing', 'Home & Garden', 'Sports', 'Books'
+    { term: 'Electronics', icon: '⚡', color: 'from-blue-500 to-cyan-500' },
+    { term: 'Clothing', icon: '👕', color: 'from-purple-500 to-pink-500' },
+    { term: 'Home & Garden', icon: '🏠', color: 'from-green-500 to-emerald-500' },
+    { term: 'Sports', icon: '⚽', color: 'from-orange-500 to-red-500' },
+    { term: 'Books', icon: '📚', color: 'from-indigo-500 to-purple-500' }
   ];
 
   const handleClearSearch = () => {
@@ -54,130 +52,193 @@ const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <div className="relative">
       {/* Main Search Container */}
-      <div className={`bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 ${
-        isFocused ? 'border-cb-red shadow-xl scale-[1.02]' : 'border-gray-200'
-      }`}>
-        <div className="p-6">
+      <div className={`relative bg-white rounded-3xl shadow-2xl border-2 transition-all duration-500 overflow-hidden `}>
+        
+        {/* Animated Background Gradient */}
+        {/* <div className={`absolute inset-0 bg-gradient-to-r from-cb-red/5 via-transparent to-cb-red/5 transition-opacity duration-500 ${
+          isFocused ? 'opacity-100' : 'opacity-0'
+        }`}></div> */}
+        
+        <div className="relative p-2">
           {/* Search Input Section */}
-          <div className="flex items-center gap-4">
+          <div className="flex  gap-6">
             <div className="flex-1 relative">
-              <div className="relative">
-                {/* Search Icon */}
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
-                  {isSearching ? (
-                    <Loader2 className="h-6 w-6 text-cb-red animate-spin" />
-                  ) : (
-                    <Search className={`h-6 w-6 transition-colors duration-200 ${
-                      isFocused ? 'text-cb-red' : 'text-gray-400'
-                    }`} />
-                  )}
+              <div className="relative group">
+                {/* Search Icon with Animation */}
+                <div className="absolute left-6 top-1/2 transform -translate-y-1/2 z-10">
+                    <div className="relative">
+                      <Search className={`h-7 w-7 transition-all duration-300 ${
+                        isFocused ? 'text-cb-red scale-110' : 'text-gray-400 group-hover:text-gray-600'
+                      }`} />
+                      {/* {isFocused && (
+                        <div className="absolute inset-0 h-7 w-7 bg-cb-red/20 rounded-full animate-pulse"></div>
+                      )} */}
+                    </div>
                 </div>
 
-                {/* Search Input */}
+                {/* Search Input with Enhanced Styling */}
                 <input
+                  ref={inputRef}
                   type="text"
                   placeholder={translations.search.placeholder}
                   value={searchTerm}
                   onChange={(e) => onSearchChange(e.target.value)}
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
-                  className={`w-full pl-14 pr-12 py-4 text-lg font-medium border-2 rounded-xl transition-all duration-200 bg-gray-50 focus:bg-white focus:outline-none ${
-                    isFocused ? 'border-cb-red' : 'border-transparent'
+                  className={`w-full pl-16 pr-16 py-2 text-lg font-medium border-3 rounded-2xl transition-all duration-300 bg-gray-50/50 backdrop-blur-sm focus:bg-white focus:outline-none placeholder-gray-400 ${
+                    isFocused 
+                      ? 'border-transparent shadow-lg transform scale-[1.01]' 
+                      : 'border-transparent hover:border-gray-200'
                   }`}
                 />
 
-                {/* Clear Button */}
+                {/* Clear Button with Animation */}
                 {searchTerm && (
                   <button
                     onClick={handleClearSearch}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                    className="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-all duration-200 hover:scale-110 bg-gray-100 hover:bg-gray-200 rounded-full p-2"
                   >
                     <X className="h-5 w-5" />
                   </button>
                 )}
 
-                {/* Search Loading Overlay */}
-                {isSearching && (
-                  <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                    <div className="flex items-center gap-3 text-cb-red">
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      <span className="font-medium">Searching products...</span>
+                {/* Floating Search Animation */}
+                {/* {isSearching && (
+                  <div className="absolute inset-0 bg-white/90 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                    <div className="flex items-center gap-4 text-cb-red">
+                      <div className="relative">
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                      </div>
+                      <span className="font-semibold text-lg">Searching products...</span>
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-cb-red rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-cb-red rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-cb-red rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
                     </div>
                   </div>
-                )}
+                )} */}
               </div>
 
-              {/* Search Results Count */}
+              {/* Search Results Count with Animation */}
               {searchTerm && !isSearching && (
-                <div className="mt-2 text-sm text-gray-600">
-                  <span className="font-medium">Found results for "{searchTerm}"</span>
+                <div className="mt-3 flex items-center gap-2 animate-fadeIn">
+                  <Zap className="h-4 w-4 text-cb-red" />
+                  <span className="text-sm font-medium text-gray-600">
+                    Showing results for <span className="font-bold text-cb-red">"{searchTerm}"</span>
+                  </span>
                 </div>
               )}
             </div>
 
-            {/* Filter Button */}
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={onFilterClick}
-              leftIcon={<Filter className="h-5 w-5" />}
-              className={`border-2 font-semibold px-6 py-4 transition-all duration-200 min-w-[140px] ${
-                activeFiltersCount > 0 
-                  ? 'border-cb-red text-cb-red bg-cb-red/5' 
-                  : 'border-gray-300 text-gray-700 hover:border-cb-red hover:text-cb-red'
-              }`}
-            >
-              Filters
-              {activeFiltersCount > 0 && (
-                <span className="ml-2 bg-cb-red text-white text-sm px-2 py-1 rounded-full font-bold min-w-[1.5rem] h-6 flex items-center justify-center">
-                  {activeFiltersCount}
-                </span>
-              )}
-            </Button>
+            {/* Enhanced Filter Button */}
+            <div className="relative">
+              <Button
+                variant="outline"
+                size="md"
+                onClick={onFilterClick}
+                leftIcon={<Filter className="h-6 w-6" />}
+                className={`border-3 font-bold transition-all duration-300 min-w-[160px] text-lg rounded-2xl relative overflow-hidden group ${
+                  activeFiltersCount > 0 
+                    ? 'border-cb-red text-cb-red bg-gradient-to-r from-cb-red/10 to-cb-red/5 shadow-lg shadow-cb-red/20' 
+                    : 'border-gray-300 text-gray-700 hover:border-cb-red hover:text-cb-red hover:shadow-lg'
+                }`}
+              >
+                {/* Animated Background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-cb-red/0 via-cb-red/5 to-cb-red/0 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                
+                <span className="relative z-10">Filters</span>
+                
+                {activeFiltersCount > 0 && (
+                  <div className="relative z-10 ml-3 bg-gradient-to-r from-cb-red to-red-600 text-white text-sm px-3 py-1.5 rounded-full font-bold min-w-[2rem] h-8 flex items-center justify-center shadow-lg animate-pulse">
+                    {activeFiltersCount}
+                  </div>
+                )}
+
+                {/* Glow Effect */}
+                {activeFiltersCount > 0 && (
+                  <div className="absolute inset-0 bg-cb-red/20 rounded-2xl blur-lg animate-pulse"></div>
+                )}
+              </Button>
+            </div>
           </div>
-
-          {/* Popular Searches */}
-          {!searchTerm && !isSearching && (
-            <div className="mt-6 pt-4 border-t border-gray-100">
-              <div className="flex items-center gap-4 flex-wrap">
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
-                  <TrendingUp className="h-4 w-4" />
-                  Popular searches:
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {popularSearches.map((term) => (
-                    <button
-                      key={term}
-                      onClick={() => handlePopularSearch(term)}
-                      className="px-3 py-1.5 bg-gray-100 hover:bg-cb-red hover:text-white text-sm font-medium text-gray-700 rounded-full transition-all duration-200 hover:scale-105"
-                    >
-                      {term}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Search Suggestions */}
-          {searchTerm && !isSearching && (
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <div className="text-sm text-gray-600">
-                <span className="font-medium">Search tips:</span> Try searching by product name, category, or specific features
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Search Progress Bar */}
+        {/* Animated Progress Bar */}
         {isSearching && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 rounded-b-2xl overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-cb-red to-red-600 animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-cb-red via-red-500 to-cb-red animate-pulse"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
           </div>
         )}
       </div>
+
+      {/* CSS for custom animations */}
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 };
 
 export default SearchBar;
+
+
+
+// extra 
+
+{/* Popular Searches with Enhanced UI */}
+          // {!searchTerm && !isSearching && (
+          //   <div className="mt-8 pt-6 border-t border-gray-100">
+          //     <div className="flex items-center gap-4 mb-4">
+          //       <div className="flex items-center gap-3 text-lg font-bold text-gray-700">
+          //         <TrendingUp className="h-6 w-6 text-cb-red" />
+          //         Popular searches:
+          //       </div>
+          //     </div>
+              
+          //     <div className="flex items-center gap-4 flex-wrap">
+          //       {popularSearches.map((item, index) => (
+          //         <button
+          //           key={item.term}
+          //           onClick={() => handlePopularSearch(item.term)}
+          //           className={`group relative px-6 py-3 bg-gradient-to-r ${item.color} text-white text-sm font-bold rounded-2xl transition-all duration-300 hover:scale-110 hover:shadow-xl transform overflow-hidden`}
+          //           style={{
+          //             animationDelay: `${index * 100}ms`,
+          //             animation: 'slideUp 0.6s ease-out forwards'
+          //           }}
+          //         >
+          //           {/* Animated Background */}
+          //           <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                    
+          //           <span className="relative z-10 flex items-center gap-2">
+          //             <span className="text-lg">{item.icon}</span>
+          //             {item.term}
+          //           </span>
+                    
+          //           {/* Glow Effect */}
+          //           <div className={`absolute inset-0 bg-gradient-to-r ${item.color} opacity-0 group-hover:opacity-30 blur-lg transition-opacity duration-300`}></div>
+          //         </button>
+          //       ))}
+          //     </div>
+          //   </div>
+          // )}
+
+          {/* Search Tips */}
+          // {searchTerm && !isSearching && (
+          //   <div className="mt-6 pt-4 border-t border-gray-100">
+          //     <div className="flex items-center gap-3 text-sm text-gray-600">
+          //       <Sparkles className="h-4 w-4 text-yellow-500" />
+          //       <span className="font-medium">Search tips:</span> 
+          //       <span>Try searching by product name, category, or specific features</span>
+          //     </div>
+          //   </div>
+          // )}

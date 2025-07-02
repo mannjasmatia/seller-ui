@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../../store/appStore";
 import { UserCircle2 } from "lucide-react";
 
+const MEDIA_URL = import.meta.env.VITE_MEDIA_URL;
+
 const Header = () => {
     const navigate = useNavigate();
     const { lang } = useParams();
@@ -24,9 +26,10 @@ const Header = () => {
                 <div className="w-[1px] sm:w-[2px] h-[4em] bg-gray-600"></div>
                 
                 <div className="flex items-center">
-                    {userInfo?.profilePic ? (
+                    {userInfo?.companyLogo ? (
                         <img 
-                            src={userInfo.profilePic} 
+                            src={`${MEDIA_URL}/${userInfo?.companyLogo}`} 
+                            crossOrigin="anonymous"
                             alt="Profile" 
                             className="w-8 sm:w-12 h-8 sm:h-12 rounded-full border-2 border-white cursor-pointer hover:border-gray-200 transition-colors" 
                         />

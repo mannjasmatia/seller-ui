@@ -1,23 +1,34 @@
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import { RootState } from "../store/appStore";
 
 const PublicRoutes = ({ children }: { children: React.ReactNode }) => {
-  const isLoggedIn = useSelector((state: any) => state.user.isLoggedIn);
+  const userInfo = useSelector((state: RootState) => state.user.userInfo);
+  const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
   const navigate = useNavigate();
   const { lang } = useParams();
  
-  // If the user is logged in, redirect to the dashboard
+  // If the user has userInfo (authenticated), redirect based on profile status
   useEffect(() => {
-    if (isLoggedIn) {
+    if (userInfo) {
       const preferredLang = lang || localStorage.getItem("lang") || "en";
-      console.log("User is logged in, redirecting to dashboard");
-      navigate(`/${preferredLang}/dashboard`, { replace: true });
+      
+      if (!userInfo.isProfileComplete) {
+        console.log("User authenticated but profile incomplete, redirecting to complete-profile");
+        navigate(`/${preferredLang}/complete-profile`, { replace: true });
+      } else if (!userInfo.isVerified) {
+        console.log("User profile complete but not verified, redirecting to verification-pending");
+        navigate(`/${preferredLang}/verification-pending`, { replace: true });
+      } else if (isLoggedIn) {
+        console.log("User is fully logged in, redirecting to dashboard");
+        navigate(`/${preferredLang}/dashboard`, { replace: true });
+      }
     }
-  }, [isLoggedIn, navigate, lang]);
+  }, [userInfo, isLoggedIn, navigate, lang]);
 
-  // Don't render anything if user is logged in (will redirect)
-  if (isLoggedIn) {
+  // Don't render anything if user has userInfo (will redirect)
+  if (userInfo) {
     return null;
   }
 

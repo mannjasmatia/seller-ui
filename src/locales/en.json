@@ -1,5 +1,5 @@
 {
-    "auth": {
+  "auth": {
     "signup": {
       "title": "Create Your Account",
       "subtitle": "Join us today and start your journey",
@@ -44,7 +44,7 @@
         "accountCreated": "Account created successfully! Please sign in."
       }
     },
-    "login" : {
+    "login": {
       "welcomeBack": "Welcome Back",
       "loginAgain": "Please login to your account",
       "forgotPassword": "Forgot Password?",
@@ -72,18 +72,91 @@
       "maxOtpExceeded": "Maximum resend attempts exceeded"
     }
   },
-  "confirmationModal": {
-        "title": "Confirmation",
-        "message": "Are you sure you want to proceed?",
-        "confirm": "Confirm",
-        "cancel": "Cancel"
+  "completeProfile": {
+    "title": "Complete Your Business Profile",
+    "subtitle": "Help us verify your business by providing the following information",
+    "notice": {
+      "title": "Important Information",
+      "description": "To ensure the security and authenticity of our marketplace, all seller profiles must be verified by our admin team.",
+      "point1": "All information provided will be reviewed within 24-48 hours",
+      "point2": "Ensure all details are accurate to avoid delays in verification",
+      "point3": "You'll receive an email notification once your profile is approved"
     },
-    "mediaModal": {
-        "title": "Media",
-        "close": "Close",
-        "previous": "Previous",
-        "next": "Next",
-        "loading": "Loading...",
-        "error": "Error loading media"
+    "sections": {
+      "companyInfo": "Company Information",
+      "categoryInfo": "Company's Product Categories",
+      "businessDetails": "Business Details",
+      "addressInfo": "Business Address",
+      "companyLogo": "Company Logo"
+    },
+    "fields": {
+      "fullName": "Full Name",
+      "businessType": "Business Type",
+      "categories": "Business Categories",
+      "businessNumber": "Business Registration Number",
+      "street": "Street Address",
+      "city": "City",
+      "state": "Province/Territory",
+      "zip": "Postal Code",
+      "logo": "Company Logo",
+      "logoHint": "Upload your company logo (Max 5MB, PNG/JPG/JPEG)"
+    },
+    "submit": "Complete Profile",
+    "submitting": "Submitting...",
+    "error": {
+      "title": "Error Submitting Profile",
+      "generic": "An error occurred while submitting your profile. Please try again."
     }
+  },
+  "verificationPending": {
+    "title": "Verification in Progress",
+    "subtitle": "Your business profile is currently being reviewed by our team",
+    "status": {
+      "title": "Current Status",
+      "description": "Your profile has been submitted and is now under review. This process typically takes 24-48 hours.",
+      "steps": {
+        "profileSubmitted": "Profile information submitted",
+        "underReview": "Under admin review",
+        "approved": "Approved & ready to sell"
+      }
+    },
+    "timeline": {
+      "title": "Expected Timeline",
+      "description": "24-48 hours for standard verification"
+    },
+    "nextSteps": {
+      "title": "What's Next?",
+      "description": "You'll receive an email once verification is complete"
+    },
+    "verification": {
+      "title": "What's Being Verified?",
+      "items": {
+        "businessRegistration": "Business registration number",
+        "businessType": "Business type and categories",
+        "addressVerification": "Business address verification",
+        "companyLogo": "Company logo and branding"
+      }
+    },
+    "actions": {
+      "refresh": "Refresh Status",
+      "contactSupport": "Contact Support"
+    },
+    "footer": {
+      "note": "If you have any questions, feel free to contact our support team."
+    }
+  },
+  "confirmationModal": {
+    "title": "Confirmation",
+    "message": "Are you sure you want to proceed?",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "mediaModal": {
+    "title": "Media",
+    "close": "Close",
+    "previous": "Previous",
+    "next": "Next",
+    "loading": "Loading...",
+    "error": "Error loading media"
+  }
 }

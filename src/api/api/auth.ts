@@ -1,9 +1,13 @@
+import { useRef } from "react"
 import { SignupStep1Data, SignupStep2Data } from "../../pages/signup/types.signup"
 import { apiPaths } from "../api-service/apiPaths"
 import ApiService from "../api-service/ApiService"
 
+
 export const verifyTokens = () =>{
-    console.log("Calling VerifyTokens")
+    // const verificationCount = useRef(0);
+    // verificationCount.current+=1;
+    // console.log("Calling VerifyTokens, count : ", verificationCount.current)
     return ApiService({
         method: 'GET',
         endpoint:apiPaths.auth.verifyTokens,

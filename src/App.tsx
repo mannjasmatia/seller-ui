@@ -1,31 +1,42 @@
-import { ReactElement, useEffect, useRef } from "react"
+import { ReactElement, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { BrowserRouter as Router, Routes, Route, useParams, useLocation, Navigate } from "react-router-dom"
 import { useVerifyTokensApi } from "./api/api-hooks/useAuthApi"
 import { setLanguage } from "./store/languageSlice"
-import { resetAuthState, setIsLoggedIn } from "./store/userSlice"
+import { resetAuthState, setIsLoggedIn, setUser } from "./store/userSlice"
 import Login from "./pages/login/Login"
 import PublicRoutes from "./routes/PublicRoutes"
 import PrivateRoutes from "./routes/PrivateRoutes"
+import ProfileCompletionRoutes from "./routes/ProfileCompletionRoutes"
 import Dashboard from "./pages/dashboard/Dashboard"
 import Signup from "./pages/signup/Signup"
+import CompleteProfile from "./pages/complete-profile/CompleteProfile"
 import ProductsList from "./pages/products/ProductsList"
 import AddProduct from "./pages/add-product/AddProduct"
 import EditProduct from "./pages/edit-product/EditProduct"
+import { RootState } from "./store/appStore"
+import VerificationPending from "./pages/ verification-pending/VerificationPending"
+import { LoginResponse } from "./pages/login/types.login"
 
 interface Route {
   path: string
   element: ReactElement
 }
-const availableLanguages = ["en","hi", "fr", "zh-CN", "pa", "es", "ar", "tl", "it", "de", "yue"]
+
+const availableLanguages = ["en", "hi", "fr", "zh-CN", "pa", "es", "ar", "tl", "it", "de", "yue"]
 
 const publicRoutes: Route[] = [
-  {path:"/login", element:<Login/>},
-  {path:"/signup", element:<Signup/>},
+  { path: "/login", element: <Login /> },
+  { path: "/signup", element: <Signup /> },
+]
+
+const profileCompletionRoutes: Route[] = [
+  { path: "/complete-profile", element: <CompleteProfile /> },
+  { path: "/verification-pending", element: <VerificationPending /> },
 ]
 
 const privateRoutes: Route[] = [
-  {path:"/dashboard", element:<Dashboard/>},
+  { path: "/dashboard", element: <Dashboard /> },
   { path: "/products", element: <ProductsList /> },
   { path: "/products/add/:step", element: <AddProduct /> },
   { path: "/products/edit/:productId/:step", element: <EditProduct /> },
@@ -44,20 +55,20 @@ const LoadingScreen = () => (
   </div>
 );
 
-
 // Main app wrapper to handle authentication state
 function AppContent() {
   const { lang } = useParams();
   const dispatch = useDispatch();
   const location = useLocation();
-  const isLoggedIn = useSelector((state:any) => state.user.isLoggedIn);
+  const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
+  const userInfo = useSelector((state: RootState) => state.user.userInfo);
   
   // Setup API verification
   const {
+    data: verifyData,
     isLoading: isVerifying,
     isSuccess: isVerifySuccess,
     isError: isVerifyError,
-    error: verifyError,
   } = useVerifyTokensApi();
   
   // Set language from URL parameter
@@ -70,18 +81,24 @@ function AppContent() {
   
   // Handle authentication state changes
   useEffect(() => {
+    if (isVerifySuccess && verifyData?.data?.response) {
+      const userData = verifyData.data.response?.user as LoginResponse;
+      console.log("Token verification successful, user data:", userData);
 
-    if (isVerifySuccess) {
-      // Successful token verification - user is authenticated
-      console.log("Token verification successful, setting user as logged in");
-      dispatch(setIsLoggedIn(true));
-      // dispatch(setUser(verifyData.data.response));
+      if(userInfo !== userData){
+        console.log("User info changed , syncing ... ")
+        dispatch(setUser(userData));
+      }
+      
+      // Only set isLoggedIn to true if profile is complete AND verified
+      if (userData.isProfileComplete && userData.isVerified) {
+        dispatch(setIsLoggedIn(true));
+      }
     } else if (isVerifyError) {
-      // Token verification failed - user is not authenticated
       console.log("Token verification failed, setting user as logged out");
       dispatch(resetAuthState());
     }
-  }, [isVerifySuccess, isVerifyError]);
+  }, [isVerifySuccess, isVerifyError, verifyData, dispatch]);
 
   // Show loading screen while verifying tokens on initial load
   if (isVerifying) {
@@ -101,8 +118,8 @@ function AppContent() {
 
   return (
     <Routes>
-      {/* Public routes - only show when user is NOT logged in */}
-      {!isLoggedIn && publicRoutes.map((route, index) => (
+      {/* Public routes - show when user is NOT logged in and has no userInfo */}
+      {!userInfo && publicRoutes.map((route, index) => (
         <Route 
           key={index} 
           path={route.path} 
@@ -114,25 +131,50 @@ function AppContent() {
         />
       ))}
 
-      {/* Private routes - only show when user IS logged in */}
-      {isLoggedIn && privateRoutes.map((route, index) => (
-        <Route 
-          key={index + publicRoutes.length} 
-          path={route.path} 
-          element={
-            <PrivateRoutes>
-              {route.element}
-            </PrivateRoutes>
-          } 
-        />
-      ))}
+      {/* Profile completion routes - show when user has userInfo but profile is incomplete or unverified */}
+      {userInfo && (!userInfo.isProfileComplete || !userInfo.isVerified) && 
+        profileCompletionRoutes.map((route, index) => (
+          <Route 
+            key={index + publicRoutes.length} 
+            path={route.path} 
+            element={
+              <ProfileCompletionRoutes>
+                {route.element}
+              </ProfileCompletionRoutes>
+            } 
+          />
+        ))
+      }
 
-      {/* Default redirect based on authentication status */}
+      {/* Private routes - show when user is fully logged in (profile complete AND verified) */}
+      {isLoggedIn && userInfo?.isProfileComplete && userInfo?.isVerified && 
+        privateRoutes.map((route, index) => (
+          <Route 
+            key={index + publicRoutes.length + profileCompletionRoutes.length} 
+            path={route.path} 
+            element={
+              <PrivateRoutes>
+                {route.element}
+              </PrivateRoutes>
+            } 
+          />
+        ))
+      }
+
+      {/* Default redirect based on user state */}
       <Route 
         path="*" 
         element={
           <Navigate 
-            to={`/${currentLang}/${isLoggedIn ? 'dashboard' : 'login'}`} 
+            to={
+              !userInfo 
+                ? `/${currentLang}/login`
+                : !userInfo.isProfileComplete 
+                  ? `/${currentLang}/complete-profile`
+                  : !userInfo.isVerified 
+                    ? `/${currentLang}/verification-pending`
+                    : `/${currentLang}/dashboard`
+            } 
             replace 
           />
         } 

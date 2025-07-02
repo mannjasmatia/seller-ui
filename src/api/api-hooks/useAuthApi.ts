@@ -10,10 +10,17 @@ import { useRef } from "react";
  */
 export const useVerifyTokensApi = () => {
   const isLoggedIn = useSelector((state: any) => state.user.isLoggedIn);
+  const verificationCount = useRef(0);
 
   return useQuery({
     queryKey: ["verifyTokens"],
-    queryFn: () => authApi.verifyTokens(),
+    queryFn: () => {
+
+      // remove this code, its just for development
+      verificationCount.current+=1;
+      console.log("Calling VerifyTokens, count : ", verificationCount.current)
+      return authApi.verifyTokens()
+    },
 
     // Important settings to control when the query runs
     gcTime: 0, // Don't cache results

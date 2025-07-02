@@ -54,18 +54,19 @@ export const useProductsList = () => {
     refetch
   } = useProductsApi(queryParams);
 
-  const {
-    data: categoriesData,
-    isLoading: isLoadingCategories
-  } = useFetchAllCategoriesApi({
-    page: 1,
-    limit: 100
-  });
+  // const {
+  //   data: categoriesData,
+  //   isLoading: isLoadingCategories
+  // } = useFetchAllCategoriesApi({
+  //   page: 1,
+  //   limit: 100
+  // });
 
   // Computed values
   const products = productsData?.docs || [];
   const totalPages = productsData?.totalPages || 1;
-  const categories = categoriesData?.docs || [];
+  const totalProducts = productsData?.total || 0;
+  // const categories = categoriesData?.docs || [];
 
   // Navigation functions
   const handleAddProduct = useCallback(() => {
@@ -144,6 +145,7 @@ export const useProductsList = () => {
   return {
     // Data
     products,
+    totalProducts,
     totalPages,
     currentPage,
     isLoading,
@@ -172,8 +174,8 @@ export const useProductsList = () => {
     handleSearch,
     
     // Categories
-    categories,
-    isLoadingCategories,
+    // categories,
+    // isLoadingCategories,
     
     // Utilities
     refetch,

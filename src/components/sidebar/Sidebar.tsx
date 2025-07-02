@@ -9,6 +9,8 @@ import {
   X,
   ChevronRight
 } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/appStore';
 
 interface SidebarItem {
   id: string;
@@ -56,6 +58,8 @@ const defaultItems: SidebarItem[] = [
   }
 ];
 
+const MEDIA_URL = import.meta.env.VITE_MEDIA_URL;
+
 const Sidebar: React.FC<SidebarProps> = ({ 
   items = defaultItems, 
   onItemClick,
@@ -66,6 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   );
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const userInfo = useSelector((state: RootState) => state.user.userInfo);
 
   const handleItemClick = (item: SidebarItem) => {
     setActiveItem(item.id);
@@ -200,14 +205,16 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div className="p-6 border-t border-gray-100 bg-white">
               <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                 <div className="w-8 h-8 bg-cb-red rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold">U</span>
+                  <span className="text-white text-sm font-semibold">
+                    {String(userInfo?.companyName)?.toUpperCase().charAt(0) || '-'}
+                  </span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">
-                    User Account
+                    {userInfo?.companyName ?? "Seller"}
                   </p>
                   <p className="text-xs text-gray-500 truncate">
-                    user@example.com
+                    {userInfo?.email ?? "seller@canadianbazaar.com"}
                   </p>
                 </div>
               </div>

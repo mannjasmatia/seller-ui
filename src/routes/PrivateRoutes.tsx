@@ -7,21 +7,43 @@ import { RootState } from "../store/appStore";
 
 const PrivateRoutes = ({ children }: { children: React.ReactNode }) => {
     const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
+    const userInfo = useSelector((state: RootState) => state.user.userInfo);
     const navigate = useNavigate();
     const location = useLocation();
     const { lang } = useParams();
     
     const preferredLang = lang || localStorage.getItem("lang") || "en";
     
-    // If the user is not logged in, redirect to the login page
+    // Redirect if user is not properly authenticated or verified
     useEffect(() => {
-        if (!isLoggedIn) {
-            console.log("User is not logged in, redirecting to login page");
+        if (!userInfo) {
+            console.log("No user info, redirecting to login");
             const currentPath = location.pathname.split('/').slice(2).join('/');
             const redirectParam = currentPath ? `?redirectUrl=/${currentPath}` : '';
             navigate(`/${preferredLang}/login${redirectParam}`, { replace: true });
+            return;
         }
-    }, [isLoggedIn, navigate, location.pathname, preferredLang]);
+
+        if (!userInfo.isProfileComplete) {
+            console.log("Profile incomplete, redirecting to complete-profile");
+            navigate(`/${preferredLang}/complete-profile`, { replace: true });
+            return;
+        }
+
+        if (!userInfo.isVerified) {
+            console.log("Profile not verified, redirecting to verification-pending");
+            navigate(`/${preferredLang}/verification-pending`, { replace: true });
+            return;
+        }
+
+        if (!isLoggedIn) {
+            console.log("User not logged in, redirecting to login");
+            const currentPath = location.pathname.split('/').slice(2).join('/');
+            const redirectParam = currentPath ? `?redirectUrl=/${currentPath}` : '';
+            navigate(`/${preferredLang}/login${redirectParam}`, { replace: true });
+            return;
+        }
+    }, [userInfo, isLoggedIn, navigate, location.pathname, preferredLang]);
 
     // Handle sidebar navigation
     const handleSidebarItemClick = (item: any) => {
@@ -38,12 +60,12 @@ const PrivateRoutes = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    // Don't render anything if user is not logged in (will redirect)
-    if (!isLoggedIn) {
+    // Don't render anything if user doesn't meet requirements (will redirect)
+    if (!userInfo || !userInfo.isProfileComplete || !userInfo.isVerified || !isLoggedIn) {
         return null;
     }
 
-    // If the user is logged in, render the layout
+    // If the user is fully authenticated and verified, render the layout
     return (
         <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
             {/* Fixed Header */}
@@ -58,7 +80,7 @@ const PrivateRoutes = ({ children }: { children: React.ReactNode }) => {
                 <main className="flex-1 h-[90dvh] bg-white overflow-y-auto lg:ml-16 transition-all duration-300 ease-in-out">
                     <div className="p-1 sm:p-2 lg:p-3">
                         <div className="p-6 bg-gray-50 rounded-2xl">
-                          {children}
+                            {children}
                         </div>
                     </div>
                 </main>

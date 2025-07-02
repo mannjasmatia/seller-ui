@@ -5,6 +5,7 @@ import { customToast } from "../../toast-config/customToast";
 import { setIsLoggedIn, setUser } from "../../store/userSlice";
 import { InputType } from "../../components/BasicComponents/Input";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { LoginResponse } from "./types.login";
 
 const useLogin = ()=>{
     // Form state with initial values
@@ -24,25 +25,32 @@ const useLogin = ()=>{
       const [errors, setErrors] = useState<Record<string, string>>({});
       const { data:loginData, mutate: login,isPending, isError, error, isSuccess } = useLoginApi();
     
-      useEffect(()=>{
-        if(isSuccess){
-          customToast.success("Logged in successfully")
-          dispatch(setIsLoggedIn(true))
-          dispatch(setUser(loginData?.data?.response))
-          console.log("redirectUrl : ",`/${lang}${redirectUrl}`)
-          // navigate(`/${lang}/${redirectUrl}`, { replace: true });
-        }
-      },[isSuccess])
-
-      // Handle navigation after login success
       useEffect(() => {
-        if (isSuccess && isLoggedIn) {
-            const preferredLang = lang || localStorage.getItem("lang") || "en";
-            const finalRedirectUrl = redirectUrl.startsWith('/') ? redirectUrl : `/${redirectUrl}`;
-            console.log("Login successful, redirecting to:", `/${preferredLang}${finalRedirectUrl}`);
-            navigate(`/${preferredLang}${finalRedirectUrl}`, { replace: true });
-        }
-    }, [isSuccess, isLoggedIn, lang, redirectUrl]);
+    if (isSuccess && loginData?.data?.response) {
+      const userData = loginData.data.response as LoginResponse;
+      
+      customToast.success("Logged in successfully");
+      dispatch(setUser(userData));
+      
+      console.log("Login successful, user data:", userData);
+      
+      const preferredLang = lang || localStorage.getItem("lang") || "en";
+      
+      // Check profile completion status
+      if (!userData?.isProfileComplete) {
+        console.log("Profile incomplete, redirecting to complete-profile");
+        navigate(`/${preferredLang}/complete-profile`, { replace: true });
+      } else if (!userData?.isVerified) {
+        console.log("Profile complete but not verified, redirecting to verification-pending");
+        navigate(`/${preferredLang}/verification-pending`, { replace: true });
+      } else {
+        console.log("Profile complete and verified, setting logged in and redirecting");
+        dispatch(setIsLoggedIn(true));
+        const finalRedirectUrl = redirectUrl.startsWith('/') ? redirectUrl : `/${redirectUrl}`;
+        navigate(`/${preferredLang}${finalRedirectUrl}`, { replace: true });
+      }
+    }
+  }, [isSuccess, loginData, dispatch, lang, navigate, redirectUrl]);
     
       // Input field configurations
       const inputFields = [
