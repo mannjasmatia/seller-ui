@@ -1,7 +1,9 @@
-// usePerformanceGraph.ts
-import { useMemo, useState, useEffect } from 'react';
+// src/pages/dashboard/components/performance-graph/usePerformanceGraph.tsx
+import { useMemo } from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { FilterState } from '../../types.dashboard';
+import moment from 'moment';
+import { useProductPerformanceApi } from '../../../../api/api-hooks/useAnalyticsPerformanceApi';
 
 interface PerformanceData {
   period: string;
@@ -20,126 +22,120 @@ interface GranularityInfo {
   days: number;
 }
 
-export const usePerformanceGraph = (filterState: FilterState) => {
-  const [isLoading, setIsLoading] = useState(false);
+interface UsePerformanceGraphProps {
+  filterState: FilterState;
+  selectedProductIds: string[];
+  performanceType?: 'popularityScore' | 'bestsellerScore' | 'quotationsSent' | 'quotationsAccepted' | 'quotationsRejected' | 'quotationsInProgress';
+}
 
-  // Simulate API loading
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 300);
-    return () => clearTimeout(timer);
-  }, [filterState]);
-
-  // Function to calculate optimal granularity based on date range
-  const calculateGranularity = (fromDate: Date, toDate: Date): 'days' | 'weeks' | 'months' | 'years' => {
-    const diffTime = Math.abs(toDate.getTime() - fromDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+export const usePerformanceGraph = ({ 
+  filterState, 
+  selectedProductIds, 
+  performanceType = 'popularityScore' 
+}: UsePerformanceGraphProps) => {
+  
+  // Calculate date range and granularity based on filter state
+  const { from, to, granularity } = useMemo(() => {
+    const today = moment();
     
-    if (diffDays <= 7) return 'days';
-    if (diffDays <= 90) return 'weeks';
-    if (diffDays <= 730) return 'months';
-    return 'years';
-  };
-
-  // Function to generate date periods based on granularity
-  const generateDatePeriods = (
-    fromDate: Date, 
-    toDate: Date, 
-    granularity: 'days' | 'weeks' | 'months' | 'years'
-  ): string[] => {
-    const periods: string[] = [];
-    const current = new Date(fromDate);
-    
-    switch (granularity) {
-      case 'days':
-        while (current <= toDate) {
-          periods.push(current.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric' 
-          }));
-          current.setDate(current.getDate() + 1);
-        }
-        break;
-        
-      case 'weeks':
-        while (current <= toDate) {
-          const weekStart = new Date(current);
-          const weekEnd = new Date(current);
-          weekEnd.setDate(weekEnd.getDate() + 6);
-          
-          if (weekEnd > toDate) weekEnd.setTime(toDate.getTime());
-          
-          periods.push(`${weekStart.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric' 
-          })} - ${weekEnd.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric' 
-          })}`);
-          
-          current.setDate(current.getDate() + 7);
-        }
-        break;
-        
-      case 'months':
-        while (current <= toDate) {
-          periods.push(current.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short' 
-          }));
-          current.setMonth(current.getMonth() + 1);
-        }
-        break;
-        
-      case 'years':
-        while (current <= toDate) {
-          periods.push(current.getFullYear().toString());
-          current.setFullYear(current.getFullYear() + 1);
-        }
-        break;
-    }
-    
-    return periods;
-  };
-
-  // Generate performance seed based on period for consistent random data
-  const generatePerformanceSeed = (period: string, index: number): number => {
-    const periodHash = period.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
-      return a & a;
-    }, 0);
-    
-    // Use a combination of hash and index for more realistic progression
-    const seed = Math.abs(periodHash) + index * 123;
-    return (seed % 1000) / 1000;
-  };
-
-  // Mock data generation with realistic growth patterns
-  const generateMockData = (periods: string[]): PerformanceData[] => {
-    let baseValue = 1000;
-    const growthTrend = 0.1; // 10% average growth trend
-    
-    return periods.map((period, index) => {
-      const seed = generatePerformanceSeed(period, index);
-      const randomFactor = (seed - 0.5) * 0.4; // ±20% random variation
-      const growthFactor = 1 + (growthTrend * index / periods.length) + randomFactor;
+    if (filterState.timeGranularity === 'custom' && filterState.customFromDate && filterState.customToDate) {
+      const fromDate = moment(filterState.customFromDate);
+      const toDate = moment(filterState.customToDate);
+      const diffDays = toDate.diff(fromDate, 'days');
       
-      baseValue = Math.max(100, baseValue * growthFactor);
+      let autoGranularity: 'days' | 'weeks' | 'months' | 'years';
+      if (diffDays <= 7) autoGranularity = 'days';
+      else if (diffDays <= 90) autoGranularity = 'weeks';
+      else if (diffDays <= 730) autoGranularity = 'months';
+      else autoGranularity = 'years';
       
       return {
-        period,
-        performance: Math.round(baseValue)
+        from: filterState.customFromDate,
+        to: filterState.customToDate,
+        granularity: autoGranularity
       };
-    });
-  };
+    }
+
+    // Calculate date range and granularity based on time period
+    switch (filterState.timeGranularity) {
+      case 'this-week':
+        return {
+          from: today.clone().startOf('week').format('YYYY-MM-DD'),
+          to: today.format('YYYY-MM-DD'),
+          granularity: 'days' as const
+        };
+      case 'this-month':
+        return {
+          from: today.clone().startOf('month').format('YYYY-MM-DD'),
+          to: today.format('YYYY-MM-DD'),
+          granularity: 'weeks' as const
+        };
+      case 'this-year':
+        return {
+          from: today.clone().startOf('year').format('YYYY-MM-DD'),
+          to: today.format('YYYY-MM-DD'),
+          granularity: 'months' as const
+        };
+      case 'last-2-years':
+        return {
+          from: today.clone().subtract(2, 'years').format('YYYY-MM-DD'),
+          to: today.format('YYYY-MM-DD'),
+          granularity: 'months' as const
+        };
+      case 'last-5-years':
+        return {
+          from: today.clone().subtract(5, 'years').format('YYYY-MM-DD'),
+          to: today.format('YYYY-MM-DD'),
+          granularity: 'years' as const
+        };
+      default: // all-time
+        return {
+          from: moment('2020-01-01').format('YYYY-MM-DD'),
+          to: today.format('YYYY-MM-DD'),
+          granularity: 'months' as const
+        };
+    }
+  }, [filterState]);
+
+  // Get performance data from API
+  const { 
+    data: apiData, 
+    isLoading, 
+    isError, 
+    error,
+    refetch 
+  } = useProductPerformanceApi({
+    products: selectedProductIds,
+    from,
+    to,
+    granularity,
+    type: performanceType
+  });
+
+  // Transform API data to chart format
+  const chartData: PerformanceData[] = useMemo(() => {
+    if (!apiData?.x || !apiData?.y) {
+      return [];
+    }
+
+    return apiData.x.map((period, index) => ({
+      period,
+      performance: apiData.y[index] || 0
+    }));
+  }, [apiData]);
 
   // Calculate granularity info for display
   const granularityInfo = useMemo((): GranularityInfo | null => {
     if (filterState.timeGranularity === 'custom' && filterState.customFromDate && filterState.customToDate) {
-      const fromDate = new Date(filterState.customFromDate);
-      const toDate = new Date(filterState.customToDate);
-      const autoGranularity = calculateGranularity(fromDate, toDate);
-      const diffDays = Math.ceil((toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24));
+      const fromDate = moment(filterState.customFromDate);
+      const toDate = moment(filterState.customToDate);
+      const diffDays = toDate.diff(fromDate, 'days') + 1;
+      
+      let autoGranularity: 'days' | 'weeks' | 'months' | 'years';
+      if (diffDays <= 7) autoGranularity = 'days';
+      else if (diffDays <= 90) autoGranularity = 'weeks';
+      else if (diffDays <= 730) autoGranularity = 'months';
+      else autoGranularity = 'years';
       
       return {
         granularity: autoGranularity,
@@ -148,54 +144,6 @@ export const usePerformanceGraph = (filterState: FilterState) => {
     }
     return null;
   }, [filterState.timeGranularity, filterState.customFromDate, filterState.customToDate]);
-
-  // Generate chart data based on filters
-  const chartData = useMemo((): PerformanceData[] => {
-    // Handle custom date range
-    if (filterState.timeGranularity === 'custom' && filterState.customFromDate && filterState.customToDate) {
-      const fromDate = new Date(filterState.customFromDate);
-      const toDate = new Date(filterState.customToDate);
-      const autoGranularity = calculateGranularity(fromDate, toDate);
-      const periods = generateDatePeriods(fromDate, toDate, autoGranularity);
-      
-      return generateMockData(periods);
-    }
-
-    // Predefined data for standard time periods
-    const dataTemplates: { [key: string]: { periods: string[], baseValues: number[] } } = {
-      'all-time': {
-        periods: ['January', 'February', 'March', 'April', 'May'],
-        baseValues: [1000, 2500, 3200, 4000, 5500]
-      },
-      'this-week': {
-        periods: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-        baseValues: [4800, 5200, 4900, 5100, 5400, 5800, 6200]
-      },
-      'this-month': {
-        periods: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-        baseValues: [4200, 4600, 5100, 5500]
-      },
-      'this-year': {
-        periods: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        baseValues: [3800, 4100, 4400, 4700, 5000, 5300, 5600, 5900, 6200, 6500, 6800, 7100]
-      },
-      'last-2-years': {
-        periods: ['2023 Q1', '2023 Q2', '2023 Q3', '2023 Q4', '2024 Q1', '2024 Q2', '2024 Q3', '2024 Q4'],
-        baseValues: [3200, 3600, 4000, 4400, 4800, 5200, 5600, 6000]
-      },
-      'last-5-years': {
-        periods: ['2020', '2021', '2022', '2023', '2024'],
-        baseValues: [2000, 2800, 3600, 4400, 5200]
-      },
-    };
-
-    const template = dataTemplates[filterState.timeGranularity] || dataTemplates['all-time'];
-    
-    return template.periods.map((period, index) => ({
-      period,
-      performance: template.baseValues[index] || 1000,
-    }));
-  }, [filterState]);
 
   // Calculate performance metrics
   const performanceMetrics = useMemo((): PerformanceMetrics => {
@@ -212,9 +160,11 @@ export const usePerformanceGraph = (filterState: FilterState) => {
     let growthPoints = 0;
     
     for (let i = 1; i < values.length; i++) {
-      const growth = ((values[i] - values[i - 1]) / values[i - 1]) * 100;
-      totalGrowth += growth;
-      growthPoints++;
+      if (values[i - 1] > 0) { // Avoid division by zero
+        const growth = ((values[i] - values[i - 1]) / values[i - 1]) * 100;
+        totalGrowth += growth;
+        growthPoints++;
+      }
     }
     
     const averageGrowth = growthPoints > 0 ? totalGrowth / growthPoints : 0;
@@ -267,10 +217,13 @@ export const usePerformanceGraph = (filterState: FilterState) => {
     chartData,
     performanceMetrics,
     isLoading,
+    isError,
+    error,
     granularityInfo,
     formatValue,
     getTrendIcon,
-    getTrendColor
+    getTrendColor,
+    refetch,
   };
 };
 

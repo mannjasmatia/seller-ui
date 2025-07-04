@@ -11,6 +11,7 @@ import useProductsList from './useProductList';
 import SearchBar from './components/SearchBar';
 import ProductCard from './components/ProductCard';
 import FilterModal from './components/FilterModal';
+import ConfirmationModal from '../../modals/ConfirmationModal';
 
 const ProductsList: React.FC = () => {
   const { lang } = useParams();
@@ -34,6 +35,10 @@ const ProductsList: React.FC = () => {
     // UI state
     showFilterModal,
     setShowFilterModal,
+
+    deleteProductId,
+    handleConfirmDelete,
+    handleConfirmationModalClose,
     
     // Actions
     handleAddProduct,
@@ -130,7 +135,7 @@ const ProductsList: React.FC = () => {
 
           {/* Active Filters Display */}
           {Object.values(filters).some(v => 
-            Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null
+            Array.isArray(v) ? v?.length > 0 : v !== undefined && v !== null
           ) && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
@@ -147,10 +152,10 @@ const ProductsList: React.FC = () => {
               </div>
               
               <div className="flex items-center gap-3 flex-wrap">
-                {filters.categories && filters.categories.length > 0 && (
+                {filters.categories && filters.categories?.length > 0 && (
                   <span className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 border border-blue-200">
                     <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                    Categories: {filters.categories.length}
+                    Categories: {filters.categories?.length}
                     <button
                       onClick={() => setFilters(prev => ({ ...prev, categories: [] }))}
                       className="ml-2 hover:text-blue-600 font-bold"
@@ -204,7 +209,7 @@ const ProductsList: React.FC = () => {
         </div>
 
         {/* Products Content */}
-        {products && products.length === 0 ? (
+        {products && products?.length === 0 ? (
           <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden">
             <EmptyState onAddProduct={handleAddProduct} />
           </div>
@@ -246,6 +251,17 @@ const ProductsList: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        {!!deleteProductId && (
+          <ConfirmationModal
+              open={!!deleteProductId}
+              onConfirm={handleConfirmDelete}
+              onClose={handleConfirmationModalClose}
+              title='Delete this product ?'
+              description="Are you sure you want to delete this product? You won't be able to reverse this action."
+            />
+        ) }
 
         {/* Enhanced Filter Modal */}
         {showFilterModal && (

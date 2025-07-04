@@ -158,5 +158,347 @@
     "next": "Next",
     "loading": "Loading...",
     "error": "Error loading media"
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Manage your business profile and account settings",
+    "edit": "Edit Profile",
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "sections": {
+      "companyInfo": "Company Information",
+      "businessDetails": "Business Details",
+      "addressInfo": "Address Information",
+      "profilePicture": "Profile Picture"
+    },
+    "fields": {
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "phoneNumber": "Phone Number",
+      "businessType": "Business Type",
+      "categories": "Business Categories",
+      "businessNumber": "Business Registration Number",
+      "street": "Street Address",
+      "city": "City",
+      "state": "Province/Territory",
+      "zip": "Postal Code",
+      "profilePic": "Profile Picture"
+    },
+    "placeholders": {
+      "fullName": "Enter your full name",
+      "email": "Enter your email address",
+      "phoneNumber": "Enter your phone number",
+      "businessType": "Select your business type",
+      "categories": "Select your business categories",
+      "businessNumber": "Enter your business registration number",
+      "street": "Enter your street address",
+      "city": "Select your city",
+      "state": "Select your province or territory",
+      "zip": "Enter your postal code"
+    },
+    "imageActions": {
+      "chooseFile": "Choose File",
+      "chooseAvatar": "Choose Avatar",
+      "uploadImage": "Upload Image",
+      "changeImage": "Change Image",
+      "removeImage": "Remove Image",
+      "longPressToView": "Long press to view image"
+    },
+    "validation": {
+      "required": "{field} is required",
+      "minLength": "{field} must be at least {length} characters",
+      "maxLength": "{field} cannot exceed {length} characters",
+      "pattern": "Please enter a valid {field}",
+      "email": "Please enter a valid email address",
+      "phone": "Please enter a valid phone number",
+      "postalCode": "Please enter a valid Canadian postal code (e.g., K1A 0A6)"
+    },
+    "verification": {
+      "emailChanged": "Email Changed",
+      "phoneChanged": "Phone Changed",
+      "emailVerificationTitle": "Verify Your New Email",
+      "phoneVerificationTitle": "Verify Your New Phone",
+      "emailVerificationDesc": "We've sent a verification code to your new email address. Please enter it below to complete the change.",
+      "phoneVerificationDesc": "We've sent a verification code to your new phone number. Please enter it below to complete the change.",
+      "verifyButton": "Verify",
+      "resendCode": "Resend Code",
+      "codeExpiry": "Code expires in",
+      "enterValidEmail": "Please enter a valid email address",
+      "enterValidPhone": "Please enter a valid phone number"
+    },
+    "toast": {
+      "profileUpdated": "Profile updated successfully",
+      "profileUpdateFailed": "Failed to update profile",
+      "emailVerificationSent": "Verification code sent to your email",
+      "phoneVerificationSent": "Verification code sent to your phone",
+      "emailVerified": "Email verified successfully",
+      "phoneVerified": "Phone verified successfully",
+      "invalidFileType": "Please select a valid image file",
+      "fileTooLarge": "File size must be less than 5MB",
+      "fixErrors": "Please fix the form errors before saving",
+      "changeOneAtTime": "Please change email and phone number separately"
+    },
+    "errors": {
+      "loadingFailed": "Failed to load profile data",
+      "updateFailed": "Failed to update profile",
+      "verificationFailed": "Verification failed",
+      "invalidOtp": "Invalid verification code",
+      "networkError": "Network error, please try again"
+    },
+    "avatarModal": {
+      "title": "Choose Avatar",
+      "select": "Select",
+      "cancel": "Cancel"
+    },
+    "mediaModal": {
+      "title": "Profile Picture",
+      "close": "Close",
+      "download": "Download"
+    }
+  },
+  "inbox": {
+    "title": "Inbox",
+    "subtitle": "Manage your quotation requests",
+    "noQuotations": "No quotations found",
+    "noQuotationsDescription": "You haven't received any quotation requests yet.",
+    "loadingQuotations": "Loading quotations...",
+    "errorLoading": "Error loading quotations",
+    "retry": "Retry",
+    
+    "filters": {
+      "allStatus": "All Status",
+      "pending": "Pending",
+      "accepted": "Accepted", 
+      "rejected": "Rejected",
+      "negotiation": "Negotiation",
+      "allVisibility": "All",
+      "seen": "Seen",
+      "unseen": "Unseen",
+      "searchPlaceholder": "Search quotations...",
+      "clearFilters": "Clear Filters"
+    },
+    
+    "quotationCard": {
+      "quantity": "Qty:",
+      "pieces": "pieces",
+      "priceRange": "Price Range:",
+      "deadline": "Deadline:",
+      "location": "Location:",
+      "newRequest": "New Request",
+      "timeAgo": {
+        "justNow": "Just now",
+        "minutesAgo": "{{minutes}}m ago",
+        "hoursAgo": "{{hours}}h ago",
+        "yesterday": "Yesterday",
+        "daysAgo": "{{days}} days ago"
+      }
+    },
+    
+    "actions": {
+      "accept": "Accept",
+      "reject": "Reject",
+      "negotiate": "Negotiate",
+      "viewDetails": "View Details",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "negotiating": "Negotiating",
+      "viewChat": "View Chat",
+      "viewOrder": "View Order"
+    },
+    
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {{current}} of {{total}}"
+    },
+    
+    "detailModal": {
+      "title": "Quotation Details",
+      "close": "Close",
+      "productInfo": "Product Information",
+      "buyerInfo": "Buyer Information", 
+      "quotationInfo": "Quotation Information",
+      "quantity": "Quantity",
+      "priceRange": "Price Range",
+      "deadline": "Deadline",
+      "location": "Location",
+      "description": "Description",
+      "attributes": "Attributes",
+      "status": "Status",
+      "businessStatus": "Business Status",
+      "chatPhase": "Chat Phase",
+      "invoiceInfo": "Invoice Information",
+      "orderInfo": "Order Information",
+      "amount": "Amount",
+      "negotiatedPrice": "Negotiated Price",
+      "finalPrice": "Final Price",
+      "createdAt": "Created At",
+      "noDescription": "No description provided",
+      "noAttributes": "No specific attributes"
+    },
+    
+    "confirmations": {
+      "acceptTitle": "Accept Quotation",
+      "acceptMessage": "Are you sure you want to accept this quotation? This will start the business process.",
+      "rejectTitle": "Reject Quotation", 
+      "rejectMessage": "Are you sure you want to reject this quotation? This action cannot be undone.",
+      "negotiateTitle": "Start Negotiation",
+      "negotiateMessage": "Are you sure you want to start negotiation for this quotation? This will open a chat."
+    },
+    
+    "success": {
+      "quotationAccepted": "Quotation accepted successfully",
+      "quotationRejected": "Quotation rejected successfully",
+      "negotiationStarted": "Negotiation started successfully"
+    },
+    
+    "errors": {
+      "acceptFailed": "Failed to accept quotation",
+      "rejectFailed": "Failed to reject quotation", 
+      "negotiateFailed": "Failed to start negotiation",
+      "loadDetailsFailed": "Failed to load quotation details"
+    }
+  },
+  "inboxChat": {
+    "title": "Chat Inbox",
+    "subtitle": "Communicate with your buyers",
+    "noChats": "No conversations found",
+    "noChatsDescription": "You don't have any active conversations yet.",
+    "loadingChats": "Loading conversations...",
+    "loadingMessages": "Loading messages...",
+    "errorLoading": "Error loading data",
+    "retry": "Retry",
+    
+    "chatList": {
+      "newMessage": "New",
+      "typing": "Typing...",
+      "uploadingImages": "Uploading images...",
+      "noMessages": "No messages yet",
+      "activeConversations": "Active Conversations"
+    },
+    
+    "chatHeader": {
+      "buyer": "Buyer",
+      "online": "Online",
+      "offline": "Offline",
+      "quotationDetails": "Quotation Details",
+      "generateInvoice": "Generate Invoice",
+      "viewInvoice": "View Invoice",
+      "invoiceStatus": "Invoice Status",
+      "phase": "Phase"
+    },
+    
+    "messageInput": {
+      "placeholder": "Type a message...",
+      "attachImages": "Attach images",
+      "send": "Send",
+      "uploading": "Uploading...",
+      "notConnected": "Not connected",
+      "sending": "Sending...",
+      "pressEnter": "Press Enter to send"
+    },
+    
+    "messageStatus": {
+      "sending": "Sending",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "failed": "Failed",
+      "retry": "Retry"
+    },
+    
+    "businessActions": {
+      "quotationCreated": "Quotation Created",
+      "quotationAccepted": "Quotation Accepted",
+      "quotationRejected": "Quotation Rejected",
+      "invoiceSent": "Invoice Sent",
+      "invoiceAccepted": "Invoice Accepted",
+      "invoiceRejected": "Invoice Rejected",
+      "orderCreated": "Order Created"
+    },
+    
+    "invoiceModal": {
+      "title": "Generate Invoice",
+      "close": "Close",
+      "negotiatedPrice": "Negotiated Price",
+      "negotiatedPricePlaceholder": "Enter the final agreed price",
+      "paymentTerms": "Payment Terms",
+      "paymentTermsPlaceholder": "e.g., Payment on delivery",
+      "deliveryTerms": "Delivery Terms", 
+      "deliveryTermsPlaceholder": "e.g., Standard delivery within 5-7 days",
+      "taxAmount": "Tax Amount",
+      "taxAmountPlaceholder": "Enter tax amount (optional)",
+      "shippingCharges": "Shipping Charges",
+      "shippingChargesPlaceholder": "Enter shipping charges (optional)",
+      "notes": "Additional Notes",
+      "notesPlaceholder": "Any additional terms or notes",
+      "totalAmount": "Total Amount",
+      "generate": "Generate Invoice",
+      "generating": "Generating...",
+      "cancel": "Cancel",
+      "validation": {
+        "priceRequired": "Negotiated price is required",
+        "priceMin": "Price must be greater than 0",
+        "taxMin": "Tax amount must be 0 or greater",
+        "shippingMin": "Shipping charges must be 0 or greater"
+      }
+    },
+    
+    "quotationModal": {
+      "title": "Quotation Details",
+      "close": "Close",
+      "productInfo": "Product Information",
+      "buyerInfo": "Buyer Information",
+      "quotationInfo": "Quotation Information",
+      "quantity": "Quantity",
+      "priceRange": "Price Range",
+      "deadline": "Deadline",
+      "location": "Location",
+      "description": "Description",
+      "attributes": "Attributes",
+      "status": "Status",
+      "createdAt": "Created At"
+    },
+    
+    "connectionStatus": {
+      "connected": "Connected",
+      "disconnected": "Disconnected",
+      "error": "Connection Error",
+      "connecting": "Connecting..."
+    },
+    
+    "invoiceInfo": {
+      "currentInvoice": "Current Invoice",
+      "status": "Status",
+      "amount": "Amount",
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "expired": "Expired",
+      "noInvoice": "No active invoice"
+    },
+    
+    "errors": {
+      "sendMessageFailed": "Failed to send message",
+      "uploadFailed": "Failed to upload images",
+      "invalidFileType": "Please select valid image files",
+      "fileTooLarge": "File size must be less than 5MB",
+      "invoiceGenerationFailed": "Failed to generate invoice",
+      "connectionLost": "Connection lost",
+      "chatNotFound": "Chat not found"
+    },
+    
+    "success": {
+      "messageSent": "Message sent successfully",
+      "invoiceGenerated": "Invoice generated successfully",
+      "imageUploaded": "Images uploaded successfully"
+    },
+    
+    "empty": {
+      "selectChat": "Select a conversation",
+      "selectChatDescription": "Choose a conversation from the sidebar to start messaging",
+      "noMessages": "No messages yet",
+      "noMessagesDescription": "Start the conversation by sending a message"
+    }
   }
 }

@@ -122,3 +122,31 @@ export const useVerifyPhoneOtpApi = () => {
       authApi.verifyPhoneOtp(data),
   });
 };
+
+
+// Profile Apis
+
+
+// export const useSendEmailVerificationApi = () => {
+//   return useMutation({
+//     mutationFn: (data: { email: string }) => authApi.sendEmailVerification(data),
+//   });
+// };
+
+// export const useSendPhoneVerificationApi = () => {
+//   return useMutation({
+//     mutationFn: (data: { phoneNumber: string }) => authApi.sendPhoneVerification(data),
+//   });
+// };
+
+// export const useVerifyEmailOtpApi = () => {
+//   return useMutation({
+//     mutationFn: (data: { sessionToken: string; otp: string }) => authApi.verifyEmailOtp(data),
+//   });
+// };
+
+// export const useVerifyPhoneOtpApi = () => {
+//   return useMutation({
+//     mutationFn: (data: { sessionToken: string; otp: string }) => authApi.verifyPhoneOtp(data),
+//   });
+// };

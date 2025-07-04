@@ -4,6 +4,9 @@ import axios, { AxiosRequestConfig, AxiosInstance } from "axios";
  * Add Base URL
  */
 const API_BASE_URL: string | undefined = import.meta.env.VITE_BACKEND_URL ;
+const API_CHAT_URL: string | undefined = import.meta.env.VITE_CHAT_URL ;
+
+
 
 /**
  * Interface for defining the properties required for making an API service request
@@ -15,6 +18,7 @@ interface ApiServiceProps {
   headers?: Record<string, string>;
   data?: any;
   params?:any;
+  isChatApi?:boolean
 }
 
 /**
@@ -47,11 +51,11 @@ const createApiInstance = (): AxiosInstance => {
  * @param data Data to be sent with the request (for POST and PUT requests)
  * @returns A Promise that resolves with the API response data
  */
-const ApiService = async ({ method, endpoint, headers = {}, data = undefined, params=undefined }: ApiServiceProps) => {
+const ApiService = async ({ method, endpoint, headers = {}, data = undefined, params=undefined,isChatApi=false }: ApiServiceProps) => {
 
   const axiosConfig: AxiosRequestConfig = {
     method,
-    url: `${API_BASE_URL}/${endpoint}`,
+    url: isChatApi ? `${API_CHAT_URL}/${endpoint}` : `${API_BASE_URL}/${endpoint}`,
     withCredentials: true,
     headers: {
       ...headers,

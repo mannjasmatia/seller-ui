@@ -1,7 +1,6 @@
 // src/pages/products/useProductsList.ts
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useFetchAllCategoriesApi } from '../../api/api-hooks/useCategoryApi';
 import { customToast } from '../../toast-config/customToast';
 import translations from './translations.json';
 import { useProductsApi } from '../../api/api-hooks/useProductApi';
@@ -17,6 +16,7 @@ export const useProductsList = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [filters, setFilters] = useState<ProductFilters>({});
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [deleteProductId, setDeleteProductId]= useState<string>('')
   const limit = 10;
 
   // Debounce search term
@@ -54,14 +54,6 @@ export const useProductsList = () => {
     refetch
   } = useProductsApi(queryParams);
 
-  // const {
-  //   data: categoriesData,
-  //   isLoading: isLoadingCategories
-  // } = useFetchAllCategoriesApi({
-  //   page: 1,
-  //   limit: 100
-  // });
-
   // Computed values
   const products = productsData?.docs || [];
   const totalPages = productsData?.totalPages || 1;
@@ -74,7 +66,7 @@ export const useProductsList = () => {
   }, [navigate, lang]);
 
   const handleEditProduct = useCallback((productId: string, incompleteSteps?: string[]) => {
-    if (incompleteSteps && incompleteSteps.length > 0) {
+    if (incompleteSteps && incompleteSteps?.length > 0) {
       const firstIncompleteStep = incompleteSteps[0];
       const stepRoutes = {
         'productInfo': 'product-info',
@@ -93,7 +85,7 @@ export const useProductsList = () => {
   }, [navigate, lang]);
 
   const handleCompleteNow = useCallback((productId: string, incompleteSteps?: string[]) => {
-    if (incompleteSteps && incompleteSteps.length > 0) {
+    if (incompleteSteps && incompleteSteps?.length > 0) {
       const firstIncompleteStep = incompleteSteps[0];
       const stepRoutes = {
         'productInfo': 'product-info',
@@ -117,8 +109,18 @@ export const useProductsList = () => {
 
   const handleDeleteProduct = useCallback((productId: string) => {
     // TODO: Implement delete functionality with confirmation modal
-    customToast.info(`Delete product ${productId} - To be implemented`);
+    // customToast.info(`Delete product ${productId} - To be implemented`);
+    setDeleteProductId(productId)
   }, []);
+
+  const handleConfirmDelete =()=>{
+    customToast.info(`Delete product API To be implemented`);
+    setDeleteProductId('')
+  }
+
+  const handleConfirmationModalClose = () =>{
+    setDeleteProductId('')
+  }
 
   // Pagination
   const handlePageChange = useCallback((page: number) => {
@@ -172,6 +174,10 @@ export const useProductsList = () => {
     handleDeleteProduct,
     handlePageChange,
     handleSearch,
+
+    deleteProductId,
+    handleConfirmDelete,
+    handleConfirmationModalClose,
     
     // Categories
     // categories,

@@ -1,0 +1,87 @@
+{
+  "dashboard": {
+    "title": "Product Analytics Dashboard",
+    "subtitle": "Track your product performance and revenue metrics",
+    "filters": {
+      "title": "Filters",
+      "products": "Products",
+      "allProducts": "All Products",
+      "timePeriod": "Time Period",
+      "customDateRange": "Custom Date Range",
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "autoGranularity": "Auto Granularity",
+      "granularityInfo": "Showing {granularity} over {days} days ({breakdown} breakdown)",
+      "options": {
+        "allTime": "All time",
+        "thisWeek": "This week",
+        "thisMonth": "This month",
+        "thisYear": "This year",
+        "last2Years": "Last 2 years",
+        "last5Years": "Last 5 years",
+        "custom": "Custom Range"
+      }
+    },
+    "charts": {
+      "productsSold": "Products Sold",
+      "profitGenerated": "Profit Generated",
+      "performanceOverview": "Performance Overview"
+    },
+    "summaryCards": {
+      "totalProductsSold": "Total Products Sold",
+      "totalProfit": "Total Profit",
+      "averagePerPeriod": "Average per Period",
+      "selectedProducts": "Selected Products"
+    },
+    "salesSummary": {
+      "title": "Sales Summary",
+      "totalProductShipped": "Total product shipped",
+      "inProgress": "In Progress",
+      "popularityScore": "Popularity score",
+      "totalProductViewed": "Total product viewed",
+      "totalQuotationReceived": "Total Quotation received",
+      "totalOrderAccepted": "Total order accepted",
+      "totalOrderRejected": "Total order rejected",
+      "viewMore": "View more"
+    },
+    "performance": {
+      "title": "Performance Analytics",
+      "metrics": {
+        "avgGrowth": "Avg Growth",
+        "peak": "Peak",
+        "current": "Current"
+      },
+      "granularityInfo": {
+        "showing": "Showing",
+        "over": "over",
+        "days": "days"
+      },
+      "autoGranularity": {
+        "title": "Auto Granularity",
+        "description": "{granularity} breakdown over {days} days"
+      },
+      "tooltip": {
+        "performance": "Performance"
+      }
+    },
+    "loading": {
+      "analytics": "Loading analytics data...",
+      "performance": "Loading performance data...",
+      "products": "Loading products..."
+    },
+    "errors": {
+      "analyticsError": "Failed to load analytics data",
+      "performanceError": "Failed to load performance data",
+      "productsError": "Failed to load products",
+      "retry": "Retry"
+    },
+    "navigation": {
+      "shipped": "Navigating to shipped products...",
+      "inProgress": "Navigating to in-progress orders...",
+      "viewed": "Navigating to product analytics...",
+      "quotation": "Navigating to quotations...",
+      "accepted": "Navigating to accepted orders...",
+      "rejected": "Navigating to rejected orders..."
+    }
+  }
+}

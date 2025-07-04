@@ -1,22 +1,27 @@
+// src/pages/dashboard/components/Filters.tsx
 import { useMemo, useState } from "react";
 import { FilterState, Product } from "../types.dashboard";
-import { Calendar, Check, ChevronDown } from "lucide-react";
+import { Calendar, Check, ChevronDown, Loader2 } from "lucide-react";
+import dashboardTranslations from "../translations.json";
 
-// FilterComponent.tsx - Reusable filter component
-const Filter = ({
-  filterState,
-  products,
-  timeGranularityOptions,
-  onProductsChange,
-  onGranularityChange,
-  onCustomDateChange,
-}: {
+interface FilterProps {
   filterState: FilterState;
   products: Product[];
   timeGranularityOptions: { value: string; label: string }[];
   onProductsChange: (products: string[]) => void;
   onGranularityChange: (granularity: string) => void;
   onCustomDateChange: (field: 'customFromDate' | 'customToDate', value: string) => void;
+  isLoading?: boolean;
+}
+
+const Filter: React.FC<FilterProps> = ({
+  filterState,
+  products,
+  timeGranularityOptions,
+  onProductsChange,
+  onGranularityChange,
+  onCustomDateChange,
+  isLoading = false
 }) => {
   // Function to calculate optimal granularity based on date range
   const calculateGranularity = (fromDate: Date, toDate: Date): 'days' | 'weeks' | 'months' | 'years' => {
@@ -45,24 +50,42 @@ const Filter = ({
     return null;
   }, [filterState.timeGranularity, filterState.customFromDate, filterState.customToDate]);
 
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          {dashboardTranslations.dashboard.filters.title}
+        </h2>
+        <div className="animate-pulse">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="h-12 bg-gray-200 rounded"></div>
+            <div className="h-12 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Filters</h2>
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        {dashboardTranslations.dashboard.filters.title}
+      </h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Products
+            {dashboardTranslations.dashboard.filters.products}
           </label>
           <MultiSelectDropdown
             options={products}
             selected={filterState.selectedProducts}
             onChange={onProductsChange}
-            placeholder="All Products"
+            placeholder={dashboardTranslations.dashboard.filters.allProducts}
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Time Period
+            {dashboardTranslations.dashboard.filters.timePeriod}
           </label>
           <SingleSelectDropdown
             options={timeGranularityOptions}
@@ -75,7 +98,9 @@ const Filter = ({
       {/* Custom Date Range */}
       {filterState.timeGranularity === 'custom' && (
         <div className="mt-6 pt-6 border-t border-gray-200">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Custom Date Range</h3>
+          <h3 className="text-sm font-medium text-gray-700 mb-3">
+            {dashboardTranslations.dashboard.filters.customDateRange}
+          </h3>
           <DateRangePicker
             fromDate={filterState.customFromDate}
             toDate={filterState.customToDate}
@@ -88,13 +113,19 @@ const Filter = ({
             <div className="mt-4 p-3 bg-red-50 rounded-lg">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-red-600" />
-                <span className="text-sm font-medium text-red-800">Auto Granularity</span>
+                <span className="text-sm font-medium text-red-800">
+                  {dashboardTranslations.dashboard.filters.autoGranularity}
+                </span>
               </div>
               <p className="text-sm text-red-700 mt-1">
-                Showing {granularityInfo.granularity} over <strong>{granularityInfo.days}</strong> days
-                ({granularityInfo.granularity === 'days' ? 'Daily' : 
-                  granularityInfo.granularity === 'weeks' ? 'Weekly' : 
-                  granularityInfo.granularity === 'months' ? 'Monthly' : 'Yearly'} breakdown)
+                {dashboardTranslations.dashboard.filters.granularityInfo
+                  .replace('{granularity}', granularityInfo.granularity)
+                  .replace('{days}', granularityInfo.days.toString())
+                  .replace('{breakdown}', 
+                    granularityInfo.granularity === 'days' ? 'Daily' : 
+                    granularityInfo.granularity === 'weeks' ? 'Weekly' : 
+                    granularityInfo.granularity === 'months' ? 'Monthly' : 'Yearly'
+                  )}
               </p>
             </div>
           )}
@@ -104,20 +135,13 @@ const Filter = ({
   );
 };
 
-export default Filter;
-
 // Multi-select Dropdown Component
-const MultiSelectDropdown = ({ 
-  options, 
-  selected, 
-  onChange, 
-  placeholder 
-}: {
+const MultiSelectDropdown: React.FC<{ 
   options: Product[];
   selected: string[];
   onChange: (selected: string[]) => void;
   placeholder: string;
-}) => {
+}> = ({ options, selected, onChange, placeholder }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleOption = (optionId: string) => {
@@ -139,7 +163,7 @@ const MultiSelectDropdown = ({
   const displayText = selected.length === 0 
     ? placeholder 
     : selected.length === options.length 
-      ? 'All Products'
+      ? dashboardTranslations.dashboard.filters.allProducts
       : `${selected.length} selected`;
 
   return (
@@ -171,20 +195,27 @@ const MultiSelectDropdown = ({
             </div>
           </div>
           
-          {options.map((option) => (
-            <div
-              key={option.id}
-              onClick={() => toggleOption(option.id)}
-              className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer"
-            >
-              <div className="flex items-center justify-center w-4 h-4 mr-3">
-                {selected.includes(option.id) && (
-                  <Check className="h-3 w-3 text-red-600" />
-                )}
-              </div>
-              <span className="text-gray-700">{option.name}</span>
+          {options.length === 0 ? (
+            <div className="px-4 py-8 text-center text-gray-500">
+              <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+              <p className="text-sm">Loading products...</p>
             </div>
-          ))}
+          ) : (
+            options.map((option) => (
+              <div
+                key={option.id}
+                onClick={() => toggleOption(option.id)}
+                className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer"
+              >
+                <div className="flex items-center justify-center w-4 h-4 mr-3">
+                  {selected.includes(option.id) && (
+                    <Check className="h-3 w-3 text-red-600" />
+                  )}
+                </div>
+                <span className="text-gray-700">{option.name}</span>
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>
@@ -192,15 +223,11 @@ const MultiSelectDropdown = ({
 };
 
 // Single Select Dropdown Component
-const SingleSelectDropdown = ({ 
-  options, 
-  selected, 
-  onChange 
-}: {
+const SingleSelectDropdown: React.FC<{ 
   options: { value: string; label: string }[];
   selected: string;
   onChange: (value: string) => void;
-}) => {
+}> = ({ options, selected, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const selectedOption = options.find(option => option.value === selected);
 
@@ -237,33 +264,34 @@ const SingleSelectDropdown = ({
 };
 
 // Date Range Picker Component
-const DateRangePicker = ({ 
-  fromDate, 
-  toDate, 
-  onFromDateChange, 
-  onToDateChange 
-}: {
-  fromDate: string;
-  toDate: string;
-  onFromDateChange: (date: string) => void;
-  onToDateChange: (date: string) => void;
-}) => {
+const DateRangePicker: React.FC<{ 
+  fromDate: string; 
+  toDate: string; 
+  onFromDateChange: (date: string) => void; 
+  onToDateChange: (date: string) => void; 
+}> = ({ fromDate, toDate, onFromDateChange, onToDateChange }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div>
-        <label className="block text-sm font-medium text-gray-600 mb-1">From Date</label>
+        <label className="block text-sm font-medium text-gray-600 mb-1">
+          {dashboardTranslations.dashboard.filters.fromDate}
+        </label>
         <div className="relative">
           <input
             type="date"
             value={fromDate}
-            onChange={(e) => onFromDateChange(e.target.value)}
+            onChange={(e) => {
+              onFromDateChange(e.target.value)
+            }}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-400 transition-colors"
           />
           <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-600 mb-1">To Date</label>
+        <label className="block text-sm font-medium text-gray-600 mb-1">
+          {dashboardTranslations.dashboard.filters.toDate}
+        </label>
         <div className="relative">
           <input
             type="date"
@@ -277,3 +305,5 @@ const DateRangePicker = ({
     </div>
   );
 };
+
+export default Filter;

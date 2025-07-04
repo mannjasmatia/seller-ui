@@ -32,6 +32,7 @@ export const apiPaths: ApiPaths = {
     product:{
         all:"api/v1/products",
         productById:"api/v1/product",
+        names: "api/v1/product/names"
     },
     productInfo: {
         create: "api/v1/product-info",
@@ -63,6 +64,13 @@ export const apiPaths: ApiPaths = {
         syncImages: "api/v1/product-description",
         get: "api/v1/product-description",
     },
+    analytics: {
+        getAnalytics: "api/v1/product-analytics",
+    },
+    performance: {
+        getPerformance: "api/v1/product-performance",
+        getSummary: "api/v1/product-performance/summary",
+    },
     productStats:{
         popular:"api/v1/product-stats/popular",
         bestSeller:"api/v1/product-stats/best-seller",
@@ -91,7 +99,29 @@ export const apiPaths: ApiPaths = {
         delete:"api/v1/address",
     },
     quotation: {
-        sendInquiry:"api/v1/quotation",
+        all: "api/v1/quotation",
+        getById: "api/v1/quotation", // will be used as `${apiPaths.quotation.getById}/${quotationId}`
+        accept: "api/v1/quotation", // will be used as `${apiPaths.quotation.accept}/${quotationId}/accepted`
+        reject: "api/v1/quotation", // will be used as `${apiPaths.quotation.reject}/${quotationId}/rejected`
+        negotiate: "api/v1/quotation", // will be used as `${apiPaths.quotation.negotiate}/${quotationId}/negotiate`
+    },
+    chat: {
+        all: "api/v1/chats",
+        messages: "api/v1/messages", // will be used as `${apiPaths.chat.messages}/${chatId}`
+        getById: "api/v1/chats", // will be used as `${apiPaths.chat.getById}/${chatId}`
+    },
+    
+    media: {
+        upload: "api/v1/upload",
+        download: "api/v1/upload", // will be used as `${apiPaths.media.download}/${fileName}/download`
+    },
+    
+    invoice: {
+        generate: "api/v1/invoice/generate",
+        sellerList: "api/v1/invoice/seller/list",
+        getById: "api/v1/invoice/seller", // will be used as `${apiPaths.invoice.getById}/${invoiceId}`
+        update: "api/v1/invoice/seller", // will be used as `${apiPaths.invoice.update}/${invoiceId}`
+        delete: "api/v1/invoice/seller", // will be used as `${apiPaths.invoice.delete}/${invoiceId}`
     },
     notification :{
         get : "api/v1/notifications",

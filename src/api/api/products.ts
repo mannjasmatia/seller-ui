@@ -10,3 +10,13 @@ export const getProducts = async (params: ProductsQueryParams) => {
         params,
     })
 };
+
+
+export const getProductNames = async (params: any) => {
+  return ApiService({
+        method: 'GET',
+        endpoint: apiPaths.product.names,
+        params,
+    })
+};
+

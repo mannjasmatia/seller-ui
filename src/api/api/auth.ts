@@ -105,3 +105,37 @@ export const verifyPhoneOtp = (data: { sessionToken: string, otp: string }) => {
         data
     })
 }
+
+// APIs for profile 
+
+// export const sendEmailVerification = (data: { email: string }) => {
+//   return ApiService({
+//     method: 'POST',
+//     endpoint: apiPaths.auth.sendEmailVerification,
+//     data
+//   });
+// };
+
+// export const sendPhoneVerification = (data: { phoneNumber: string }) => {
+//   return ApiService({
+//     method: 'POST',
+//     endpoint: apiPaths.auth.sendPhoneVerification,
+//     data
+//   });
+// };
+
+// export const verifyEmailOtp = (data: { sessionToken: string; otp: string }) => {
+//   return ApiService({
+//     method: 'POST',
+//     endpoint: apiPaths.auth.verifyEmailOtp,
+//     data
+//   });
+// };
+
+// export const verifyPhoneOtp = (data: { sessionToken: string; otp: string }) => {
+//   return ApiService({
+//     method: 'POST',
+//     endpoint: apiPaths.auth.verifyPhoneOtp,
+//     data
+//   });
+// };

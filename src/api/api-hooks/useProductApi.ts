@@ -12,3 +12,20 @@ export const useProductsApi = (params: ProductsQueryParams) => {
     select: (data: any) => data?.data?.response as ProductsResponse,
   });
 };
+
+export const useProductNamesApi = (params:any = {page:"1",limit:"20",search:""}) => {
+
+  const {search, ...finalParams} = params; 
+
+  if(params?.search){
+      finalParams.search = params?.search
+  }
+
+  return useQuery({
+    queryKey: ['productNames', params],
+    queryFn: () => productApi.getProducts(finalParams),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    select: (data: any) => data?.data?.response as Partial<ProductsResponse>,
+  });
+};

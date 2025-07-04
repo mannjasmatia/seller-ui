@@ -14,6 +14,10 @@ const Header = () => {
         navigate(`/${lang}/dashboard`);
     }
 
+    const handleProfileClick = ()=>{
+        navigate(`/${lang}/profile`);
+    }
+
     return (
         <header className="w-full flex flex-col sm:flex-row justify-between px-4 sm:px-6 py-2 sm:py-3 bg-gray-400 items-center fixed top-0 z-50 shadow-sm">
             <img 
@@ -29,12 +33,13 @@ const Header = () => {
                     {userInfo?.companyLogo ? (
                         <img 
                             src={`${MEDIA_URL}/${userInfo?.companyLogo}`} 
+                            onClick={handleProfileClick}
                             crossOrigin="anonymous"
                             alt="Profile" 
                             className="w-8 sm:w-12 h-8 sm:h-12 rounded-full border-2 border-white cursor-pointer hover:border-gray-200 transition-colors" 
                         />
                     ) : (
-                        <UserCircle2 className="w-8 sm:w-12 h-8 sm:h-12 text-white cursor-pointer hover:text-gray-200 transition-colors" />
+                        <UserCircle2 onClick={handleProfileClick} className="w-8 sm:w-12 h-8 sm:h-12 text-white cursor-pointer hover:text-gray-200 transition-colors" />
                     )}
                 </div>
             </div>

@@ -88,7 +88,7 @@ const SlantToast: React.FC<SlantToastProps> = ({ message, type = 'success', onCl
                 </div>
                 
                 {/* Message */}
-                <div className="ml-2 font-medium text-gray-800 text-sm break-words truncate">
+                <div className="ml-2 font-medium text-gray-800 text-sm break-words">
                   {message}
                 </div>
               </div>

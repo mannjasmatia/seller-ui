@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   LayoutDashboard, 
   Inbox, 
@@ -11,12 +11,13 @@ import {
 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/appStore';
+import { useLocation } from 'react-router-dom';
 
 interface SidebarItem {
   id: string;
   label: string;
   icon: React.ComponentType<any>;
-  badge?: number;
+  badge?: number | string;
   isActive?: boolean;
 }
 
@@ -31,7 +32,7 @@ const defaultItems: SidebarItem[] = [
     id: 'dashboard',
     label: 'Dashboard',
     icon: LayoutDashboard,
-    isActive: true
+    // isActive: true
   },
   {
     id: 'inbox',
@@ -40,8 +41,8 @@ const defaultItems: SidebarItem[] = [
     badge: 3
   },
   {
-    id: 'inquires',
-    label: 'Inquires',
+    id: 'inquiry',
+    label: 'Inquiry',
     icon: FileText,
     badge: 12
   },
@@ -55,6 +56,12 @@ const defaultItems: SidebarItem[] = [
     label: 'Accepted Orders',
     icon: CheckCircle,
     badge: 5
+  },
+  {
+    id: 'global-quote',
+    label: 'Global Quote',
+    icon: Inbox,
+    badge: "99+"
   }
 ];
 
@@ -65,12 +72,21 @@ const Sidebar: React.FC<SidebarProps> = ({
   onItemClick,
   className = ''
 }) => {
+
+  const location = useLocation();
+  const currentLocation = location.pathname.split('/').slice(-1)[0]
+
   const [activeItem, setActiveItem] = useState<string>(
-    items.find(item => item.isActive)?.id || items[0]?.id || ''
+    items.find(item => item.isActive )?.id || items[0]?.id || ''
   );
+
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const userInfo = useSelector((state: RootState) => state.user.userInfo);
+
+  useEffect(()=>{
+    setActiveItem(currentLocation)
+  },[currentLocation])
 
   const handleItemClick = (item: SidebarItem) => {
     setActiveItem(item.id);
@@ -101,7 +117,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Overlay for mobile */}
       {isMobileOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          className="lg:hidden fixed inset-0 bg-transparent bg-opacity-50 z-30"
           onClick={() => setIsMobileOpen(false)}
         />
       )}

@@ -28,7 +28,7 @@ interface EnhancedProductCardProps {
   translations: any;
 }
 
-const EnhancedProductCard: React.FC<EnhancedProductCardProps> = ({
+const ProductCard: React.FC<EnhancedProductCardProps> = ({
   product,
   onEdit,
   onCompleteNow,
@@ -74,7 +74,7 @@ const EnhancedProductCard: React.FC<EnhancedProductCardProps> = ({
 
   const handleImageNavigation = (direction: 'prev' | 'next', e: React.MouseEvent) => {
     e.stopPropagation();
-    if (direction === 'next' && currentImageIndex < product.images.length - 1) {
+    if (direction === 'next' && currentImageIndex < product.images?.length - 1) {
       setCurrentImageIndex(prev => prev + 1);
     } else if (direction === 'prev' && currentImageIndex > 0) {
       setCurrentImageIndex(prev => prev - 1);
@@ -98,7 +98,7 @@ const EnhancedProductCard: React.FC<EnhancedProductCardProps> = ({
       <div className="flex">
         {/* Left Image Section - 40% width */}
         <div className="w-2/5 relative bg-gray-50 overflow-hidden">
-          {product.images.length > 0 ? (
+          {product.images?.length > 0 ? (
             <>
               <div className="relative h-full group-hover:scale-105 transition-transform duration-300">
                 <DynamicImage
@@ -112,7 +112,7 @@ const EnhancedProductCard: React.FC<EnhancedProductCardProps> = ({
               </div>
 
               {/* Carousel Controls */}
-              {product.images.length > 1 && (
+              {product.images?.length > 1 && (
                 <>
                   <button
                     onClick={(e) => handleImageNavigation('prev', e)}
@@ -127,9 +127,9 @@ const EnhancedProductCard: React.FC<EnhancedProductCardProps> = ({
                   <button
                     onClick={(e) => handleImageNavigation('next', e)}
                     className={`absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/90 text-gray-800 p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white ${
-                      currentImageIndex === product.images.length - 1 ? 'cursor-not-allowed opacity-30' : ''
+                      currentImageIndex === product.images?.length - 1 ? 'cursor-not-allowed opacity-30' : ''
                     }`}
-                    disabled={currentImageIndex === product.images.length - 1}
+                    disabled={currentImageIndex === product.images?.length - 1}
                   >
                     <ChevronRight className="h-4 w-4" />
                   </button>
@@ -151,7 +151,7 @@ const EnhancedProductCard: React.FC<EnhancedProductCardProps> = ({
 
                   {/* Image Counter */}
                   <div className="absolute top-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded-full font-medium">
-                    {currentImageIndex + 1}/{product.images.length}
+                    {currentImageIndex + 1}/{product.images?.length}
                   </div>
                 </>
               )}
@@ -201,7 +201,7 @@ const EnhancedProductCard: React.FC<EnhancedProductCardProps> = ({
               </div>
 
               {/* Progress Circle */}
-              <div className="flex-shrink-0 relative">
+              {product.completionPercentage!==100 && <div className="flex-shrink-0 relative">
                 <div className="relative w-12 h-12">
                   <svg className="w-12 h-12 transform -rotate-90">
                     <circle
@@ -238,7 +238,7 @@ const EnhancedProductCard: React.FC<EnhancedProductCardProps> = ({
                     </span>
                   </div>
                 </div>
-              </div>
+              </div>}
             </div>
 
             {/* Product Details in simple grid - NO ICONS */}
@@ -292,7 +292,7 @@ const EnhancedProductCard: React.FC<EnhancedProductCardProps> = ({
             </div>
 
             {/* Incomplete Steps - Show ALL steps */}
-            {!product.isComplete && product.incompleteSteps.length > 0 && (
+            {!product.isComplete && product.incompleteSteps?.length > 0 && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <AlertCircle className="h-4 w-4 text-yellow-600" />
@@ -365,4 +365,4 @@ const EnhancedProductCard: React.FC<EnhancedProductCardProps> = ({
   );
 };
 
-export default EnhancedProductCard;
+export default ProductCard;

@@ -17,6 +17,9 @@ import EditProduct from "./pages/edit-product/EditProduct"
 import { RootState } from "./store/appStore"
 import VerificationPending from "./pages/ verification-pending/VerificationPending"
 import { LoginResponse } from "./pages/login/types.login"
+import Profile from "./pages/profile/Profile"
+import Inquiry from "./pages/inquires/Inquiry"
+import Inbox from "./pages/inbox/Inbox"
 
 interface Route {
   path: string
@@ -40,6 +43,9 @@ const privateRoutes: Route[] = [
   { path: "/products", element: <ProductsList /> },
   { path: "/products/add/:step", element: <AddProduct /> },
   { path: "/products/edit/:productId/:step", element: <EditProduct /> },
+  { path: "/profile", element: <Profile /> },
+  { path: "/inquiry", element: <Inquiry /> },
+  { path: "/inbox", element: <Inbox /> },
 ]
 
 // Helper to get the current language from localStorage or default to "en"
@@ -78,6 +84,12 @@ function AppContent() {
       localStorage.setItem("lang", lang);
     }
   }, [lang, dispatch]);
+
+  // Storing the last page rendered in localstorage to help redirect back to it again and also if user revisits the website
+  useEffect(()=>{
+    const lastVisitedPath = location.pathname.split('/').slice(-1)[0]
+    localStorage.setItem("lastVisitedPath",lastVisitedPath)
+  },[location.pathname])
   
   // Handle authentication state changes
   useEffect(() => {
@@ -173,7 +185,7 @@ function AppContent() {
                   ? `/${currentLang}/complete-profile`
                   : !userInfo.isVerified 
                     ? `/${currentLang}/verification-pending`
-                    : `/${currentLang}/dashboard`
+                    : `/${currentLang}/${localStorage.getItem('lastVisitedPath') || "dashboard"}`
             } 
             replace 
           />

@@ -23,7 +23,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
   translations
 }) => {
   const [localFilters, setLocalFilters] = useState<ProductFilters>(filters);
-  const [isAnimating, setIsAnimating] = useState(false);
+  // const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     setLocalFilters(filters);
@@ -39,7 +39,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
-      setIsAnimating(true);
+      // setIsAnimating(true);
     }
 
     return () => {
@@ -49,7 +49,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
   }, [isOpen]);
 
   const handleClose = () => {
-    setIsAnimating(false);
+    // setIsAnimating(false);
     setTimeout(() => {
       onClose();
     }, 200);
@@ -92,19 +92,15 @@ const FilterModal: React.FC<FilterModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 max-h-screen z-50 ">
       {/* Enhanced Backdrop */}
       <div 
-        className={`fixed inset-0 bg-transparent transition-opacity duration-300 ${
-          isAnimating ? 'bg-opacity-60 backdrop-blur-sm' : 'bg-opacity-0'
-        }`}
+        className={`fixed inset-0 bg-transparent transition-opacity duration-300 `}
         onClick={handleClose} 
       />
       
-      <div className="flex items-center justify-center min-h-screen p-4">
-        <div className={`relative bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden border border-gray-200 transition-all duration-500 ${
-          isAnimating ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-4'
-        }`}>
+      <div className="flex items-center justify-center p-4">
+        <div className={`relative bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90dvh] overflow-hidden border border-gray-200 transition-all duration-500 `}>
           
           {/* Enhanced Header */}
           <div className="bg-gradient-to-r from-cb-red to-red-600 text-white p-6 relative overflow-hidden">
@@ -150,7 +146,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
           </div>
 
           {/* Enhanced Content */}
-          <div className="p-8 space-y-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
+          <div className="sticky p-8 space-y-8 max-h-[60vh] overflow-y-auto ">
             {/* Categories Section */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">

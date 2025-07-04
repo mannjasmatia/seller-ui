@@ -50,7 +50,7 @@ const PrivateRoutes = ({ children }: { children: React.ReactNode }) => {
         const routeMap: { [key: string]: string } = {
             'dashboard': `/${preferredLang}/dashboard`,
             'inbox': `/${preferredLang}/inbox`,
-            'inquires': `/${preferredLang}/inquires`,
+            'inquiry': `/${preferredLang}/inquiry`,
             'products': `/${preferredLang}/products`,
             'accepted-orders': `/${preferredLang}/accepted-orders`,
         };
