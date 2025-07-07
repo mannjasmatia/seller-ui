@@ -20,6 +20,7 @@ import { LoginResponse } from "./pages/login/types.login"
 import Profile from "./pages/profile/Profile"
 import Inquiry from "./pages/inquires/Inquiry"
 import Inbox from "./pages/inbox/Inbox"
+import Orders from "./pages/orders/Orders"
 
 interface Route {
   path: string
@@ -46,6 +47,7 @@ const privateRoutes: Route[] = [
   { path: "/profile", element: <Profile /> },
   { path: "/inquiry", element: <Inquiry /> },
   { path: "/inbox", element: <Inbox /> },
+  { path: "/orders", element: <Orders /> },
 ]
 
 // Helper to get the current language from localStorage or default to "en"
@@ -86,10 +88,11 @@ function AppContent() {
   }, [lang, dispatch]);
 
   // Storing the last page rendered in localstorage to help redirect back to it again and also if user revisits the website
-  useEffect(()=>{
-    const lastVisitedPath = location.pathname.split('/').slice(-1)[0]
-    localStorage.setItem("lastVisitedPath",lastVisitedPath)
-  },[location.pathname])
+  // useEffect(()=>{
+  //   const lastVisitedPath = location.pathname.split('/').slice(-1)[0]
+  //   //i am not using last visited path anywhere
+  //   localStorage.setItem("lastVisitedPath",lastVisitedPath)
+  // },[location.pathname])
   
   // Handle authentication state changes
   useEffect(() => {
@@ -113,7 +116,7 @@ function AppContent() {
   }, [isVerifySuccess, isVerifyError, verifyData, dispatch]);
 
   // Show loading screen while verifying tokens on initial load
-  if (isVerifying) {
+  if (isVerifying || (!isVerifying && isLoggedIn && !userInfo)) {
     console.log("Verifying tokens...");
     return <LoadingScreen />;
   }
@@ -185,7 +188,7 @@ function AppContent() {
                   ? `/${currentLang}/complete-profile`
                   : !userInfo.isVerified 
                     ? `/${currentLang}/verification-pending`
-                    : `/${currentLang}/${localStorage.getItem('lastVisitedPath') || "dashboard"}`
+                    : `/${currentLang}/${"dashboard"}`
             } 
             replace 
           />

@@ -113,7 +113,7 @@ export const apiPaths: ApiPaths = {
     
     media: {
         upload: "api/v1/upload",
-        download: "api/v1/upload", // will be used as `${apiPaths.media.download}/${fileName}/download`
+        download: "api/v1/upload/download", // will be used as `${apiPaths.media.download}/${fileName}/download`
     },
     
     invoice: {
@@ -128,5 +128,10 @@ export const apiPaths: ApiPaths = {
         markAsRead : "api/v1/notifications",
         markAllAsRead : "api/v1/notifications/mark-all-as-read",
         delete : "api/v1/notifications",
-    }
+    },
+    orders: {
+        getAll: "api/v1/orders", 
+        getById: "api/v1/orders", // will be used as `${apiPaths.orders.getById}/${orderId}`
+        updateStatus: "api/v1/orders", // will be used as `${apiPaths.orders.updateStatus}/${orderId}/status`
+    },
 };

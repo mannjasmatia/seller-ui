@@ -1,7 +1,7 @@
 export interface ProfileFormState {
-  fullName: string;
+  companyName: string;
   email: string;
-  phoneNumber: string;
+  phone: string;
   businessType: string;
   categories: string[];
   businessNumber: string;

@@ -1,22 +1,22 @@
-import React, { useRef } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store/appStore';
-import { Edit, Save, X, Upload, Camera } from 'lucide-react';
-import useProfile from './useProfile';
-import Input from '../../components/BasicComponents/Input';
-import Button from '../../components/BasicComponents/Button';
-import DynamicImage from '../../components/BasicComponents/Image';
-import CategoryDropdown from '../../components/category-dropdown/CategoryDropdown';
-import BusinessTypeDropdown from '../../components/business-types-dropdown/BusinessTypesDropdown';
-import MediaModal from '../../modals/MediaModal';
-import VerifyOtpModal from '../../modals/verify-otp/VerifyOtpModal';
-import StateDropdown from '../../components/state-city-dropdown/StateDropdown';
-import CityDropdown from '../../components/state-city-dropdown/CItyDropdown';
+import React, { useRef } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/appStore";
+import { Edit, Save, X, Upload, Camera } from "lucide-react";
+import useProfile from "./useProfile";
+import Input from "../../components/BasicComponents/Input";
+import Button from "../../components/BasicComponents/Button";
+import DynamicImage from "../../components/BasicComponents/Image";
+import CategoryDropdown from "../../components/category-dropdown/CategoryDropdown";
+import BusinessTypeDropdown from "../../components/business-types-dropdown/BusinessTypesDropdown";
+import MediaModal from "../../modals/MediaModal";
+import VerifyOtpModal from "../../modals/verify-otp/VerifyOtpModal";
+import StateDropdown from "../../components/state-city-dropdown/StateDropdown";
+import CityDropdown from "../../components/state-city-dropdown/CItyDropdown";
 
 const Profile: React.FC = () => {
-  const language = useSelector((state: RootState) => state.language?.value)['profile'];
+  const language = useSelector((state: RootState) => state.language?.value)["profile"];
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const {
     // State
     formState,
@@ -24,20 +24,20 @@ const Profile: React.FC = () => {
     errors,
     preview,
     provinces,
-    
+
     // Modal states
     isAvatarModalOpen,
     isMediaModalOpen,
     isEmailOtpModalOpen,
     isPhoneOtpModalOpen,
-    
+
     // Loading states
     isUpdating,
     isSendingEmailOtp,
     isSendingPhoneOtp,
     isVerifyingEmailOtp,
     isVerifyingPhoneOtp,
-    
+
     // Handlers
     handleChange,
     handleCategoryChange,
@@ -55,17 +55,17 @@ const Profile: React.FC = () => {
     handlePhoneOtpVerification,
     handleResendEmailOtp,
     handleResendPhoneOtp,
-    
+
     // Utilities
     getCitiesForState,
     validationRules,
-    
+
     // Modal handlers
     setIsAvatarModalOpen,
     setIsMediaModalOpen,
     setIsEmailOtpModalOpen,
     setIsPhoneOtpModalOpen,
-    
+
     // Temp data
     tempEmail,
     tempPhoneNumber,
@@ -86,11 +86,7 @@ const Profile: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header with Logo */}
         <div className="text-center mb-8">
-          <img 
-            src="/logo.png" 
-            alt="Canadian Bazaar" 
-            className="h-16 mx-auto mb-4"
-          />
+          <img src="/logo.png" alt="Canadian Bazaar" className="h-16 mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{language.title}</h1>
           <p className="text-gray-600">{language.subtitle}</p>
         </div>
@@ -101,7 +97,7 @@ const Profile: React.FC = () => {
           <div className="bg-gradient-to-r from-cb-red to-red-600 px-6 py-8">
             <div className="flex flex-col items-center">
               <div className="relative group">
-                <div 
+                <div
                   className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg cursor-pointer transition-transform duration-300 hover:scale-105"
                   onMouseDown={handleMouseDown}
                   onMouseUp={handleMouseUp}
@@ -116,7 +112,7 @@ const Profile: React.FC = () => {
                     className="transition-all duration-300"
                   />
                 </div>
-                
+
                 {/* Edit overlay for profile picture */}
                 {isEditing && (
                   <div className="absolute inset-0 rounded-full bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -124,14 +120,12 @@ const Profile: React.FC = () => {
                   </div>
                 )}
               </div>
-              
+
               <h2 className="text-2xl font-bold text-white mt-4 text-center">
-                {formState.fullName || 'Your Name'}
+                {formState.companyName || "Your Name"}
               </h2>
-              <p className="text-white/90 text-center">
-                {formState.email || 'your@email.com'}
-              </p>
-              
+              <p className="text-white/90 text-center">{formState.email || "your@email.com"}</p>
+
               {/* Edit/Save buttons */}
               <div className="mt-4 flex gap-3">
                 {isEditing ? (
@@ -184,24 +178,24 @@ const Profile: React.FC = () => {
                     {isEditing ? (
                       <Input
                         type="text"
-                        label={language.fields.fullName}
-                        placeholder={language.placeholders.fullName}
-                        value={formState.fullName}
-                        onChange={handleChange('fullName')}
-                        error={errors.fullName}
-                        validation={validationRules.fullName}
+                        label={language.fields.companyName}
+                        placeholder={language.placeholders.companyName}
+                        value={formState.companyName}
+                        onChange={handleChange("companyName")}
+                        error={errors.companyName}
+                        validation={validationRules.companyName}
                         fullWidth
                       />
                     ) : (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {language.fields.fullName}
+                          {language.fields.companyName}
                         </label>
-                        <p className="text-gray-900 font-medium">{formState.fullName || '-'}</p>
+                        <p className="text-gray-900 font-medium">{formState.companyName || "-"}</p>
                       </div>
                     )}
                   </div>
-                  
+
                   <div>
                     {isEditing ? (
                       <Input
@@ -209,7 +203,7 @@ const Profile: React.FC = () => {
                         label={language.fields.email}
                         placeholder={language.placeholders.email}
                         value={formState.email}
-                        onChange={handleChange('email')}
+                        onChange={handleChange("email")}
                         error={errors.email}
                         validation={validationRules.email}
                         fullWidth
@@ -219,39 +213,39 @@ const Profile: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           {language.fields.email}
                         </label>
-                        <p className="text-gray-900 font-medium">{formState.email || '-'}</p>
+                        <p className="text-gray-900 font-medium">{formState.email || "-"}</p>
                       </div>
                     )}
                   </div>
-                  
+
                   <div>
                     {isEditing ? (
                       <Input
                         type="tel"
-                        label={language.fields.phoneNumber}
-                        placeholder={language.placeholders.phoneNumber}
-                        value={formState.phoneNumber}
-                        onChange={handleChange('phoneNumber')}
-                        error={errors.phoneNumber}
-                        validation={validationRules.phoneNumber}
+                        label={language.fields.phone}
+                        placeholder={language.placeholders.phone}
+                        value={formState.phone}
+                        onChange={handleChange("phone")}
+                        error={errors.phone}
+                        validation={validationRules.phone}
                         fullWidth
                       />
                     ) : (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {language.fields.phoneNumber}
+                          {language.fields.phone}
                         </label>
-                        <p className="text-gray-900 font-medium">{formState.phoneNumber || '-'}</p>
+                        <p className="text-gray-900 font-medium">{formState.phone || "-"}</p>
                       </div>
                     )}
                   </div>
-                  
+
                   <div>
                     {isEditing ? (
                       <div>
                         <BusinessTypeDropdown
                           label={language.fields.businessType}
-                          selectedBusinessTypes={formState.businessType}
+                          selectedBusinessType={formState.businessType}
                           onChange={handleBusinessTypeChange}
                           placeholder={language.placeholders.businessType}
                         />
@@ -264,12 +258,19 @@ const Profile: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           {language.fields.businessType}
                         </label>
-                        <p className="text-gray-900 font-medium">{formState.businessType || '-'}</p>
+                        <p className="text-gray-900 font-medium">
+                          {/* View mode returns only the name of that _id */}
+                          <BusinessTypeDropdown
+                            selectedBusinessType={formState.businessType}
+                            onChange={handleBusinessTypeChange}
+                            mode="view"
+                          />
+                        </p>
                       </div>
                     )}
                   </div>
                 </div>
-                
+
                 <div className="mt-6">
                   {isEditing ? (
                     <div>
@@ -280,9 +281,7 @@ const Profile: React.FC = () => {
                         placeholder={language.placeholders.categories}
                         allowSelectAll={true}
                       />
-                      {errors.categories && (
-                        <p className="text-cb-red text-sm mt-1">{errors.categories}</p>
-                      )}
+                      {errors.categories && <p className="text-cb-red text-sm mt-1">{errors.categories}</p>}
                     </div>
                   ) : (
                     <div>
@@ -290,7 +289,15 @@ const Profile: React.FC = () => {
                         {language.fields.categories}
                       </label>
                       <p className="text-gray-900 font-medium">
-                        {formState.categories.length > 0 ? `${formState.categories.length} categories selected` : '-'}
+                        {formState.categories.length > 0 ? (
+                          <CategoryDropdown
+                            selectedCategories={formState.categories}
+                            onChange={handleCategoryChange}
+                            disabled={true}
+                          />
+                        ) : (
+                          "-"
+                        )}
                       </p>
                     </div>
                   )}
@@ -310,7 +317,7 @@ const Profile: React.FC = () => {
                         label={language.fields.businessNumber}
                         placeholder={language.placeholders.businessNumber}
                         value={formState.businessNumber}
-                        onChange={handleChange('businessNumber')}
+                        onChange={handleChange("businessNumber")}
                         error={errors.businessNumber}
                         validation={validationRules.businessNumber}
                         fullWidth
@@ -320,7 +327,7 @@ const Profile: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           {language.fields.businessNumber}
                         </label>
-                        <p className="text-gray-900 font-medium">{formState.businessNumber || '-'}</p>
+                        <p className="text-gray-900 font-medium">{formState.businessNumber || "-"}</p>
                       </div>
                     )}
                   </div>
@@ -340,7 +347,7 @@ const Profile: React.FC = () => {
                         label={language.fields.street}
                         placeholder={language.placeholders.street}
                         value={formState.street}
-                        onChange={handleChange('street')}
+                        onChange={handleChange("street")}
                         error={errors.street}
                         validation={validationRules.street}
                         fullWidth
@@ -350,11 +357,11 @@ const Profile: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           {language.fields.street}
                         </label>
-                        <p className="text-gray-900 font-medium">{formState.street || '-'}</p>
+                        <p className="text-gray-900 font-medium">{formState.street || "-"}</p>
                       </div>
                     )}
                   </div>
-                  
+
                   <div>
                     {isEditing ? (
                       <StateDropdown
@@ -370,12 +377,12 @@ const Profile: React.FC = () => {
                           {language.fields.state}
                         </label>
                         <p className="text-gray-900 font-medium">
-                          {provinces.find(p => p.value === formState.state)?.label || '-'}
+                          {provinces.find((p) => p.value === formState.state)?.label || "-"}
                         </p>
                       </div>
                     )}
                   </div>
-                  
+
                   <div>
                     {isEditing ? (
                       <CityDropdown
@@ -391,11 +398,11 @@ const Profile: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           {language.fields.city}
                         </label>
-                        <p className="text-gray-900 font-medium">{formState.city || '-'}</p>
+                        <p className="text-gray-900 font-medium">{formState.city || "-"}</p>
                       </div>
                     )}
                   </div>
-                  
+
                   <div>
                     {isEditing ? (
                       <Input
@@ -403,7 +410,7 @@ const Profile: React.FC = () => {
                         label={language.fields.zip}
                         placeholder={language.placeholders.zip}
                         value={formState.zip}
-                        onChange={handleChange('zip')}
+                        onChange={handleChange("zip")}
                         error={errors.zip}
                         validation={validationRules.zip}
                         fullWidth
@@ -413,7 +420,7 @@ const Profile: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           {language.fields.zip}
                         </label>
-                        <p className="text-gray-900 font-medium">{formState.zip || '-'}</p>
+                        <p className="text-gray-900 font-medium">{formState.zip || "-"}</p>
                       </div>
                     )}
                   </div>
@@ -442,9 +449,7 @@ const Profile: React.FC = () => {
                       {language.imageActions.chooseAvatar}
                     </Button>
                   </div>
-                  <p className="text-sm text-gray-500 mt-2">
-                    {language.imageActions.longPressToView}
-                  </p>
+                  <p className="text-sm text-gray-500 mt-2">{language.imageActions.longPressToView}</p>
                 </div>
               )}
             </div>
@@ -453,13 +458,7 @@ const Profile: React.FC = () => {
       </div>
 
       {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="hidden"
-      />
+      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
 
       {/* Avatar Selection Modal */}
       {/* <AvatarModal

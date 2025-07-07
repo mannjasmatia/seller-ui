@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, AxiosInstance } from "axios";
+import axios, { AxiosRequestConfig, AxiosInstance, ResponseType } from "axios";
 
 /**
  * Add Base URL
@@ -18,7 +18,8 @@ interface ApiServiceProps {
   headers?: Record<string, string>;
   data?: any;
   params?:any;
-  isChatApi?:boolean
+  isChatApi?:boolean,
+  responseType?:ResponseType;
 }
 
 /**
@@ -51,7 +52,7 @@ const createApiInstance = (): AxiosInstance => {
  * @param data Data to be sent with the request (for POST and PUT requests)
  * @returns A Promise that resolves with the API response data
  */
-const ApiService = async ({ method, endpoint, headers = {}, data = undefined, params=undefined,isChatApi=false }: ApiServiceProps) => {
+const ApiService = async ({ method, endpoint, headers = {}, data = undefined, params=undefined,isChatApi=false,responseType }: ApiServiceProps) => {
 
   const axiosConfig: AxiosRequestConfig = {
     method,
@@ -61,7 +62,8 @@ const ApiService = async ({ method, endpoint, headers = {}, data = undefined, pa
       ...headers,
     },
     data,
-    params
+    params,
+    responseType : responseType ?? undefined
     // params: method.toUpperCase() === 'GET' ? data : undefined,
   };
 

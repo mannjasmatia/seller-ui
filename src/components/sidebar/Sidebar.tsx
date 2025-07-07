@@ -52,8 +52,8 @@ const defaultItems: SidebarItem[] = [
     icon: Bell
   },
   {
-    id: 'accepted-orders',
-    label: 'Accepted Orders',
+    id: 'orders',
+    label: 'Orders',
     icon: CheckCircle,
     badge: 5
   },

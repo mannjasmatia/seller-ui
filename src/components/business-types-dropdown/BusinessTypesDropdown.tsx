@@ -5,18 +5,22 @@ interface BusinessTypeDropdownProps {
     limit?:number;
     label?:string;
     allowSelectAll?:boolean,
-  selectedBusinessTypes: string;
-  onChange: (businessTypes: string) => void;
-  placeholder?: string;
+    selectedBusinessType: string;
+    onChange: (businessTypes: string) => void;
+    placeholder?: string;
+    disabled?:boolean;
+    mode?:'view'| 'edit';
 }
 
 const BusinessTypeDropdown : React.FC<BusinessTypeDropdownProps> = ({
     limit=5,
     label,
     allowSelectAll=false,
-  selectedBusinessTypes,
-  onChange,
-  placeholder,
+    disabled=false,
+    selectedBusinessType,
+    onChange,
+    placeholder,
+    mode='edit',
 })=>{
 
     const handleSelection = (businessTypes:string[] | string)=>{
@@ -40,14 +44,18 @@ const BusinessTypeDropdown : React.FC<BusinessTypeDropdownProps> = ({
       return transformedData;
     }
 
-    console.log("BUSINESS : ", getTransformedData())
+    if(mode==='view'){
+      console.log("View mode : ", getTransformedData()?.filter((b:any)=> b.value === selectedBusinessType as string)[0]?.label)
+      return getTransformedData()?.filter((b:any)=> b.value === selectedBusinessType as string)[0]?.label
+    }
 
     return (
         <Dropdown
           label={label}
+          disabled={disabled}
           defaultValues={getTransformedData()}
           placeholder={placeholder}
-          selectedValues={selectedBusinessTypes}
+          selectedValues={selectedBusinessType}
           onSelectionChange={handleSelection}
           allowSelectAll={allowSelectAll}
           transformItem={(item) => ({ value: item._id || item.id, label: item.name || item.label })}

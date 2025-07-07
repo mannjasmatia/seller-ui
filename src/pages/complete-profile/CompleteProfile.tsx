@@ -93,7 +93,7 @@ const CompleteProfile = () => {
                         <BusinessTypeDropdown
                             limit={10}
                             label={language.fields.businessType}
-                            selectedBusinessTypes={formState.businessType}
+                            selectedBusinessType={formState.businessType}
                             onChange={handleBusinessTypeChange}
                             placeholder='Select business type of your company'
                         />

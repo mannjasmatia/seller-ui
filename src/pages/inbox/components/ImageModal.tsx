@@ -1,7 +1,9 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { MediaFile } from '../type.inbox';
+import { useDownloadMediaApi } from '../../../api/api-hooks/useChatApi';
+import { customToast } from '../../../toast-config/customToast';
 
 interface ImageModalProps {
   isOpen: boolean;
@@ -15,19 +17,22 @@ interface ImageModalProps {
 const MEDIA_URL = import.meta.env.VITE_MEDIA_URL || '';
 
 export const ImageModal: React.FC<ImageModalProps> = ({
-  isOpen,
-  images,
-  currentIndex,
-  onClose,
-  onNext,
-  onPrev
+    isOpen,
+    images,
+    currentIndex,
+    onClose,
+    onNext,
+    onPrev
 }) => {
-  const handleKeyPress = useCallback((e: KeyboardEvent) => {
-    if (!isOpen) return;
-    if (e.key === 'Escape') onClose();
-    if (e.key === 'ArrowLeft') onPrev();
-    if (e.key === 'ArrowRight') onNext();
-  }, [isOpen, onClose, onNext, onPrev]);
+    const handleKeyPress = useCallback((e: KeyboardEvent) => {
+        if (!isOpen) return;
+        if (e.key === 'Escape') onClose();
+        if (e.key === 'ArrowLeft') onPrev();
+        if (e.key === 'ArrowRight') onNext();
+    }, [isOpen, onClose, onNext, onPrev]);
+    
+    const { mutate: downloadMedia } = useDownloadMediaApi();
+    const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
@@ -46,26 +51,55 @@ export const ImageModal: React.FC<ImageModalProps> = ({
     };
   }, [isOpen]);
 
-  if (!isOpen || !images || images.length === 0) return null;
-
   const currentImage = images[currentIndex];
 
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = `${MEDIA_URL}/${currentImage.url}`;
-    link.download = currentImage.name || 'image';
-    link.click();
-  };
+    useEffect(() => {
+    if (isOpen) {
+        document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+    };
+    }, [isOpen]);
+
+
+    const handleClickOutside = (e: MouseEvent) => {
+    if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+        onClose();
+    }
+    };
+
+
+    const handleDownload = () => {
+        downloadMedia(currentImage.url, {
+            onSuccess: (response: import('axios').AxiosResponse<Blob>) => {
+                const url = window.URL.createObjectURL(response.data);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = currentImage.name || 'image';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+            },
+            onError: (err) => {
+                customToast.error("Failed to download image :")
+            // Optionally show a toast or error
+            }
+    });
+    };
+
+    if (!isOpen || !images || images.length === 0) return null;
 
   const modalContent = (
-    <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
-      <div className="relative max-w-screen-lg max-h-screen-lg p-4 w-full h-full flex items-center justify-center">
+    <div className="fixed inset-0 bg-transparent  bg-opacity-40 z-50 flex items-center justify-center">
+      <div ref={modalRef} className="relative max-w-screen-lg backdrop-blur-2xl max-h-[80dvh] p-4 w-full h-full flex items-center justify-center">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-white hover:text-gray-300 z-10 bg-black bg-opacity-50 rounded-full p-2"
+          className="absolute top-1 right-1 text-white bg-cb-red hover:text-gray-300 z-10 bg-opacity-50 rounded-full p-2"
         >
-          <X className="w-6 h-6" />
+          <X className="w-9 h-9" />
         </button>
 
         {/* Navigation buttons */}
@@ -94,7 +128,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({
         />
 
         {/* Image info */}
-        <div className="absolute bottom-4 left-4 text-white bg-black bg-opacity-50 p-3 rounded-lg">
+        {/* <div className="absolute bottom-4 left-4 text-white bg-black bg-opacity-50 p-3 rounded-lg">
           <p className="text-sm font-medium">{currentImage.name}</p>
           {currentImage.size && (
             <p className="text-xs opacity-75">
@@ -106,14 +140,15 @@ export const ImageModal: React.FC<ImageModalProps> = ({
               {currentIndex + 1} of {images.length}
             </p>
           )}
-        </div>
+        </div> */}
 
         {/* Download button */}
         <button
           onClick={handleDownload}
-          className="absolute bottom-4 right-4 text-white hover:text-gray-300 bg-black bg-opacity-50 rounded-full p-2"
+          className="absolute flex gap-1 justify-center items-center bottom-4 right-4 text-white hover:text-gray-300 bg-black bg-opacity-50 rounded-full p-2"
         >
           <Download className="w-5 h-5" />
+          <span className="font-semibold text-white">Download</span>
         </button>
       </div>
     </div>

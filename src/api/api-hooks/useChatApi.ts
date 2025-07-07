@@ -36,15 +36,15 @@ export const useGetChatMessagesApi = (chatId: string, params?: {
 /**
  * Custom hook for getting chat by ID
  */
-export const useGetChatByIdApi = (chatId: string) => {
-  return useQuery({
-    queryKey: ["getChatById", chatId],
-    queryFn: () => chatApi.getChatById(chatId),
-    enabled: !!chatId,
-    staleTime: 1 * 60 * 1000, // 1 minute
-    gcTime: 3 * 60 * 1000, // 3 minutes
-  });
-};
+// export const useGetChatByIdApi = (chatId: string) => {
+//   return useQuery({
+//     queryKey: ["getChatById", chatId],
+//     queryFn: () => chatApi.getChatById(chatId),
+//     enabled: !!chatId,
+//     staleTime: 1 * 60 * 1000, // 1 minute
+//     gcTime: 3 * 60 * 1000, // 3 minutes
+//   });
+// };
 
 /**
  * Custom hook for uploading media
@@ -106,5 +106,14 @@ export const useGetInvoiceByIdApi = (invoiceId: string) => {
     enabled: !!invoiceId,
     staleTime: 1 * 60 * 1000, // 1 minute
     gcTime: 3 * 60 * 1000, // 3 minutes
+  });
+};
+
+/**
+ * Custom hook for downloading media
+ */
+export const useDownloadMediaApi = () => {
+  return useMutation({
+    mutationFn: (fileName: string) => chatApi.downloadMedia(fileName),
   });
 };

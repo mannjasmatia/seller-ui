@@ -26,9 +26,9 @@ const useProfile = () => {
 
   // Form state
   const [formState, setFormState] = useState<ProfileFormState>({
-    fullName: '',
+    companyName: '',
     email: '',
-    phoneNumber: '',
+    phone: '',
     businessType: '',
     categories: [],
     businessNumber: '',
@@ -41,9 +41,9 @@ const useProfile = () => {
   });
 
   const [originalFormState, setOriginalFormState] = useState<ProfileFormState>({
-    fullName: '',
+    companyName: '',
     email: '',
-    phoneNumber: '',
+    phone: '',
     businessType: '',
     categories: [],
     businessNumber: '',
@@ -99,16 +99,16 @@ const useProfile = () => {
 
   // Validation rules
   const validationRules: Record<string, ValidationOptions> = {
-    fullName: {
+    companyName: {
       required: true,
       minLength: 2,
       maxLength: 50,
       pattern: /^[a-zA-Z\s]+$/,
       errorMessages: {
-        required: 'Full name is required',
-        minLength: 'Full name must be at least 2 characters',
-        maxLength: 'Full name cannot exceed 50 characters',
-        pattern: 'Full name can only contain letters and spaces'
+        required: 'Company name is required',
+        minLength: 'Company name must be at least 2 characters',
+        maxLength: 'Company name cannot exceed 50 characters',
+        pattern: 'Company name can only contain letters and spaces'
       }
     },
     email: {
@@ -187,9 +187,9 @@ const useProfile = () => {
   useEffect(() => {
     if (profileSuccess && profileData) {
       const data = {
-        fullName: profileData.fullName || '',
+        companyName: profileData.companyName || '',
         email: profileData.email || '',
-        phoneNumber: profileData.phoneNumber || '',
+        phone: profileData.phone || '',
         businessType: profileData.businessType || '',
         categories: profileData.categories || [],
         businessNumber: profileData.businessNumber || '',
@@ -503,7 +503,7 @@ const useProfile = () => {
     }
 
     const emailChanged = formState.email !== originalFormState.email;
-    const phoneChanged = formState.phoneNumber !== originalFormState.phoneNumber;
+    const phoneChanged = formState.phone !== originalFormState.phone;
 
     if (emailChanged && phoneChanged) {
       customToast.error('Please change email and phone number separately');
@@ -515,7 +515,7 @@ const useProfile = () => {
       setTempEmail(formState.email);
     //   sendEmailVerification({ email: formState.email });
     } else if (phoneChanged) {
-      setTempPhoneNumber(formState.phoneNumber);
+      setTempPhoneNumber(formState.phone);
     //   sendPhoneVerification({ phoneNumber: formState.phoneNumber });
     } else {
       handleSaveProfile();

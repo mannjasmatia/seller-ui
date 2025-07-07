@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { ChatMessage, ConnectionStatus, MediaFile } from '../../pages/inbox/type.inbox';
+import { ChatMessage, ConnectionStatus, MediaFile } from '../pages/inbox/type.inbox';
 
 interface SocketEventHandlers {
   onMessageReceived?: (message: ChatMessage) => void;
@@ -34,6 +34,9 @@ const useSocket = (url?: string) => {
   
   const socketRef = useRef<Socket | null>(null);
   const handlersRef = useRef<SocketEventHandlers>({});
+  const reconnectAttempts = useRef(0);
+  const maxReconnectAttempts = 5;
+  const reconnectDelay = useRef(1000);
 
   const connect = useCallback(() => {
     if (socketRef.current?.connected) {
@@ -51,12 +54,17 @@ const useSocket = (url?: string) => {
       withCredentials: true,
       transports: ['websocket', 'polling'],
       timeout: 10000,
-      forceNew: true
+      forceNew: true,
+      reconnection: true,
+      reconnectionAttempts: maxReconnectAttempts,
+      reconnectionDelay: reconnectDelay.current
     });
     
     // Setup core event listeners
     newSocket.on('connect', () => {
       console.log('✅ Seller socket connected');
+      reconnectAttempts.current = 0;
+      reconnectDelay.current = 1000;
       setConnectionStatus({
         status: 'connected',
         isConnected: true
@@ -73,14 +81,27 @@ const useSocket = (url?: string) => {
 
     newSocket.on('connect_error', (error) => {
       console.error('🔥 Seller socket connection error:', error);
-      setConnectionStatus({
-        status: 'error',
-        isConnected: false
-      });
+      reconnectAttempts.current++;
+      
+      if (reconnectAttempts.current >= maxReconnectAttempts) {
+        setConnectionStatus({
+          status: 'error',
+          isConnected: false
+        });
+      } else {
+        // Exponential backoff
+        reconnectDelay.current = Math.min(reconnectDelay.current * 2, 10000);
+        setConnectionStatus({
+          status: 'connecting',
+          isConnected: false
+        });
+      }
     });
 
     newSocket.on('reconnect', (attemptNumber) => {
       console.log('🔄 Seller socket reconnected after', attemptNumber, 'attempts');
+      reconnectAttempts.current = 0;
+      reconnectDelay.current = 1000;
       setConnectionStatus({
         status: 'connected',
         isConnected: true
@@ -91,6 +112,14 @@ const useSocket = (url?: string) => {
       console.log('🔄 Seller socket reconnection attempt', attemptNumber);
       setConnectionStatus({
         status: 'connecting',
+        isConnected: false
+      });
+    });
+
+    newSocket.on('reconnect_failed', () => {
+      console.log('❌ Seller socket reconnection failed');
+      setConnectionStatus({
+        status: 'error',
         isConnected: false
       });
     });
@@ -141,6 +170,11 @@ const useSocket = (url?: string) => {
       handlersRef.current.onImageUploadComplete?.(data);
     });
 
+    // Error handling
+    newSocket.on('error', (error) => {
+      console.error('🔥 Socket error:', error);
+    });
+
     setSocket(newSocket);
     socketRef.current = newSocket;
     return newSocket;
@@ -173,7 +207,6 @@ const useSocket = (url?: string) => {
   }, []);
 
   const sendMessage = useCallback((data: SendMessageData) => {
-    stopTyping(data.chatId,data.receiverId)
     return emit('sendMessage', data);
   }, [emit]);
 
@@ -201,6 +234,25 @@ const useSocket = (url?: string) => {
     handlersRef.current = { ...handlersRef.current, ...handlers };
   }, []);
 
+  // Auto reconnect with exponential backoff
+  const reconnect = useCallback(() => {
+    if (connectionStatus.status === 'error' || connectionStatus.status === 'disconnected') {
+      console.log('🔄 Manual reconnection attempt...');
+      disconnect();
+      setTimeout(() => {
+        connect();
+      }, 1000);
+    }
+  }, [connectionStatus.status, disconnect, connect]);
+
+  // Health check
+  const healthCheck = useCallback(() => {
+    if (socketRef.current?.connected) {
+      return emit('ping', { timestamp: Date.now() });
+    }
+    return false;
+  }, [emit]);
+
   // Auto cleanup on unmount
   useEffect(() => {
     return () => {
@@ -208,11 +260,29 @@ const useSocket = (url?: string) => {
     };
   }, [disconnect]);
 
+  // Health check interval
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (connectionStatus.isConnected) {
+      interval = setInterval(() => {
+        healthCheck();
+      }, 30000); // Every 30 seconds
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [connectionStatus.isConnected, healthCheck]);
+
   return {
     socket,
     connectionStatus,
     connect,
     disconnect,
+    reconnect,
     emit,
     sendMessage,
     startTyping,
@@ -220,7 +290,8 @@ const useSocket = (url?: string) => {
     openChat,
     switchChat,
     markAsRead,
-    setEventHandlers
+    setEventHandlers,
+    healthCheck
   };
 };
 

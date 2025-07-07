@@ -173,9 +173,9 @@
       "profilePicture": "Profile Picture"
     },
     "fields": {
-      "fullName": "Full Name",
+      "companyName": "Full Name",
       "email": "Email Address",
-      "phoneNumber": "Phone Number",
+      "phone": "Phone Number",
       "businessType": "Business Type",
       "categories": "Business Categories",
       "businessNumber": "Business Registration Number",
@@ -186,9 +186,9 @@
       "profilePic": "Profile Picture"
     },
     "placeholders": {
-      "fullName": "Enter your full name",
+      "companyName": "Enter your full name",
       "email": "Enter your email address",
-      "phoneNumber": "Enter your phone number",
+      "phone": "Enter your phone number",
       "businessType": "Select your business type",
       "categories": "Select your business categories",
       "businessNumber": "Enter your business registration number",
@@ -499,6 +499,86 @@
       "selectChatDescription": "Choose a conversation from the sidebar to start messaging",
       "noMessages": "No messages yet",
       "noMessagesDescription": "Start the conversation by sending a message"
+    }
+  },
+  "orders": {
+    "title": "Orders Management",
+    "subtitle": "Manage and track your customer orders",
+    "noOrders": {
+      "title": "No orders found",
+      "description": "You haven't received any orders yet."
+    },
+    "filters": {
+      "allStatus": "All Status",
+      "searchPlaceholder": "Search orders by ID, buyer, product, or tracking...",
+      "clearFilters": "Clear Filters"
+    },
+    "orderCard": {
+      "orderNumber": "Order",
+      "quantity": "Qty",
+      "tracking": "Tracking",
+      "estimatedDelivery": "Est. Delivery"
+    },
+    "actions": {
+      "viewDetails": "View Details", 
+      "updateStatus": "Update Status",
+      "cancelOrder": "Cancel Order",
+      "retry": "Retry"
+    },
+    "pagination": {
+      "showing": "Showing",
+      "to": "to", 
+      "of": "of",
+      "results": "results",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "detailModal": {
+      "title": "Order Details",
+      "close": "Close",
+      "productInfo": "Product Information",
+      "buyerInfo": "Buyer Information",
+      "orderInfo": "Order Information", 
+      "shippingAddress": "Shipping Address",
+      "invoiceInfo": "Invoice Information",
+      "quantity": "Quantity",
+      "status": "Status",
+      "finalPrice": "Final Price",
+      "tracking": "Tracking",
+      "estimatedDelivery": "Est. Delivery",
+      "createdAt": "Created",
+      "negotiatedPrice": "Base Price",
+      "tax": "Tax",
+      "shipping": "Shipping",
+      "total": "Total"
+    },
+    "statusModal": {
+      "title": "Update Order Status",
+      "description": "Update the status of this order and add tracking information if needed.",
+      "status": "New Status",
+      "trackingNumber": "Tracking Number",
+      "trackingPlaceholder": "Enter tracking number",
+      "estimatedDelivery": "Estimated Delivery Date",
+      "update": "Update Status",
+      "updating": "Updating..."
+    },
+    "cancelModal": {
+      "title": "Cancel Order",
+      "description": "Are you sure you want to cancel this order? This action cannot be undone.",
+      "reason": "Cancellation Reason (Optional)",
+      "reasonPlaceholder": "Please provide a reason for cancellation...",
+      "cancel": "Cancel Order",
+      "cancelling": "Cancelling..."
+    },
+    "success": {
+      "statusUpdated": "Order status updated successfully",
+      "orderCancelled": "Order cancelled successfully"
+    },
+    "errors": {
+      "loadingFailed": "Failed to load orders",
+      "tryAgain": "Please try again later",
+      "updateFailed": "Failed to update order status", 
+      "cancelFailed": "Failed to cancel order"
     }
   }
 }

@@ -8,14 +8,15 @@ import {
   useGenerateInvoiceApi
 } from '../../api/api-hooks/useChatApi';
 import { Chat, ChatMessage, MediaFile } from './type.inbox';
-import useSocket from '../../api/custom-hooks/useSocket';
 import { customToast } from '../../toast-config/customToast';
+import useSocket from '../../custom-hooks/useSocket';
 
 export const useInboxChat = () => {
   const language = useSelector((state: RootState) => state.language?.value)['inboxChat'];
   
   // State
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [chats, setChats] = useState<Chat[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [selectedImages, setSelectedImages] = useState<MediaFile[]>([]);
@@ -26,6 +27,11 @@ export const useInboxChat = () => {
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [quotationDetailModalOpen, setQuotationDetailModalOpen] = useState(false);
   const [messageRetryQueue, setMessageRetryQueue] = useState(new Map());
+  const [imageModalData, setImageModalData] = useState({
+    isOpen: false,
+    images: [] as MediaFile[],
+    currentIndex: 0
+  });
   
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -73,7 +79,8 @@ export const useInboxChat = () => {
     stopTyping: socketStopTyping,
     openChat: socketOpenChat,
     switchChat: socketSwitchChat,
-    setEventHandlers
+    setEventHandlers,
+    reconnect
   } = useSocket();
 
   // Update refs
@@ -81,8 +88,14 @@ export const useInboxChat = () => {
     selectedChatRef.current = selectedChat;
   }, [selectedChat]);
 
+  // Update chats from API
+  useEffect(() => {
+    if (chatsData?.data?.response?.docs) {
+      setChats(chatsData.data.response.docs);
+    }
+  }, [chatsData]);
+
   // Extract data
-  const chats: Chat[] = chatsData?.data?.response?.docs || [];
   const chatContext = messagesData?.data?.response?.chatContext;
 
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -135,14 +148,31 @@ export const useInboxChat = () => {
           scrollToBottom();
         }
 
-        
-        // Update chat list with new message and emit openChat if currently selected
-        if (currentSelectedChat?._id === message.chat) {
-          socketOpenChat(message.chat, currentSelectedChat.otherUser._id);
-        }
-        
-        // Refresh chats to update last message and unread status
-        refetchChats();
+        // Update chat list with new message
+        setChats(prev => {
+          const updatedChats = prev.map(chat => {
+            if (chat._id === message.chat) {
+              // Emit openChat only if this is the currently selected chat
+              if (currentSelectedChat?._id === message.chat) {
+                socketOpenChat(chat._id, chat.otherUser._id);
+              }
+
+              console.log('Updating chat:', chat._id);
+              return {
+                ...chat,
+                lastMessage: message,
+                lastMessageAt: message.createdAt,
+                hasUnread: currentSelectedChat?._id !== message.chat,
+              };
+            }
+            return chat;
+          });
+
+          // Move updated chat to top
+          const chatToMove = updatedChats.find(chat => chat._id === message.chat);
+          const otherChats = updatedChats.filter(chat => chat._id !== message.chat);
+          return chatToMove ? [chatToMove, ...otherChats] : updatedChats;
+        });
       },
       
       onMessageSent: (data) => {
@@ -158,7 +188,7 @@ export const useInboxChat = () => {
         console.log('Message delivered confirmation:', data);
         setMessages(prev =>
           prev.map(msg =>
-            msg.timestamp === data.timestamp ? { ...msg, status: 'delivered' } : msg
+            msg.timestamp === data.timestamp ? { ...msg, status: 'sent' } : msg
           )
         );
       },
@@ -236,7 +266,7 @@ export const useInboxChat = () => {
         }
       }
     });
-  }, [setEventHandlers, refetchChats, socketOpenChat, scrollToBottom]);
+  }, [setEventHandlers, socketOpenChat]);
 
   // Initialize socket connection
   useEffect(() => {
@@ -253,9 +283,9 @@ export const useInboxChat = () => {
   }, [selectedChat, messagesData, scrollToBottom]);
 
   // Auto-scroll when messages change
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
+//   useEffect(() => {
+//     scrollToBottom();
+//   }, [messages, scrollToBottom]);
 
   // Heartbeat to keep chat alive
   useEffect(() => {
@@ -270,7 +300,7 @@ export const useInboxChat = () => {
         if (chat?._id && chat?.otherUser?._id) {
           socketOpenChat(chat._id, chat.otherUser._id);
         }
-      }, 5000); // Every 5 seconds
+      }, 2000); // Every 2 seconds like in JS code
     }
     
     return () => {
@@ -291,12 +321,17 @@ export const useInboxChat = () => {
       socketSwitchChat(chat._id);
       console.log(`Switched to chat: ${chat._id}`);
       socketOpenChat(chat._id, chat.otherUser._id);
+      
+      // Mark chat as read
+      setChats(prev => prev.map(c => 
+        c._id === chat._id ? { ...c, hasUnread: false } : c
+      ));
     }
 
     refetchMessages();
   }, [connectionStatus.isConnected, socketSwitchChat, socketOpenChat, refetchMessages]);
 
-  // Stop typing
+  // Stop typing - Define this first since it's used by other functions
   const stopTyping = useCallback(() => {
     const currentSelectedChat = selectedChatRef.current;
     
@@ -388,7 +423,6 @@ export const useInboxChat = () => {
       if (selectedImages.length > 0) {
         // Emit uploading status
         if (selectedChat) {
-          // Signal upload start via typing status
           setTypingStatusByChat(prev => ({ ...prev, [selectedChat._id]: 'Uploading images...' }));
         }
         uploadedImages = await uploadImages();
@@ -429,6 +463,28 @@ export const useInboxChat = () => {
 
       console.log('Sending message with media:', messageData);
       setMessages(prev => [...prev, localMessage]);
+      
+      // Update chat list with new message
+      setChats(prev => {
+        const updatedChats = prev.map(chat => {
+          if (chat._id === selectedChat._id) {
+            return {
+              ...chat,
+              lastMessage: localMessage,
+              lastMessageAt: localMessage.createdAt,
+              hasUnread: false // Since we're sending, no unread for us
+            };
+          }
+          return chat;
+        });
+
+        // Move current chat to top
+        const currentChatUpdated = updatedChats.find(chat => chat._id === selectedChat._id);
+        const otherChats = updatedChats.filter(chat => chat._id !== selectedChat._id);
+        
+        return currentChatUpdated ? [currentChatUpdated, ...otherChats] : updatedChats;
+      });
+      
       socketSendMessage(messageData);
       setNewMessage('');
       stopTyping();
@@ -475,7 +531,7 @@ export const useInboxChat = () => {
           type: 'image',
           name: file.name,
           size: file.size,
-          file: file as any // Add file for upload
+          file: file as any
         };
         validFiles.push(imageData);
       }
@@ -513,6 +569,37 @@ export const useInboxChat = () => {
     setUploadError(null);
   }, []);
 
+  // Image modal functions
+  const openImageModal = useCallback((images: MediaFile[], startIndex = 0) => {
+    setImageModalData({
+      isOpen: true,
+      images,
+      currentIndex: startIndex
+    });
+  }, []);
+
+  const closeImageModal = useCallback(() => {
+    setImageModalData({
+      isOpen: false,
+      images: [],
+      currentIndex: 0
+    });
+  }, []);
+
+  const nextImage = useCallback(() => {
+    setImageModalData(prev => ({
+      ...prev,
+      currentIndex: (prev.currentIndex + 1) % prev.images.length
+    }));
+  }, []);
+
+  const prevImage = useCallback(() => {
+    setImageModalData(prev => ({
+      ...prev,
+      currentIndex: prev.currentIndex > 0 ? prev.currentIndex - 1 : prev.images.length - 1
+    }));
+  }, []);
+
   // Invoice handlers
   const handleGenerateInvoice = useCallback((invoiceData: {
     negotiatedPrice: number;
@@ -522,13 +609,13 @@ export const useInboxChat = () => {
     shippingCharges?: number;
     notes?: string;
   }) => {
-    if (!selectedChat?.quotation?._id) {
+    if (!selectedChat?.quotationDetails?._id) {
       customToast.error('No quotation found for this chat');
       return;
     }
 
     const data = {
-      quotationId: selectedChat.quotation._id,
+      quotationId: selectedChat.quotationDetails?._id,
       ...invoiceData
     };
 
@@ -544,7 +631,7 @@ export const useInboxChat = () => {
           chat: selectedChat._id,
           senderId: 'seller1', // Replace with actual seller ID
           senderModel: 'seller',
-          content: `Invoice sent for $${invoiceData.negotiatedPrice}`,
+          content: `Invoice sent for ${invoiceData.negotiatedPrice}`,
           messageType: 'text',
           isRead: false,
           seen: false,
@@ -557,7 +644,7 @@ export const useInboxChat = () => {
         
         socketSendMessage({
           chatId: selectedChat._id,
-          content: `Invoice sent for $${invoiceData.negotiatedPrice}`,
+          content: `Invoice sent for ${invoiceData.negotiatedPrice}`,
           receiverId: selectedChat.otherUser._id,
           timestamp,
           messageType: 'text'
@@ -607,6 +694,33 @@ export const useInboxChat = () => {
     return { hasInvoice: false, status: null, canUpdate: false };
   }, [chatContext]);
 
+  // Load chats function (similar to JS version)
+  const loadChats = useCallback(async () => {
+    try {
+      console.log('Loading chats...');
+      await refetchChats();
+    } catch (error) {
+      console.error('Failed to load chats:', error);
+      customToast.error('Failed to load chats');
+    }
+  }, [refetchChats]);
+
+  // Load messages function
+  const loadMessages = useCallback(async (chatId: string) => {
+    try {
+      console.log('Loading messages for chat:', chatId);
+      await refetchMessages();
+    } catch (error) {
+      console.error('Failed to load messages:', error);
+      customToast.error('Failed to load messages');
+    }
+  }, [refetchMessages]);
+
+  // Get typing status for a specific chat
+  const getTypingStatusForChat = useCallback((chatId: string) => {
+    return typingStatusByChat[chatId];
+  }, [typingStatusByChat]);
+
   // Clean up URLs on unmount
   useEffect(() => {
     return () => {
@@ -628,6 +742,7 @@ export const useInboxChat = () => {
     typingUsers,
     typingStatusByChat,
     chatContext,
+    imageModalData,
     
     // State
     isTyping,
@@ -666,10 +781,19 @@ export const useInboxChat = () => {
     closeInvoiceModal,
     openQuotationDetail,
     closeQuotationDetail,
+    loadChats,
+    loadMessages,
     refetchChats,
     refetchMessages,
     setUploadError,
     stopTyping,
+    reconnect,
+    
+    // Image modal handlers
+    openImageModal,
+    closeImageModal,
+    nextImage,
+    prevImage,
     
     // Utilities
     formatTime,
@@ -678,6 +802,7 @@ export const useInboxChat = () => {
     getInvoiceStatus,
     scrollToBottom,
     validateFile,
+    getTypingStatusForChat,
     
     // Language
     language

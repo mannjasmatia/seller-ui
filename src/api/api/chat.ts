@@ -35,13 +35,13 @@ export const getChatMessages = (chatId: string, params?: {
 /**
  * Get chat by ID
  */
-export const getChatById = (chatId: string) => {
-  return ApiService({
-    method: 'GET',
-    endpoint: `${apiPaths.chat.getById}/${chatId}`,
-    isChatApi:true,
-  });
-};
+// export const getChatById = (chatId: string) => {
+//   return ApiService({
+//     method: 'GET',
+//     endpoint: `${apiPaths.chat.getById}/${chatId}`,
+//     isChatApi:true,
+//   });
+// };
 
 /**
  * Upload media files
@@ -106,12 +106,27 @@ export const getInvoiceById = (invoiceId: string) => {
   });
 };
 
+/**
+ * Download media file by fileName
+ */
+export const downloadMedia = (fileName: string) => {
+  return ApiService({
+    method: 'GET',
+    endpoint: `${apiPaths.media.download}`,
+    params:{fileName},
+    // responseType: 'blob', // Ensure you get a Blob for file download
+    isChatApi: true,
+    responseType:'blob',
+  });
+};
+
 export const chatApi = {
   getAllChats,
   getChatMessages,
-  getChatById,
+  // getChatById,
   uploadMedia,
   generateInvoice,
   getSellerInvoices,
-  getInvoiceById
+  getInvoiceById,
+  downloadMedia
 };

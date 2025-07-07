@@ -52,7 +52,7 @@ const PrivateRoutes = ({ children }: { children: React.ReactNode }) => {
             'inbox': `/${preferredLang}/inbox`,
             'inquiry': `/${preferredLang}/inquiry`,
             'products': `/${preferredLang}/products`,
-            'accepted-orders': `/${preferredLang}/accepted-orders`,
+            'orders': `/${preferredLang}/orders`,
         };
         
         if (routeMap[item.id]) {
