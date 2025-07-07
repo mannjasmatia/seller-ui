@@ -258,7 +258,7 @@
     }
   },
   "inbox": {
-    "title": "Inbox",
+    "title": "Inquiries",
     "subtitle": "Manage your quotation requests",
     "noQuotations": "No quotations found",
     "noQuotationsDescription": "You haven't received any quotation requests yet.",

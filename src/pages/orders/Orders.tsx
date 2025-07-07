@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { Search, Filter, Calendar, Package, Eye, Edit3, X, Truck, MapPin, Phone, Mail, User, Building } from 'lucide-react';
 import { RootState } from '../../store/appStore';
 import { useOrders } from './useOrders';
+import OrderDetailModal from './OrderDetailModal';
 import Button from '../../components/BasicComponents/Button';
 import Input from '../../components/BasicComponents/Input';
 import DynamicImage from '../../components/BasicComponents/Image';
@@ -356,182 +357,17 @@ const Orders: React.FC = () => {
       </div>
 
       {/* Order Detail Modal */}
-      {isDetailModalOpen && selectedOrder && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={closeDetailModal}></div>
-            
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-              {/* Modal Header */}
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">
-                    {language?.detailModal?.title || 'Order Details'} - #{selectedOrder.orderId}
-                  </h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={closeDetailModal}
-                    ariaLabel="Close"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {isLoadingOrderDetail ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cb-red"></div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Product Information */}
-                    <div className="space-y-4">
-                      <h4 className="font-semibold text-gray-900">
-                        {language?.detailModal?.productInfo || 'Product Information'}
-                      </h4>
-                      <div className="border rounded-lg p-4">
-                        <div className="flex space-x-4">
-                          <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                            <DynamicImage
-                              src={`${MEDIA_URL}/${selectedOrder?.product?.images[0]}`}
-                              alt={selectedOrder.product.name}
-                              objectFit="cover"
-                              width="w-full"
-                              height="h-full"
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <h5 className="font-medium text-gray-900">{selectedOrder?.product.name}</h5>
-                            <p className="text-sm text-gray-600 mt-1">{selectedOrder.product.category}</p>
-                            <p className="text-sm text-gray-500 mt-2">
-                              {language?.detailModal?.quantity || 'Quantity'}: {selectedOrder.quotation.quantity}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Order Information */}
-                      <h4 className="font-semibold text-gray-900">
-                        {language?.detailModal?.orderInfo || 'Order Information'}
-                      </h4>
-                      <div className="border rounded-lg p-4 space-y-3">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-gray-600">{language?.detailModal?.status || 'Status'}:</span>
-                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getOrderStatusBadgeColor(selectedOrder.status)}`}>
-                            {formatOrderStatus(selectedOrder.status)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-gray-600">{language?.detailModal?.finalPrice || 'Final Price'}:</span>
-                          <span className="text-sm font-medium text-gray-900">{formatCurrency(selectedOrder.finalPrice)}</span>
-                        </div>
-                        {selectedOrder.trackingNumber && (
-                          <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">{language?.detailModal?.tracking || 'Tracking'}:</span>
-                            <span className="text-sm font-medium text-gray-900">{selectedOrder.trackingNumber}</span>
-                          </div>
-                        )}
-                        {selectedOrder.estimatedDeliveryDate && (
-                          <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">{language?.detailModal?.estimatedDelivery || 'Est. Delivery'}:</span>
-                            <span className="text-sm font-medium text-gray-900">{formatDate(selectedOrder.estimatedDeliveryDate)}</span>
-                          </div>
-                        )}
-                        <div className="flex justify-between">
-                          <span className="text-sm text-gray-600">{language?.detailModal?.createdAt || 'Created'}:</span>
-                          <span className="text-sm font-medium text-gray-900">{formatDate(selectedOrder.createdAt)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Buyer & Address Information */}
-                    <div className="space-y-4">
-                      {/* Buyer Info */}
-                      <h4 className="font-semibold text-gray-900">
-                        {language?.detailModal?.buyerInfo || 'Buyer Information'}
-                      </h4>
-                      <div className="border rounded-lg p-4 space-y-3">
-                        <div className="flex items-center space-x-3">
-                          <User className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm font-medium text-gray-900">{selectedOrder.buyer.fullName}</span>
-                        </div>
-                        {selectedOrder.buyer.companyName && (
-                          <div className="flex items-center space-x-3">
-                            <Building className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm text-gray-600">{selectedOrder.buyer.companyName}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center space-x-3">
-                          <Mail className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-600">{selectedOrder.buyer.email}</span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <Phone className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-600">{selectedOrder.buyer.phone}</span>
-                        </div>
-                      </div>
-
-                      {/* Shipping Address */}
-                      <h4 className="font-semibold text-gray-900">
-                        {language?.detailModal?.shippingAddress || 'Shipping Address'}
-                      </h4>
-                      <div className="border rounded-lg p-4">
-                        <div className="flex items-start space-x-3">
-                          <MapPin className="h-4 w-4 text-gray-400 mt-1" />
-                          <div className="text-sm text-gray-600">
-                            <p className="font-medium text-gray-900">{selectedOrder.shippingAddress.fullName}</p>
-                            <p>{selectedOrder.shippingAddress.addressLine1}</p>
-                            {selectedOrder.shippingAddress.addressLine2 && (
-                              <p>{selectedOrder.shippingAddress.addressLine2}</p>
-                            )}
-                            <p>
-                              {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.pincode}
-                            </p>
-                            <p>{selectedOrder.shippingAddress.country}</p>
-                            <p className="mt-1">
-                              <Phone className="h-3 w-3 inline mr-1" />
-                              {selectedOrder.shippingAddress.phone}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Invoice Information */}
-                      <h4 className="font-semibold text-gray-900">
-                        {language?.detailModal?.invoiceInfo || 'Invoice Information'}
-                      </h4>
-                      <div className="border rounded-lg p-4 space-y-3">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-gray-600">{language?.detailModal?.negotiatedPrice || 'Base Price'}:</span>
-                          <span className="text-sm font-medium text-gray-900">{formatCurrency(selectedOrder.invoice.negotiatedPrice)}</span>
-                        </div>
-                        {selectedOrder.invoice.taxAmount && (
-                          <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">{language?.detailModal?.tax || 'Tax'}:</span>
-                            <span className="text-sm font-medium text-gray-900">{formatCurrency(selectedOrder.invoice.taxAmount)}</span>
-                          </div>
-                        )}
-                        {selectedOrder.invoice.shippingCharges && (
-                          <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">{language?.detailModal?.shipping || 'Shipping'}:</span>
-                            <span className="text-sm font-medium text-gray-900">{formatCurrency(selectedOrder.invoice.shippingCharges)}</span>
-                          </div>
-                        )}
-                        <div className="border-t pt-3">
-                          <div className="flex justify-between">
-                            <span className="text-sm font-semibold text-gray-900">{language?.detailModal?.total || 'Total'}:</span>
-                            <span className="text-sm font-semibold text-gray-900">{formatCurrency(selectedOrder.finalPrice)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <OrderDetailModal
+        open={isDetailModalOpen}
+        order={selectedOrder ?? null}
+        isLoading={isLoadingOrderDetail}
+        language={language}
+        onClose={closeDetailModal}
+        getOrderStatusBadgeColor={(status: string) => getOrderStatusBadgeColor(status as OrderStatus)}
+        formatOrderStatus={(status: string) => formatOrderStatus(status as OrderStatus)}
+        formatCurrency={formatCurrency}
+        formatDate={formatDate}
+      />
 
       {/* Status Update Modal */}
       <ConfirmationModal

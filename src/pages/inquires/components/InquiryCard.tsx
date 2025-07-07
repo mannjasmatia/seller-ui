@@ -98,19 +98,19 @@ export const InquiryCard: React.FC<QuotationCardProps> = ({
         </Button>
       );
     } else if (quotation.hasOrder && quotation.orderId) {
-      return (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            // Navigate to order - implement this
-          }}
-          className="px-3 py-2 text-sm border-cb-red text-cb-red hover:bg-cb-red/5 flex items-center gap-1"
-        >
-          <Package className="w-4 h-4" />
-          Order
-        </Button>
+      return (<></>
+        // <Button
+        //   variant="outline"
+        //   size="sm"
+        //   onClick={(e) => {
+        //     e.stopPropagation();
+        //     // Navigate to order - implement this
+        //   }}
+        //   className="px-3 py-2 text-sm border-cb-red text-cb-red hover:bg-cb-red/5 flex items-center gap-1"
+        // >
+        //   <Package className="w-4 h-4" />
+        //   Order
+        // </Button>
       );
     }
 

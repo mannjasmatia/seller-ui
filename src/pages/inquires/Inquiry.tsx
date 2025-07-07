@@ -167,81 +167,83 @@ const Inquiry: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {language.title}
-          </h1>
-          <p className="text-gray-600">
-            {language.subtitle}
-          </p>
-        </div>
-
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Search */}
-            <div className="lg:col-span-2">
-              <Input
-                type="text"
-                placeholder={language.filters.searchPlaceholder}
-                value={filters.search}
-                onChange={(value) => handleSearchChange(value as string)}
-                leftIcon={<Search className="w-4 h-4" />}
-                className="w-full"
-              />
+    <div className="min-h-screen p-4 bg-white rounded-2xl">
+      <div className="">
+        <div className="">
+            {/* Header */}
+            <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {language.title}
+            </h1>
+            <p className="text-gray-600">
+                {language.subtitle}
+            </p>
             </div>
 
-            {/* Status Filter */}
-            <div>
-              <Input
-                type="select"
-                value={filters.status}
-                onChange={(value) => handleFilterChange('status', value)}
-                options={[
-                  { label: language.filters.allStatus, value: '' },
-                  { label: language.filters.pending, value: 'pending' },
-                  { label: language.filters.accepted, value: 'accepted' },
-                  { label: language.filters.rejected, value: 'rejected' },
-                  { label: language.filters.negotiation, value: 'negotiation' }
-                ]}
-                leftIcon={<Filter className="w-4 h-4" />}
-              />
+            {/* Filters */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Search */}
+                <div className="lg:col-span-2">
+                <Input
+                    type="text"
+                    placeholder={language.filters.searchPlaceholder}
+                    value={filters.search}
+                    onChange={(value) => handleSearchChange(value as string)}
+                    leftIcon={<Search className="w-4 h-4" />}
+                    className="w-full"
+                />
+                </div>
+
+                {/* Status Filter */}
+                <div>
+                <Input
+                    type="select"
+                    value={filters.status}
+                    onChange={(value) => handleFilterChange('status', value)}
+                    options={[
+                    { label: language.filters.allStatus, value: '' },
+                    { label: language.filters.pending, value: 'pending' },
+                    { label: language.filters.accepted, value: 'accepted' },
+                    { label: language.filters.rejected, value: 'rejected' },
+                    { label: language.filters.negotiation, value: 'negotiation' }
+                    ]}
+                    leftIcon={<Filter className="w-4 h-4" />}
+                />
+                </div>
+
+                {/* Seen Filter */}
+                <div>
+                <Input
+                    type="select"
+                    value={filters.seen?.toString()}
+                    onChange={(value) => handleFilterChange('seen', value === '' ? '' : value === 'true')}
+                    options={[
+                    { label: language.filters.allVisibility, value: '' },
+                    { label: language.filters.seen, value: 'true' },
+                    { label: language.filters.unseen, value: 'false' }
+                    ]}
+                />
+                </div>
             </div>
 
-            {/* Seen Filter */}
-            <div>
-              <Input
-                type="select"
-                value={filters.seen?.toString()}
-                onChange={(value) => handleFilterChange('seen', value === '' ? '' : value === 'true')}
-                options={[
-                  { label: language.filters.allVisibility, value: '' },
-                  { label: language.filters.seen, value: 'true' },
-                  { label: language.filters.unseen, value: 'false' }
-                ]}
-              />
+            {/* Filter Actions */}
+            {hasActiveFilters() && (
+                <div className="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
+                <p className="text-sm text-gray-600">
+                    Filters applied
+                </p>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearFilters}
+                    theme={['cb-red', 'white']}
+                >
+                    {language.filters.clearFilters}
+                </Button>
+                </div>
+            )}
             </div>
-          </div>
-
-          {/* Filter Actions */}
-          {hasActiveFilters() && (
-            <div className="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
-              <p className="text-sm text-gray-600">
-                Filters applied
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearFilters}
-                theme={['cb-red', 'white']}
-              >
-                {language.filters.clearFilters}
-              </Button>
-            </div>
-          )}
         </div>
 
         {/* Content */}
