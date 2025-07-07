@@ -1,5 +1,5 @@
 import React from 'react';
-import { Circle, CheckCheck, Check, X, RefreshCw, AlertTriangle, Package, DollarSign, FileText } from 'lucide-react';
+import { Circle, CheckCheck, Check, X, RefreshCw, AlertTriangle, Package, DollarSign, FileText, ExternalLink } from 'lucide-react';
 import { ChatMessage } from '../type.inbox';
 import DynamicImage from '../../../components/BasicComponents/Image';
 import { Link, useParams } from 'react-router-dom';
@@ -115,12 +115,15 @@ export const Message: React.FC<MessageProps> = ({
           </p>
         )}
         {message.messageType==='link' && message.media && message.media.length>0 && (
-            <Link to={`/${lang}/invoice/${message.media[0].url}`} target='_blank' 
-            className='text-xs outline py-0.5 px-3 rounded-full hover:scale-95 font-medium'
-            >
-                View Invoice
-            </Link>
+            <button 
+            onClick={() => window.open(`/${lang}/invoice/${message.media?.[0]?.url}`, '_blank', 'noopener,noreferrer')}
+            className='text-xs bg-blue-600 text-white py-1 px-3 rounded-full hover:scale-95 font-medium inline-flex items-center gap-1'
+          >
+            <ExternalLink className="w-3 h-3" />
+            View Invoice
+          </button>
         )}
+      
       </div>
     );
   };

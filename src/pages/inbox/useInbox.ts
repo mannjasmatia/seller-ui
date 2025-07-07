@@ -625,32 +625,32 @@ export const useInboxChat = () => {
         setIsInvoiceModalOpen(false);
         
         // Send message about invoice
-        const timestamp = Date.now();
-        const localMessage: ChatMessage = {
-          _id: `temp-${timestamp}`,
-          chat: selectedChat._id,
-          senderId: 'seller1', // Replace with actual seller ID
-          senderModel: 'seller',
-          content: `Invoice sent for ${invoiceData.negotiatedPrice}`,
-          messageType: 'text',
-          isRead: false,
-          seen: false,
-          createdAt: new Date().toISOString(),
-          status: 'sending',
-          timestamp
-        };
+        // const timestamp = Date.now();
+        // const localMessage: ChatMessage = {
+        //   _id: `temp-${timestamp}`,
+        //   chat: selectedChat._id,
+        //   senderId: 'seller1', // Replace with actual seller ID
+        //   senderModel: 'seller',
+        //   content: `Invoice sent for ${invoiceData.negotiatedPrice}`,
+        //   messageType: 'text',
+        //   isRead: false,
+        //   seen: false,
+        //   createdAt: new Date().toISOString(),
+        //   status: 'sending',
+        //   timestamp
+        // };
 
-        setMessages(prev => [...prev, localMessage]);
+        // setMessages(prev => [...prev, localMessage]);
         
-        socketSendMessage({
-          chatId: selectedChat._id,
-          content: `Invoice sent for ${invoiceData.negotiatedPrice}`,
-          receiverId: selectedChat.otherUser._id,
-          timestamp,
-          messageType: 'text'
-        });
+        // socketSendMessage({
+        //   chatId: selectedChat._id,
+        //   content: `Invoice sent for ${invoiceData.negotiatedPrice}`,
+        //   receiverId: selectedChat.otherUser._id,
+        //   timestamp,
+        //   messageType: 'text'
+        // });
 
-        // Refresh chat data
+        // // Refresh chat data
         refetchChats();
         refetchMessages();
       },
@@ -658,7 +658,7 @@ export const useInboxChat = () => {
         customToast.error(error?.response?.data?.message || 'Failed to generate invoice');
       }
     });
-  }, [selectedChat, generateInvoice, socketSendMessage, refetchChats, refetchMessages]);
+  }, [selectedChat, generateInvoice, refetchChats, refetchMessages]);
 
   // Modal handlers
   const openInvoiceModal = useCallback(() => {

@@ -118,6 +118,7 @@ export const apiPaths: ApiPaths = {
     
     invoice: {
         generate: "api/v1/invoice/generate",
+        details:"api/v1/invoice" ,
         sellerList: "api/v1/invoice/seller/list",
         getById: "api/v1/invoice/seller", // will be used as `${apiPaths.invoice.getById}/${invoiceId}`
         update: "api/v1/invoice/seller", // will be used as `${apiPaths.invoice.update}/${invoiceId}`

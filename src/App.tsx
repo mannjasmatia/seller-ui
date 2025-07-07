@@ -21,6 +21,7 @@ import Profile from "./pages/profile/Profile"
 import Inquiry from "./pages/inquires/Inquiry"
 import Inbox from "./pages/inbox/Inbox"
 import Orders from "./pages/orders/Orders"
+import SellerInvoicePage from "./pages/invoice/SellerInvoicePage"
 
 interface Route {
   path: string
@@ -32,11 +33,13 @@ const availableLanguages = ["en", "hi", "fr", "zh-CN", "pa", "es", "ar", "tl", "
 const publicRoutes: Route[] = [
   { path: "/login", element: <Login /> },
   { path: "/signup", element: <Signup /> },
+
 ]
 
 const profileCompletionRoutes: Route[] = [
   { path: "/complete-profile", element: <CompleteProfile /> },
   { path: "/verification-pending", element: <VerificationPending /> },
+
 ]
 
 const privateRoutes: Route[] = [
@@ -48,6 +51,8 @@ const privateRoutes: Route[] = [
   { path: "/inquiry", element: <Inquiry /> },
   { path: "/inbox", element: <Inbox /> },
   { path: "/orders", element: <Orders /> },
+      {path:"/invoice/:invoiceToken" , element:<SellerInvoicePage></SellerInvoicePage>}
+
 ]
 
 // Helper to get the current language from localStorage or default to "en"
