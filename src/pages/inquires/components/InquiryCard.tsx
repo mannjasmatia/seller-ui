@@ -83,19 +83,19 @@ export const InquiryCard: React.FC<QuotationCardProps> = ({
         </div>
       );
     } else if (quotation.status === 'negotiation' && quotation.chatId) {
-      return (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            // Navigate to chat - implement this
-          }}
-          className="px-3 py-2 text-sm border-cb-red text-cb-red hover:bg-cb-red/5 flex items-center gap-1"
-        >
-          <MessageCircle className="w-4 h-4" />
-          Chat
-        </Button>
+      return (<></>
+        // <Button
+        //   variant="outline"
+        //   size="sm"
+        //   onClick={(e) => {
+        //     e.stopPropagation();
+        //     // Navigate to chat - implement this
+        //   }}
+        //   className="px-3 py-2 text-sm border-cb-red text-cb-red hover:bg-cb-red/5 flex items-center gap-1"
+        // >
+        //   <MessageCircle className="w-4 h-4" />
+        //   Chat
+        // </Button>
       );
     } else if (quotation.hasOrder && quotation.orderId) {
       return (<></>

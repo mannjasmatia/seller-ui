@@ -122,15 +122,15 @@ export const QuotationDetailModal: React.FC<QuotationDetailModalProps> = ({
         </div>
       );
     } else if (quotation.status === 'negotiation' && quotation.chatId) {
-      return (
-        <Button
-          variant="solid"
-          size="md"
-          onClick={() => {/* Navigate to chat */}}
-          className="w-full bg-cb-red hover:bg-cb-red/90 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-        >
-          {language.actions.viewChat}
-        </Button>
+      return (<></>
+        // <Button
+        //   variant="solid"
+        //   size="md"
+        //   onClick={() => {/* Navigate to chat */}}
+        //   className="w-full bg-cb-red hover:bg-cb-red/90 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+        // >
+        //   {language.actions.viewChat}
+        // </Button>
       );
     } else if (quotation.hasOrder && quotation.order) {
       return (

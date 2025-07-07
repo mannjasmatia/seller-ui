@@ -679,7 +679,7 @@ export const useInboxChat = () => {
 
   // Check if can generate invoice
   const canGenerateInvoice = useCallback(() => {
-    return selectedChat?.phase === 'negotiation' && !chatContext?.hasActiveInvoice;
+    return (selectedChat?.phase === 'negotiation' || selectedChat?.phase === 'invoice_rejected');
   }, [selectedChat?.phase, chatContext?.hasActiveInvoice]);
 
   // Get invoice status

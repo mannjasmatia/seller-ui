@@ -66,13 +66,13 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
       newErrors.negotiatedPrice = language.validation.priceRequired;
     }
 
-    if (formData.taxAmount < 0) {
-      newErrors.taxAmount = language.validation.taxMin;
-    }
+    // if (formData.taxAmount < 0) {
+    //   newErrors.taxAmount = language.validation.taxMin;
+    // }
 
-    if (formData.shippingCharges < 0) {
-      newErrors.shippingCharges = language.validation.shippingMin;
-    }
+    // if (formData.shippingCharges < 0) {
+    //   newErrors.shippingCharges = language.validation.shippingMin;
+    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -158,7 +158,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     onChange={(value) => handleInputChange('negotiatedPrice', value)}
                     placeholder={language.negotiatedPricePlaceholder}
                     error={errors.negotiatedPrice}
-                    validation={{ required: true, min: 0.01 }}
+                    validation={{ required: true, errorMessages:{required:'Negotiated price is required'} }}
                     disabled={isGenerating}
                     leftIcon={<DollarSign className="w-4 h-4" />}
                   />
@@ -169,7 +169,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   )}
                 </div>
 
-                <div className="space-y-4">
+                {/* <div className="space-y-4">
                   <Input
                     label={language.taxAmount}
                     type="number"
@@ -193,12 +193,12 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                     disabled={isGenerating}
                     leftIcon={<Truck className="w-4 h-4" />}
                   />
-                </div>
+                </div> */}
               </div>
             </div>
 
             {/* Terms */}
-            <div className="bg-gray-50 rounded-lg p-4">
+            {/* <div className="bg-gray-50 rounded-lg p-4">
               <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                 <FileText className="w-5 h-5 mr-2 text-cb-red" />
                 Terms & Conditions
@@ -233,7 +233,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   disabled={isGenerating}
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Total */}
             <div className="bg-cb-red/10 rounded-lg p-4">
