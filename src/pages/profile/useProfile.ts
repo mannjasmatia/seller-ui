@@ -36,7 +36,7 @@ const useProfile = () => {
     city: '',
     state: '',
     zip: '',
-    profilePic: null,
+    logo: null,
     avatar: null,
   });
 
@@ -51,7 +51,7 @@ const useProfile = () => {
     city: '',
     state: '',
     zip: '',
-    profilePic: null,
+    logo: null,
     avatar: null,
   });
 
@@ -119,7 +119,7 @@ const useProfile = () => {
         pattern: 'Please enter a valid email address'
       }
     },
-    phoneNumber: {
+    phone: {
       required: true,
       pattern: /^\+?[1-9]\d{1,14}$/,
       errorMessages: {
@@ -197,15 +197,15 @@ const useProfile = () => {
         city: profileData.city || '',
         state: profileData.state || '',
         zip: profileData.zip || '',
-        profilePic: profileData.profilePic || null,
+        logo: profileData.logo || null,
         avatar: profileData.avatar || null,
       };
       setFormState(data);
       setOriginalFormState(data);
       
       // Set preview image
-      if (profileData.profilePic) {
-        setPreview(`${import.meta.env.VITE_MEDIA_URL}/${profileData.profilePic}`);
+      if (profileData.logo) {
+        setPreview(`${import.meta.env.VITE_MEDIA_URL}/${profileData.logo}`);
       } else if (profileData.avatar) {
         setPreview(`/avatars/avatar-${profileData.avatar}.svg`);
       }
@@ -390,7 +390,7 @@ const useProfile = () => {
 
     setFormState(prev => ({
       ...prev,
-      profilePic: file,
+      logo: file,
       avatar: null,
     }));
   };
@@ -399,7 +399,7 @@ const useProfile = () => {
   const handleSelectAvatar = (avatarId: number) => {
     setFormState(prev => ({
       ...prev,
-      profilePic: null,
+      logo: null,
       avatar: String(avatarId),
     }));
     setPreview(`/avatars/avatar-${avatarId}.svg`);
@@ -486,8 +486,8 @@ const useProfile = () => {
     setUploadedFiles([]);
     
     // Reset preview
-    if (originalFormState.profilePic) {
-      setPreview(`${import.meta.env.VITE_MEDIA_URL}/${originalFormState.profilePic}`);
+    if (originalFormState.logo) {
+      setPreview(`${import.meta.env.VITE_MEDIA_URL}/${originalFormState.logo}`);
     } else if (originalFormState.avatar) {
       setPreview(`/avatars/avatar-${originalFormState.avatar}.svg`);
     } else {
@@ -498,6 +498,7 @@ const useProfile = () => {
   // Handle save
   const handleSave = () => {
     if (!validateForm()) {
+        console.log("Errors in Profile : ", errors)
       customToast.error('Please fix the form errors before saving');
       return;
     }
@@ -532,7 +533,7 @@ const useProfile = () => {
         value.forEach(categoryId => {
           formData.append('categories[]', categoryId);
         });
-      } else if (key === 'profilePic' && value instanceof File) {
+      } else if (key === 'logo' && value instanceof File) {
         formData.append('files', value);
       } else if (value !== null && value !== undefined) {
         formData.append(key, value as string);

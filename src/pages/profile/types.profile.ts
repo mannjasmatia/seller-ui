@@ -9,7 +9,7 @@ export interface ProfileFormState {
   city: string;
   state: string;
   zip: string;
-  profilePic?: File | null | string;
+  logo?: File | null | string;
   avatar?: string | null;
 }
 

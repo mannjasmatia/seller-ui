@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/appStore";
-import { Edit, Save, X, Upload, Camera } from "lucide-react";
+import { Edit, Save, X, Upload, Camera, User, Building, MapPin, Phone, Mail, Hash } from "lucide-react";
 import useProfile from "./useProfile";
 import Input from "../../components/BasicComponents/Input";
 import Button from "../../components/BasicComponents/Button";
@@ -12,6 +12,7 @@ import MediaModal from "../../modals/MediaModal";
 import VerifyOtpModal from "../../modals/verify-otp/VerifyOtpModal";
 import StateDropdown from "../../components/state-city-dropdown/StateDropdown";
 import CityDropdown from "../../components/state-city-dropdown/CItyDropdown";
+import AvatarModal from "./components/AvatarModal";
 
 const Profile: React.FC = () => {
   const language = useSelector((state: RootState) => state.language?.value)["profile"];
@@ -82,81 +83,43 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header with Logo */}
-        <div className="text-center mb-8">
-          <img src="/logo.png" alt="Canadian Bazaar" className="h-16 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{language.title}</h1>
-          <p className="text-gray-600">{language.subtitle}</p>
-        </div>
-
-        {/* Main Profile Card */}
-        <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
-          {/* Profile Picture Section */}
-          <div className="bg-gradient-to-r from-cb-red to-red-600 px-6 py-8">
-            <div className="flex flex-col items-center">
-              <div className="relative group">
-                <div
-                  className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg cursor-pointer transition-transform duration-300 hover:scale-105"
-                  onMouseDown={handleMouseDown}
-                  onMouseUp={handleMouseUp}
-                  onMouseLeave={handleMouseUp}
-                >
-                  <DynamicImage
-                    src={preview}
-                    alt="Profile Picture"
-                    width="w-full"
-                    height="h-full"
-                    objectFit="cover"
-                    className="transition-all duration-300"
-                  />
-                </div>
-
-                {/* Edit overlay for profile picture */}
-                {isEditing && (
-                  <div className="absolute inset-0 rounded-full bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <Camera className="w-8 h-8 text-white" />
-                  </div>
-                )}
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">{language.title}</h1>
+                <p className="mt-2 text-gray-600">{language.subtitle}</p>
               </div>
-
-              <h2 className="text-2xl font-bold text-white mt-4 text-center">
-                {formState.companyName || "Your Name"}
-              </h2>
-              <p className="text-white/90 text-center">{formState.email || "your@email.com"}</p>
-
-              {/* Edit/Save buttons */}
-              <div className="mt-4 flex gap-3">
+              <div className="flex items-center space-x-4">
                 {isEditing ? (
-                  <>
+                  <div className="flex space-x-3">
                     <Button
                       variant="outline"
-                      size="sm"
                       onClick={handleCancel}
-                      className="bg-white/10 text-white border-white/30 hover:bg-white/20"
                       leftIcon={<X className="w-4 h-4" />}
+                      className="border-gray-300 text-gray-700 hover:bg-gray-50"
                     >
                       {language.cancel}
                     </Button>
                     <Button
                       variant="solid"
-                      size="sm"
                       onClick={handleSave}
                       isLoading={isUpdating}
-                      className="bg-white text-cb-red hover:bg-gray-100"
                       leftIcon={<Save className="w-4 h-4" />}
+                      theme={['cb-red', 'white']}
                     >
                       {isUpdating ? language.saving : language.save}
                     </Button>
-                  </>
+                  </div>
                 ) : (
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant="solid"
                     onClick={handleEdit}
-                    className="bg-white/10 text-white border-white/30 hover:bg-white/20"
                     leftIcon={<Edit className="w-4 h-4" />}
+                    theme={['cb-red', 'white']}
                   >
                     {language.edit}
                   </Button>
@@ -164,15 +127,121 @@ const Profile: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Form Content */}
-          <div className="p-8">
-            <div className="space-y-8">
-              {/* Company Information */}
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-6 pb-2 border-b border-gray-200">
-                  {language.sections.companyInfo}
-                </h3>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Sidebar - Profile Picture & Quick Info */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden sticky top-8">
+              {/* Profile Picture Section */}
+              <div className="p-6 text-center border-b border-gray-200">
+                <div className="relative group inline-block">
+                  <div
+                    className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-100 shadow-lg cursor-pointer transition-all duration-300 hover:border-cb-red mx-auto"
+                    onMouseDown={handleMouseDown}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                  >
+                    <DynamicImage
+                      src={preview}
+                      alt="Profile Picture"
+                      width="w-full"
+                      height="h-full"
+                      objectFit="cover"
+                      className="transition-all duration-300"
+                    />
+                  </div>
+
+                  {/* Edit overlay for profile picture */}
+                  {isEditing && (
+                    <div className="absolute inset-0 rounded-full bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <Camera className="w-8 h-8 text-white" />
+                    </div>
+                  )}
+                </div>
+
+                <h2 className="text-xl font-bold text-gray-900 mt-4">
+                  {formState.companyName || "Your Name"}
+                </h2>
+                <p className="text-gray-600">{formState.email || "your@email.com"}</p>
+
+                {/* Image Upload Actions (Only visible in edit mode) */}
+                {isEditing && (
+                  <div className="mt-4 space-y-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleFileInputClick}
+                      leftIcon={<Upload className="w-4 h-4" />}
+                      fullWidth
+                      className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                    >
+                      {language.imageActions.uploadImage}
+                    </Button>
+                    {/* <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsAvatarModalOpen(true)}
+                      leftIcon={<Camera className="w-4 h-4" />}
+                      fullWidth
+                      className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                    >
+                      {language.imageActions.chooseAvatar}
+                    </Button> */}
+                    <p className="text-xs text-gray-500">{language.imageActions.longPressToView}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Info */}
+              <div className="p-6 space-y-4">
+                <div className="flex items-center space-x-3 text-gray-600">
+                  <Phone className="w-4 h-4 text-cb-red flex-shrink-0" />
+                  <span className="text-sm">{formState.phone || "No phone number"}</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-600">
+                  <Mail className="w-4 h-4 text-cb-red flex-shrink-0" />
+                  <span className="text-sm">{formState.email || "No email"}</span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-600">
+                  <Building className="w-4 h-4 text-cb-red flex-shrink-0" />
+                  <span className="text-sm">
+                    <BusinessTypeDropdown
+                      selectedBusinessType={formState.businessType}
+                      onChange={handleBusinessTypeChange}
+                      mode="view"
+                    />
+                  </span>
+                </div>
+                <div className="flex items-center space-x-3 text-gray-600">
+                  <MapPin className="w-4 h-4 text-cb-red flex-shrink-0" />
+                  <span className="text-sm">
+                    {formState.city && formState.state
+                      ? `${formState.city}, ${provinces.find((p) => p.value === formState.state)?.label}`
+                      : "No address"
+                    }
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Content - Form Sections */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Company Information */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="border-b border-gray-200 px-6 py-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-cb-red rounded-lg flex items-center justify-center">
+                    <Building className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">{language.sections.companyInfo}</h3>
+                </div>
+              </div>
+              <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     {isEditing ? (
@@ -191,7 +260,9 @@ const Profile: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           {language.fields.companyName}
                         </label>
-                        <p className="text-gray-900 font-medium">{formState.companyName || "-"}</p>
+                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-md">
+                          {formState.companyName || "-"}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -213,7 +284,9 @@ const Profile: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           {language.fields.email}
                         </label>
-                        <p className="text-gray-900 font-medium">{formState.email || "-"}</p>
+                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-md">
+                          {formState.email || "-"}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -235,7 +308,9 @@ const Profile: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           {language.fields.phone}
                         </label>
-                        <p className="text-gray-900 font-medium">{formState.phone || "-"}</p>
+                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-md">
+                          {formState.phone || "-"}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -258,8 +333,7 @@ const Profile: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           {language.fields.businessType}
                         </label>
-                        <p className="text-gray-900 font-medium">
-                          {/* View mode returns only the name of that _id */}
+                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-md">
                           <BusinessTypeDropdown
                             selectedBusinessType={formState.businessType}
                             onChange={handleBusinessTypeChange}
@@ -269,46 +343,53 @@ const Profile: React.FC = () => {
                       </div>
                     )}
                   </div>
-                </div>
 
-                <div className="mt-6">
-                  {isEditing ? (
-                    <div>
-                      <CategoryDropdown
-                        label={language.fields.categories}
-                        selectedCategories={formState.categories}
-                        onChange={handleCategoryChange}
-                        placeholder={language.placeholders.categories}
-                        allowSelectAll={true}
-                      />
-                      {errors.categories && <p className="text-cb-red text-sm mt-1">{errors.categories}</p>}
-                    </div>
-                  ) : (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {language.fields.categories}
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {formState.categories.length > 0 ? (
-                          <CategoryDropdown
-                            selectedCategories={formState.categories}
-                            onChange={handleCategoryChange}
-                            disabled={true}
-                          />
-                        ) : (
-                          "-"
-                        )}
-                      </p>
-                    </div>
-                  )}
+                  <div className="md:col-span-2">
+                    {isEditing ? (
+                      <div>
+                        <CategoryDropdown
+                          label={language.fields.categories}
+                          selectedCategories={formState.categories}
+                          onChange={handleCategoryChange}
+                          placeholder={language.placeholders.categories}
+                          allowSelectAll={true}
+                        />
+                        {errors.categories && <p className="text-cb-red text-sm mt-1">{errors.categories}</p>}
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {language.fields.categories}
+                        </label>
+                        <div className="bg-gray-50 px-3 py-2 rounded-md min-h-[42px] flex items-center">
+                          {formState.categories.length > 0 ? (
+                            <CategoryDropdown
+                              selectedCategories={formState.categories}
+                              onChange={handleCategoryChange}
+                              disabled={true}
+                            />
+                          ) : (
+                            <span className="text-gray-900">-</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
+            </div>
 
-              {/* Business Details */}
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-6 pb-2 border-b border-gray-200">
-                  {language.sections.businessDetails}
-                </h3>
+            {/* Business Details */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="border-b border-gray-200 px-6 py-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-cb-red rounded-lg flex items-center justify-center">
+                    <Hash className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">{language.sections.businessDetails}</h3>
+                </div>
+              </div>
+              <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     {isEditing ? (
@@ -327,18 +408,27 @@ const Profile: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           {language.fields.businessNumber}
                         </label>
-                        <p className="text-gray-900 font-medium">{formState.businessNumber || "-"}</p>
+                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-md">
+                          {formState.businessNumber || "-"}
+                        </p>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Address Information */}
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-6 pb-2 border-b border-gray-200">
-                  {language.sections.addressInfo}
-                </h3>
+            {/* Address Information */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="border-b border-gray-200 px-6 py-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-cb-red rounded-lg flex items-center justify-center">
+                    <MapPin className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">{language.sections.addressInfo}</h3>
+                </div>
+              </div>
+              <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
                     {isEditing ? (
@@ -357,7 +447,9 @@ const Profile: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           {language.fields.street}
                         </label>
-                        <p className="text-gray-900 font-medium">{formState.street || "-"}</p>
+                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-md">
+                          {formState.street || "-"}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -376,7 +468,7 @@ const Profile: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           {language.fields.state}
                         </label>
-                        <p className="text-gray-900 font-medium">
+                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-md">
                           {provinces.find((p) => p.value === formState.state)?.label || "-"}
                         </p>
                       </div>
@@ -398,7 +490,9 @@ const Profile: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           {language.fields.city}
                         </label>
-                        <p className="text-gray-900 font-medium">{formState.city || "-"}</p>
+                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-md">
+                          {formState.city || "-"}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -420,38 +514,14 @@ const Profile: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           {language.fields.zip}
                         </label>
-                        <p className="text-gray-900 font-medium">{formState.zip || "-"}</p>
+                        <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-md">
+                          {formState.zip || "-"}
+                        </p>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
-
-              {/* Image Upload Section (Only visible in edit mode) */}
-              {isEditing && (
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-6 pb-2 border-b border-gray-200">
-                    {language.sections.profilePicture}
-                  </h3>
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <Button
-                      variant="outline"
-                      onClick={handleFileInputClick}
-                      leftIcon={<Upload className="w-4 h-4" />}
-                    >
-                      {language.imageActions.uploadImage}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsAvatarModalOpen(true)}
-                      leftIcon={<Camera className="w-4 h-4" />}
-                    >
-                      {language.imageActions.chooseAvatar}
-                    </Button>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-2">{language.imageActions.longPressToView}</p>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -459,15 +529,6 @@ const Profile: React.FC = () => {
 
       {/* Hidden file input */}
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-
-      {/* Avatar Selection Modal */}
-      {/* <AvatarModal
-        open={isAvatarModalOpen}
-        onClose={() => setIsAvatarModalOpen(false)}
-        onSelect={handleSelectAvatar}
-        maxAvatars={50}
-        avatarsPerRow={8}
-      /> */}
 
       {/* Media Modal for viewing profile picture */}
       <MediaModal
@@ -479,6 +540,15 @@ const Profile: React.FC = () => {
         download={true}
         downloadText={language.mediaModal.download}
       />
+
+      {/* Avatar Selection Modal - Not used */}
+      {/* <AvatarModal
+        open={isAvatarModalOpen}
+        onClose={() => setIsAvatarModalOpen(false)}
+        onSelect={handleSelectAvatar}
+        maxAvatars={50}
+        avatarsPerRow={8}
+      /> */}
 
       {/* Email OTP Verification Modal */}
       <VerifyOtpModal
