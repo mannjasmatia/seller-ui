@@ -4,12 +4,13 @@ import { ApiResponse } from "../api-service/types.api";
 import { OrderStatus, Order } from "../../pages/orders/types.orders";
 
 /**
- * Orders list params
+ * Orders list params with search
  */
 export interface OrdersListParams {
   page?: number;
   limit?: number;
   status?: OrderStatus;
+  search?: string;
 }
 
 /**
@@ -20,14 +21,6 @@ export interface OrderStatusUpdateParams {
   status: OrderStatus;
   trackingNumber?: string;
   estimatedDeliveryDate?: string;
-}
-
-/**
- * Order cancellation params
- */
-export interface OrderCancellationParams {
-  orderId: string;
-  cancellationReason?: string;
 }
 
 /**
@@ -45,13 +38,13 @@ export const useGetOrderByIdApi = (orderId: string) => {
 };
 
 /**
- * Custom hook for getting seller orders
+ * Custom hook for getting seller orders with search and filters
  */
 export const useGetOrdersApi = (params: OrdersListParams = {}) => {
   return useQuery({
     queryKey: ["getSellerOrders", params],
     queryFn: () => ordersApi.getOrders(params),
-    staleTime: 1 * 60 * 1000, // 1 minute
+    staleTime: 30 * 1000, // 30 seconds for more frequent updates
     gcTime: 5 * 60 * 1000, // 5 minutes
     select: (data) => data?.data?.response as ApiResponse & { docs: Order[] },
   });
@@ -71,22 +64,8 @@ export const useUpdateOrderStatusApi = () => {
       queryClient.invalidateQueries({ queryKey: ["getSellerOrders"] });
       queryClient.invalidateQueries({ queryKey: ["getOrderById", variables.orderId] });
     },
+    onError: (error) => {
+      console.error('Order status update failed:', error);
+    },
   });
 };
-
-// /**
-//  * Custom hook for cancelling order
-//  */
-// export const useCancelOrderApi = () => {
-//   const queryClient = useQueryClient();
-  
-//   return useMutation({
-//     mutationFn: ({ orderId, ...data }: OrderCancellationParams) => 
-//       ordersApi.cancelOrder(orderId, data),
-//     onSuccess: (_, variables) => {
-//       // Invalidate and refetch orders data
-//       queryClient.invalidateQueries({ queryKey: ["getSellerOrders"] });
-//       queryClient.invalidateQueries({ queryKey: ["getOrderById", variables.orderId] });
-//     },
-//   });
-// };

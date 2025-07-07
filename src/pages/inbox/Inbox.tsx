@@ -423,7 +423,7 @@ const Inbox: React.FC = () => {
                         <Message
                           key={message._id}
                           message={message}
-                          isOwnMessage={message.senderModel === "seller"}
+                          isOwnMessage={message.senderModel.toLowerCase() === "seller"}
                           formatTime={formatTime}
                           onRetry={retryMessage}
                           onImageView={openImageModal}

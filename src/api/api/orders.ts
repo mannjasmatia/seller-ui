@@ -1,12 +1,4 @@
 import { apiPaths } from "../api-service/apiPaths";
-
-// Add these paths to your apiPaths.ts file:
-// orders: {
-//   getById: "api/v1/orders",
-//   updateStatus: "api/v1/orders", 
-//   sellerList: "api/v1/orders/seller/list",
-//   cancel: "api/v1/orders",
-// },
 import ApiService from "../api-service/ApiService";
 
 /**
@@ -29,7 +21,7 @@ export const updateOrderStatus = (orderId: string, data: {
 }) => {
     return ApiService({
         method: 'PUT',
-        endpoint: `${apiPaths.orders.updateStatus}/${orderId}/status`,
+        endpoint: `${apiPaths.orders.updateStatus}/${orderId}`,
         data,
         headers: {
             'Content-Type': 'application/json',
@@ -38,12 +30,13 @@ export const updateOrderStatus = (orderId: string, data: {
 };
 
 /**
- * Get all orders for seller
+ * Get all orders for seller with search and filters
  */
 export const getOrders = (params: {
     page?: number;
     limit?: number;
     status?: string;
+    search?: string;
 }) => {
     return ApiService({
         method: 'GET',
@@ -51,19 +44,3 @@ export const getOrders = (params: {
         params,
     });
 };
-
-// /**
-//  * Cancel order
-//  */
-// export const cancelOrder = (orderId: string, data?: {
-//     cancellationReason?: string;
-// }) => {
-//     return ApiService({
-//         method: 'PUT',
-//         endpoint: `${apiPaths.orders.cancel}/${orderId}/cancel`,
-//         data,
-//         headers: {
-//             'Content-Type': 'application/json',
-//         },
-//     });
-// };

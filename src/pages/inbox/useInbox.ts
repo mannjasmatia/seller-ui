@@ -211,7 +211,7 @@ export const useInboxChat = () => {
         if (currentSelectedChat?._id === chatId) {
           setMessages(prev => {
             return prev.map(msg => {
-              if (msg.chat === chatId && msg.senderModel === 'seller') {
+              if (msg.chat === chatId && msg.senderModel.toLowerCase() === 'seller') {
                 return { ...msg, seen: true };
               }
               return msg;

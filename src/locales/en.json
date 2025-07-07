@@ -501,7 +501,7 @@
       "noMessagesDescription": "Start the conversation by sending a message"
     }
   },
-  "orders": {
+   "orders": {
     "title": "Orders Management",
     "subtitle": "Manage and track your customer orders",
     "noOrders": {
@@ -530,6 +530,7 @@
       "to": "to", 
       "of": "of",
       "results": "results",
+      "totalOrders": "total orders",
       "previous": "Previous",
       "next": "Next"
     },
@@ -555,20 +556,32 @@
     "statusModal": {
       "title": "Update Order Status",
       "description": "Update the status of this order and add tracking information if needed.",
-      "status": "New Status",
+      "currentStatus": "Current Status",
+      "newStatus": "New Status",
+      "selectStatus": "Select new status...",
+      "willUpdateTo": "Order status will be updated to",
       "trackingNumber": "Tracking Number",
       "trackingPlaceholder": "Enter tracking number",
+      "trackingHint": "Tracking number is required for shipping statuses",
       "estimatedDelivery": "Estimated Delivery Date",
+      "deliveryHint": "Optional: Set expected delivery date and time",
+      "warningTitle": "Important Notice",
+      "warningMessage": "This status change may be irreversible. Please ensure all details are correct before proceeding.",
       "update": "Update Status",
-      "updating": "Updating..."
+      "updating": "Updating...",
+      "cancel": "Cancel",
+      "validation": {
+        "statusRequired": "Status is required",
+        "trackingRequired": "Tracking number is required for shipped orders",
+        "futureDateRequired": "Estimated delivery date must be in the future"
+      }
     },
-    "cancelModal": {
-      "title": "Cancel Order",
-      "description": "Are you sure you want to cancel this order? This action cannot be undone.",
-      "reason": "Cancellation Reason (Optional)",
-      "reasonPlaceholder": "Please provide a reason for cancellation...",
-      "cancel": "Cancel Order",
-      "cancelling": "Cancelling..."
+    "confirmModal": {
+      "title": "Confirm Status Update",
+      "description": "Are you sure you want to update the order status to",
+      "warning": "This action may be irreversible.",
+      "confirm": "Confirm Update",
+      "cancel": "Cancel"
     },
     "success": {
       "statusUpdated": "Order status updated successfully",

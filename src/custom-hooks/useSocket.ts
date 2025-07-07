@@ -24,7 +24,7 @@ interface SendMessageData {
 }
 
 const useSocket = (url?: string) => {
-  const SOCKET_URL = url || import.meta.env.VITE_SELLER_CHAT_URL || 'http://localhost:8000';
+  const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
   
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>({

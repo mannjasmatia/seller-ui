@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { 
   useGetOrdersApi, 
@@ -11,7 +11,6 @@ import {
   OrderFilters, 
   OrderPagination, 
   StatusUpdateFormData, 
-  CancelOrderFormData, 
   OrderStatus,
   Order
 } from './types.orders';
@@ -44,12 +43,16 @@ export const useOrders = () => {
     isCancelModalOpen: false,
   });
 
-  // API params for orders list
-  const ordersParams: OrdersListParams = {
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [statusUpdateData, setStatusUpdateData] = useState<StatusUpdateFormData | null>(null);
+
+  // API params for orders list (includes search and filters)
+  const ordersParams: OrdersListParams = useMemo(() => ({
     page: state.pagination.page,
     limit: state.pagination.limit,
     ...(state.filters.status && { status: state.filters.status as OrderStatus }),
-  };
+    ...(state.filters.searchQuery.trim() && { search: state.filters.searchQuery.trim() }),
+  }), [state.pagination.page, state.pagination.limit, state.filters.status, state.filters.searchQuery]);
 
   // API hooks
   const { 
@@ -73,24 +76,17 @@ export const useOrders = () => {
     isSuccess: isUpdateSuccess 
   } = useUpdateOrderStatusApi();
 
-//   const { 
-//     mutate: cancelOrder, 
-//     isPending: isCancelling, 
-//     isError: isCancelError, 
-//     isSuccess: isCancelSuccess 
-//   } = useCancelOrderApi();
-
-  // Update pagination when orders data changes
+  // Update pagination when orders data changes  
   useEffect(() => {
     if (ordersData) {
       setState(prev => ({
         ...prev,
         pagination: {
-          page: ordersData.currentPage,
-          limit: ordersData.docs.length,
-          total: ordersData.totalDocs,
-          hasNext: ordersData.hasNext,
-          hasPrev: ordersData.hasPrev,
+          page: ordersData.currentPage || ordersData.currentPage || 1,
+          limit: ordersData.docs?.length || prev.pagination.limit,
+          total: ordersData.totalDocs || 0,
+          hasNext: ordersData.hasNext || false,
+          hasPrev: ordersData.hasPrev || false,
         }
       }));
     }
@@ -99,28 +95,51 @@ export const useOrders = () => {
   // Handle status update success
   useEffect(() => {
     if (isUpdateSuccess) {
-      customToast.success(language.success.statusUpdated || 'Order status updated successfully');
+      customToast.success(language?.success?.statusUpdated || 'Order status updated successfully');
       setState(prev => ({ ...prev, isStatusModalOpen: false }));
+      setIsConfirmModalOpen(false);
+      setStatusUpdateData(null);
+      refetchOrders();
     }
-  }, [isUpdateSuccess, language]);
-
-  // Handle cancel success
-//   useEffect(() => {
-//     if (isCancelSuccess) {
-//       customToast.success(language.success.orderCancelled || 'Order cancelled successfully');
-//       setState(prev => ({ ...prev, isCancelModalOpen: false }));
-//     }
-//   }, [isCancelSuccess, language]);
+  }, [isUpdateSuccess, language, refetchOrders]);
 
   // Handle errors
   useEffect(() => {
     if (isUpdateError) {
-      customToast.error(language.errors.updateFailed || 'Failed to update order status');
+      customToast.error(language?.errors?.updateFailed || 'Failed to update order status');
+      setIsConfirmModalOpen(false);
     }
-    // if (isCancelError) {
-    //   customToast.error(language.errors.cancelFailed || 'Failed to cancel order');
-    // }
   }, [isUpdateError, language]);
+
+// Simple debounce implementation without lodash
+function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const debounced = (...args: Parameters<T>) => {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+    };
+    debounced.cancel = () => {
+        if (timer) clearTimeout(timer);
+        timer = null;
+    };
+    return debounced;
+}
+
+const debouncedRefetch = useMemo(
+    () => debounce(() => {
+        refetchOrders();
+    }, 500),
+    [refetchOrders]
+);
+
+  // Cleanup debounced function
+  useEffect(() => {
+    return () => {
+      debouncedRefetch.cancel();
+    };
+  }, [debouncedRefetch]);
+
+  
 
   // Filter functions
   const setStatusFilter = useCallback((status: string) => {
@@ -153,7 +172,8 @@ export const useOrders = () => {
       filters: INITIAL_FILTERS,
       pagination: { ...prev.pagination, page: 1 }
     }));
-  }, []);
+    refetchOrders();
+  }, [refetchOrders]);
 
   // Pagination functions
   const setPage = useCallback((page: number) => {
@@ -200,6 +220,7 @@ export const useOrders = () => {
       ...prev,
       isStatusModalOpen: false
     }));
+    setStatusUpdateData(null);
   }, []);
 
   const openCancelModal = useCallback((order: Order) => {
@@ -217,47 +238,37 @@ export const useOrders = () => {
     }));
   }, []);
 
+  // Confirmation modal functions
+  const openConfirmModal = useCallback(() => {
+    setIsConfirmModalOpen(true);
+  }, []);
+
+  const closeConfirmModal = useCallback(() => {
+    setIsConfirmModalOpen(false);
+    setStatusUpdateData(null);
+  }, []);
+
   // Action functions
-  const handleUpdateStatus = useCallback((data: StatusUpdateFormData) => {
+  const handleStatusUpdate = useCallback((data: StatusUpdateFormData) => {
     if (!state.selectedOrder) return;
+    
+    setStatusUpdateData(data);
+    setState(prev => ({ ...prev, isStatusModalOpen: false }));
+    setIsConfirmModalOpen(true);
+  }, [state.selectedOrder]);
+
+  const handleConfirmStatusUpdate = useCallback(() => {
+    if (!state.selectedOrder || !statusUpdateData) return;
     
     updateOrderStatus({
       orderId: state.selectedOrder.orderId,
-      ...data
+      ...statusUpdateData
     });
-  }, [state.selectedOrder, updateOrderStatus]);
-
-//   const handleCancelOrder = useCallback((data: CancelOrderFormData) => {
-//     if (!state.selectedOrder) return;
-    
-//     updateOrderStatus({
-//       orderId: state.selectedOrder.orderId,
-//       ...data
-//     });
-//   }, [state.selectedOrder, cancelOrder]);
+  }, [state.selectedOrder, statusUpdateData, updateOrderStatus]);
 
   // Utility functions
-  const getFilteredOrders = useCallback(() => {
-    if (!ordersData?.docs) return [];
-    
-    let filtered = ordersData.docs;
-    
-    // Apply search filter
-    if (state.filters.searchQuery) {
-      const query = state.filters.searchQuery.toLowerCase();
-      filtered = filtered.filter(order => 
-        order.orderId.toLowerCase().includes(query) ||
-        order.buyer.fullName.toLowerCase().includes(query) ||
-        order.product.name.toLowerCase().includes(query) ||
-        (order.trackingNumber && order.trackingNumber.toLowerCase().includes(query))
-      );
-    }
-    
-    return filtered;
-  }, [ordersData?.docs, state.filters.searchQuery]);
-
   const getOrderStatusBadgeColor = useCallback((status: OrderStatus) => {
-    const statusColors : any = {
+    const statusColors: Record<OrderStatus, string> = {
       pending: 'bg-yellow-100 text-yellow-800',
       confirmed: 'bg-blue-100 text-blue-800',
       processing: 'bg-purple-100 text-purple-800',
@@ -273,22 +284,36 @@ export const useOrders = () => {
   }, []);
 
   const formatOrderStatus = useCallback((status: OrderStatus) => {
-    return status.replace(/_/g, ' ').replace(/\b\w/g, (l:any) => l.toUpperCase());
+    const statusLabels: Record<OrderStatus, string> = {
+      pending: 'Pending',
+      confirmed: 'Confirmed',
+      processing: 'Processing',
+      ready_to_ship: 'Ready to Ship',
+      shipped: 'Shipped',
+      in_transit: 'In Transit',
+      out_for_delivery: 'Out for Delivery',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled',
+      returned: 'Returned',
+    };
+    return statusLabels[status] || status.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
   }, []);
 
-  const isLoading = isLoadingOrders || isUpdatingStatus ;
+  const isLoading = isLoadingOrders || isUpdatingStatus;
 
   return {
     // State
-    orders: getFilteredOrders(),
+    orders: ordersData?.docs,
     selectedOrder: selectedOrderData,
     filters: state.filters,
     pagination: state.pagination,
+    statusUpdateData,
     
     // Modal states
     isDetailModalOpen: state.isDetailModalOpen,
     isStatusModalOpen: state.isStatusModalOpen,
     isCancelModalOpen: state.isCancelModalOpen,
+    isConfirmModalOpen,
     
     // Loading states
     isLoading,
@@ -313,7 +338,10 @@ export const useOrders = () => {
     closeStatusModal,
     openCancelModal,
     closeCancelModal,
-    handleUpdateStatus,
+    openConfirmModal,
+    closeConfirmModal,
+    handleStatusUpdate,
+    handleConfirmStatusUpdate,
     refetchOrders,
     
     // Utilities
