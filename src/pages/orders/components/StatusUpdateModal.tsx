@@ -12,7 +12,7 @@ interface StatusUpdateModalProps {
   onClose: () => void;
   onSubmit: (data: StatusUpdateFormData) => void;
   isLoading: boolean;
-  formatOrderStatus: (status: string) => string;
+  formatOrderStatus: (status: OrderStatus) => string;
 }
 
 const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({
