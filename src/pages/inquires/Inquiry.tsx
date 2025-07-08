@@ -6,6 +6,7 @@ import ConfirmationModal from '../../modals/ConfirmationModal';
 import useInquiry from './useInquiry';
 import InquiryCard from './components/InquiryCard';
 import QuotationDetailModal from './components/QuotationDetailModal';
+import InvoiceModal from '../inbox/components/InvoiceModal';
 
 const Inquiry: React.FC = () => {
   const {
@@ -18,9 +19,14 @@ const Inquiry: React.FC = () => {
     // Loading states
     isLoadingQuotations,
     isLoadingDetail,
-    isAccepting,
     isRejecting,
     isNegotiating,
+
+    // invoice modal
+    isInvoiceModalOpen,
+    isGeneratingInvoice,
+    handleGenerateInvoice,
+    closeInvoiceModal,
     
     // Error states
     isQuotationsError,
@@ -288,7 +294,7 @@ const Inquiry: React.FC = () => {
                     getTimeAgo={getTimeAgo}
                     getStatusColor={getStatusColor}
                     language={language}
-                    isAccepting={isAccepting}
+                    isAccepting={isGeneratingInvoice}
                     isRejecting={isRejecting}
                     isNegotiating={isNegotiating}
                   />
@@ -331,6 +337,16 @@ const Inquiry: React.FC = () => {
         </div>
       </div>
 
+      {/* Invoice Modal */}
+      <InvoiceModal
+            open={isInvoiceModalOpen}
+            onClose={closeInvoiceModal}
+            onGenerate={handleGenerateInvoice}
+            isGenerating={isGeneratingInvoice}
+            quotationPriceRange={{min:quotationDetail?.minPrice as number, max:quotationDetail?.minPrice as number, }}
+        />
+      
+
       {/* Detail Modal */}
       <QuotationDetailModal
         open={isDetailModalOpen}
@@ -340,7 +356,7 @@ const Inquiry: React.FC = () => {
         onAccept={(id) => openConfirmation('accept', id)}
         onReject={(id) => openConfirmation('reject', id)}
         onNegotiate={(id) => openConfirmation('negotiate', id)}
-        isAccepting={isAccepting}
+        isAccepting={isGeneratingInvoice}
         isRejecting={isRejecting}
         isNegotiating={isNegotiating}
       />
@@ -353,7 +369,7 @@ const Inquiry: React.FC = () => {
         confirmButtonText={getConfirmationContent().confirmText}
         onClose={closeConfirmation}
         onConfirm={handleConfirmAction}
-        isLoading={isAccepting || isRejecting || isNegotiating}
+        isLoading={isGeneratingInvoice || isRejecting || isNegotiating}
         theme={confirmAction.type === 'reject' ? ['red-500', 'white'] : ['cb-red', 'white']}
       />
     </div>

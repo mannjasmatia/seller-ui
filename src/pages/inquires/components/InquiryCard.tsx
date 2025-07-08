@@ -41,7 +41,7 @@ export const InquiryCard: React.FC<QuotationCardProps> = ({
     if (quotation.status === 'pending') {
       return (
         <div className="flex gap-1.5">
-          <Button
+          {/* <Button
             variant="outline"
             size="sm"
             onClick={(e) => {
@@ -53,7 +53,7 @@ export const InquiryCard: React.FC<QuotationCardProps> = ({
             className="px-3 py-1.5 text-sm border-red-200 text-red-600 hover:bg-red-50"
           >
             Reject
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             size="sm"
@@ -259,7 +259,7 @@ export const InquiryCard: React.FC<QuotationCardProps> = ({
       {/* Actions Footer */}
       <div className="flex items-center justify-between pt-1.5 border-t border-gray-100">
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={(e) => {
             e.stopPropagation();

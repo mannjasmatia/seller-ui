@@ -177,7 +177,7 @@ export const ChatCard: React.FC<ChatCardProps> = ({
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 min-w-0 flex items-center justify-between">
+        <div className="flex-1 min-w-0 flex items-start justify-between">
           {/* Left side - User name and message */}
           <div className="flex-1 min-w-0 mr-3">
             <div className="flex items-center gap-2 mb-0.5">
@@ -196,12 +196,12 @@ export const ChatCard: React.FC<ChatCardProps> = ({
           </div>
 
           {/* Right side - Time, Phase, and Business Info */}
-          <div className="flex flex-col items-end gap-1 flex-shrink-0">
+          <div className="flex flex-col justify-start items-start gap-1 flex-shrink-0">
             {/* <div className="flex items-center gap-2"> */}
               {/* Phase Badge */}
-              <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${getPhaseColor(chat.phase)}`}>
+              {/* <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${getPhaseColor(chat.phase)}`}>
                 {chat.phase.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-              </span>
+              </span> */}
 
               <span className="text-xs text-gray-500">
                 {chat.lastMessage ? getTimeAgo(chat.lastMessage.createdAt) : ''}
@@ -210,7 +210,7 @@ export const ChatCard: React.FC<ChatCardProps> = ({
             {/* </div> */}
 
             {/* Business Info Row */}
-            <div className="flex items-center gap-3 text-xs text-gray-500">
+            {/* <div className="flex items-center gap-3 text-xs text-gray-500"> */}
               {/* Quotation Info */}
               {/* {chat.quotation && (
                 <div className="flex items-center gap-1">
@@ -232,7 +232,7 @@ export const ChatCard: React.FC<ChatCardProps> = ({
                 <MessageCircle className="w-3 h-3" />
                 <span className="capitalize">{chat.status}</span>
               </div> */}
-            </div>
+            {/* </div> */}
           </div>
         </div>
       </div>

@@ -107,13 +107,13 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({ filterState, selectedProduc
                     {salesData.totalProductShipped}
                   </p>
                 </div>
-                <button
+                {/* <button
                   onClick={() => handleViewMore("shipped")}
                   className="flex items-center text-sm font-medium opacity-90 hover:opacity-100 transition-opacity group"
                 >
                   {dashboardTranslations.dashboard.salesSummary.viewMore}
                   <ChevronRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </button>
+                </button> */}
               </div>
             </div>
 
@@ -127,13 +127,13 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({ filterState, selectedProduc
                     {salesData.inProgress}
                   </p>
                 </div>
-                <button
+                {/* <button
                   onClick={() => handleViewMore("inProgress")}
                   className="flex items-center text-sm font-medium opacity-90 hover:opacity-100 transition-opacity group"
                 >
                   {dashboardTranslations.dashboard.salesSummary.viewMore}
                   <ChevronRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </button>
+                </button> */}
               </div>
             </div>
 
@@ -148,13 +148,13 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({ filterState, selectedProduc
                     {salesData.totalProductViewed}
                   </p>
                 </div>
-                <button
+                {/* <button
                   onClick={() => handleViewMore("viewed")}
                   className="flex items-center text-xs font-medium opacity-90 hover:opacity-100 transition-opacity group"
                 >
                   {dashboardTranslations.dashboard.salesSummary.viewMore}
                   <ChevronRight className="ml-1 h-3 w-3 group-hover:translate-x-1 transition-transform" />
-                </button>
+                </button> */}
               </div>
             </div>
 
@@ -168,13 +168,13 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({ filterState, selectedProduc
                     {salesData.totalQuotationReceived}
                   </p>
                 </div>
-                <button
+                {/* <button
                   onClick={() => handleViewMore("quotation")}
                   className="flex items-center text-xs font-medium opacity-90 hover:opacity-100 transition-opacity group"
                 >
                   {dashboardTranslations.dashboard.salesSummary.viewMore}
                   <ChevronRight className="ml-1 h-3 w-3 group-hover:translate-x-1 transition-transform" />
-                </button>
+                </button> */}
               </div>
             </div>
 
@@ -188,13 +188,13 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({ filterState, selectedProduc
                     {salesData.totalOrderAccepted}
                   </p>
                 </div>
-                <button
+                {/* <button
                   onClick={() => handleViewMore("accepted")}
                   className="flex items-center text-xs font-medium opacity-90 hover:opacity-100 transition-opacity group"
                 >
                   {dashboardTranslations.dashboard.salesSummary.viewMore}
                   <ChevronRight className="ml-1 h-3 w-3 group-hover:translate-x-1 transition-transform" />
-                </button>
+                </button> */}
               </div>
             </div>
 
@@ -208,13 +208,13 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({ filterState, selectedProduc
                     {salesData.totalOrderRejected}
                   </p>
                 </div>
-                <button
+                {/* <button
                   onClick={() => handleViewMore("rejected")}
                   className="flex items-center text-xs font-medium opacity-90 hover:opacity-100 transition-opacity group"
                 >
                   {dashboardTranslations.dashboard.salesSummary.viewMore}
                   <ChevronRight className="ml-1 h-3 w-3 group-hover:translate-x-1 transition-transform" />
-                </button>
+                </button> */}
               </div>
             </div>
           </div>

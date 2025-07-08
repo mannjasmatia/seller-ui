@@ -340,7 +340,7 @@
     
     "confirmations": {
       "acceptTitle": "Accept Quotation",
-      "acceptMessage": "Are you sure you want to accept this quotation? This will start the business process.",
+      "acceptMessage": "Are you sure you want to accept this quotation? You will be asked to generate an invoice fot this quotation and that will start the business process.",
       "rejectTitle": "Reject Quotation", 
       "rejectMessage": "Are you sure you want to reject this quotation? This action cannot be undone.",
       "negotiateTitle": "Start Negotiation",

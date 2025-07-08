@@ -38,13 +38,13 @@ const defaultItems: SidebarItem[] = [
     id: 'inbox',
     label: 'Inbox',
     icon: Inbox,
-    badge: 3
+    // badge: 3
   },
   {
     id: 'inquiry',
     label: 'Inquiry',
     icon: FileText,
-    badge: 12
+    // badge: 12
   },
   {
     id: 'products',
@@ -55,13 +55,13 @@ const defaultItems: SidebarItem[] = [
     id: 'orders',
     label: 'Orders',
     icon: CheckCircle,
-    badge: 5
+    // badge: 5
   },
   {
     id: 'global-quote',
     label: 'Global Quote',
     icon: Inbox,
-    badge: "99+"
+    // badge: "99+"
   }
 ];
 

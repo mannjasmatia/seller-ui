@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/appStore';
 import { 
@@ -10,6 +10,7 @@ import {
 } from '../../api/api-hooks/useQuotationApi';
 import { Quotation, QuotationDetail, QuotationFilters } from './types.quotation';
 import { customToast } from '../../toast-config/customToast';
+import { useGenerateInvoiceApi } from '../../api/api-hooks/useInvoiceApi';
 
 
 export const useInquiry = () => {
@@ -25,8 +26,9 @@ export const useInquiry = () => {
   });
 
   // Modal state
-  const [selectedQuotationId, setSelectedQuotationId] = useState<string | null>(null);
+  const [selectedQuotationId, setSelectedQuotationId] = useState<string | null>('');
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
 
   // Debounced search
   const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
@@ -51,10 +53,17 @@ export const useInquiry = () => {
     isError: isDetailError
   } = useGetQuotationByIdApi(selectedQuotationId || '');
 
+  // ==> Not using this api anymore
+  // const {
+  //   mutate: acceptQuotation,
+  //   isPending: isAccepting
+  // } = useAcceptQuotationApi();
+
+  // using generate invoice to accept quotation
   const {
-    mutate: acceptQuotation,
-    isPending: isAccepting
-  } = useAcceptQuotationApi();
+      mutate: generateInvoice,
+      isPending: isGeneratingInvoice
+    } = useGenerateInvoiceApi();
 
   const {
     mutate: rejectQuotation,
@@ -135,22 +144,55 @@ export const useInquiry = () => {
 
   const closeDetailModal = () => {
     setIsDetailModalOpen(false);
-    setSelectedQuotationId(null);
+    setSelectedQuotationId('');
   };
 
   // Action handlers
   const handleAcceptQuotation = (quotationId: string) => {
-    acceptQuotation(quotationId, {
+    console.log("Quotation id : ", quotationId)
+    setIsInvoiceModalOpen(true);
+    setSelectedQuotationId(quotationId)
+    // acceptQuotation(quotationId, {
+    //   onSuccess: (response) => {
+    //     customToast.success(language.success.quotationAccepted);
+    //     closeDetailModal();
+    //     refetchQuotations();
+    //   },
+    //   onError: (error: any) => {
+    //     customToast.error(error?.response?.data?.message || language.errors.acceptFailed);
+    //   }
+    // });
+  };
+
+  // Invoice handlers
+  const handleGenerateInvoice = useCallback((invoiceData: {
+    negotiatedPrice: number;
+    paymentTerms?: string;
+    deliveryTerms?: string;
+    taxAmount?: number;
+    shippingCharges?: number;
+    notes?: string;
+  }) => {
+    const data ={
+      quotationId:selectedQuotationId as string,
+      ...invoiceData
+    }
+
+    generateInvoice(data, {
       onSuccess: (response) => {
-        customToast.success(language.success.quotationAccepted);
-        closeDetailModal();
-        refetchQuotations();
+        customToast.success('Invoice generated successfully');
+        setIsInvoiceModalOpen(false);
+        setSelectedQuotationId('')
       },
       onError: (error: any) => {
-        customToast.error(error?.response?.data?.message || language.errors.acceptFailed);
+        customToast.error(error?.response?.data?.message || 'Failed to generate invoice');
       }
     });
-  };
+  }, []);
+
+  const closeInvoiceModal = useCallback(() => {
+    setIsInvoiceModalOpen(false);
+  }, []);
 
   const handleRejectQuotation = (quotationId: string) => {
     rejectQuotation(quotationId, {
@@ -245,9 +287,14 @@ export const useInquiry = () => {
     // Loading states
     isLoadingQuotations,
     isLoadingDetail,
-    isAccepting,
     isRejecting,
     isNegotiating,
+
+    // invoice modal
+    isInvoiceModalOpen,
+    isGeneratingInvoice,
+    handleGenerateInvoice,
+    closeInvoiceModal,
     
     // Error states
     isQuotationsError,
