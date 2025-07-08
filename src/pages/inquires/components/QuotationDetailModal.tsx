@@ -6,6 +6,7 @@ import { QuotationDetail } from '../types.quotation';
 import { RootState } from '../../../store/appStore';
 import Button from '../../../components/BasicComponents/Button';
 import DynamicImage from '../../../components/BasicComponents/Image';
+import { getStateNameFromCode } from '../../../utils/getStateFromCountry';
 
 interface QuotationDetailModalProps {
   open: boolean;
@@ -41,8 +42,8 @@ export const QuotationDetailModal: React.FC<QuotationDetailModalProps> = ({
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    //   hour: '2-digit',
+    //   minute: '2-digit'
     });
   };
 
@@ -89,7 +90,7 @@ export const QuotationDetailModal: React.FC<QuotationDetailModalProps> = ({
     if (quotation.status === 'pending') {
       return (
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button
+          {/* <Button
             variant="outline"
             size="md"
             onClick={() => onReject(quotation._id)}
@@ -98,7 +99,7 @@ export const QuotationDetailModal: React.FC<QuotationDetailModalProps> = ({
             className="flex-1 border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300 transition-all duration-200"
           >
             {language.actions.reject}
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             size="md"
@@ -274,7 +275,7 @@ export const QuotationDetailModal: React.FC<QuotationDetailModalProps> = ({
                         <p className="text-sm text-gray-600">Verified Buyer</p>
                         <div className="flex items-center gap-1 mt-0.5">
                           <MapPin className="w-3 h-3 text-gray-400" />
-                          <span className="text-xs text-gray-600">{quotation.state}, {quotation.pinCode}</span>
+                          <span className="text-xs text-gray-600">{getStateNameFromCode(quotation.state)}, {quotation.pinCode}</span>
                         </div>
                       </div>
                     </div>
@@ -312,7 +313,7 @@ export const QuotationDetailModal: React.FC<QuotationDetailModalProps> = ({
                       
                       <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
                         <span className="text-gray-600">{language.detailModal.location}:</span>
-                        <span className="font-semibold text-gray-900">{quotation.state}, {quotation.pinCode}</span>
+                        <span className="font-semibold text-gray-900">{getStateNameFromCode(quotation.state)}, {quotation.pinCode}</span>
                       </div>
                     </div>
                   </div>

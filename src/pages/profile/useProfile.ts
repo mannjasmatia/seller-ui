@@ -180,11 +180,12 @@ const useProfile = () => {
     },
     zip: {
       required: true,
-      pattern: /^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/,
-      errorMessages: {
-        required: 'Postal code is required',
-        pattern: 'Please enter a valid Canadian postal code (e.g., K1A 0A6)'
-      }
+        pattern: /^\d{6}$/,
+        errorMessages: {
+          required: 'Postal code is required',
+          pattern: 'Please enter a valid 6 digit code'
+          // pattern: 'Please enter a valid Canadian postal code (e.g., K1A 0A6)'
+        }
     },
   };
 
@@ -269,17 +270,17 @@ const useProfile = () => {
   }, [phoneOtpVerified]);
 
   // Handle postal code formatting
-  useEffect(() => {
-    if (formState.zip) {
-      const formatted = formState.zip.toUpperCase().replace(/\s/g, '');
-      if (formatted.length === 6) {
-        const formattedZip = `${formatted.slice(0, 3)} ${formatted.slice(3)}`;
-        if (formattedZip !== formState.zip) {
-          setFormState(prev => ({ ...prev, zip: formattedZip }));
-        }
-      }
-    }
-  }, [formState.zip]);
+//   useEffect(() => {
+//     if (formState.zip) {
+//       const formatted = formState.zip.toUpperCase().replace(/\s/g, '');
+//       if (formatted.length === 6) {
+//         const formattedZip = `${formatted.slice(0, 3)} ${formatted.slice(3)}`;
+//         if (formattedZip !== formState.zip) {
+//           setFormState(prev => ({ ...prev, zip: formattedZip }));
+//         }
+//       }
+//     }
+//   }, [formState.zip]);
 
   // Handle form input changes
   const handleChange = (field: keyof ProfileFormState) => (value: any) => {

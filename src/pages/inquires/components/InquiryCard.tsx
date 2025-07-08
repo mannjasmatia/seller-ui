@@ -63,7 +63,7 @@ export const InquiryCard: React.FC<QuotationCardProps> = ({
             }}
             isLoading={isNegotiating}
             disabled={isAccepting || isRejecting}
-            className="px-3 py-1.5 text-sm border-blue-200 text-blue-600 hover:bg-blue-50"
+            className="px-3 py-1 text-sm border-blue-200 text-blue-600 hover:bg-blue-50"
           >
             Negotiate
           </Button>
@@ -76,7 +76,7 @@ export const InquiryCard: React.FC<QuotationCardProps> = ({
             }}
             isLoading={isAccepting}
             disabled={isRejecting || isNegotiating}
-            className="px-4 py-1.5 text-sm bg-cb-red hover:bg-cb-red/90 text-white"
+            className="px-4 py-1 text-sm bg-cb-red hover:bg-cb-red/90 text-white"
           >
             Accept
           </Button>
@@ -265,7 +265,7 @@ export const InquiryCard: React.FC<QuotationCardProps> = ({
             e.stopPropagation();
             onViewDetails(quotation._id);
           }}
-          className="px-3 py-2 text-sm text-cb-red hover:bg-cb-red/5 flex items-center gap-1"
+          className="px-3 py-1 text-sm text-cb-red hover:bg-cb-red/5 flex items-center gap-1"
         >
           <Eye className="w-4 h-4" />
           Details

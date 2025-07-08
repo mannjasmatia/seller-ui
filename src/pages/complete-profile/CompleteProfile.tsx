@@ -9,6 +9,7 @@ import CategoryFilterDropdown from '../products/components/CategoryFilterDropdow
 import CategoryDropdown from '../../components/category-dropdown/CategoryDropdown';
 import BusinessTypeDropdown from '../../components/business-types-dropdown/BusinessTypesDropdown';
 import StateDropdown from '../../components/state-city-dropdown/StateDropdown';
+import CityDropdown from '../../components/state-city-dropdown/CItyDropdown';
 
 const CompleteProfile = () => {
   const language = useSelector((state: RootState) => state.language?.value)['completeProfile'];
@@ -21,6 +22,8 @@ const CompleteProfile = () => {
     handleChange,
     handleCategoryChange,
     handleBusinessTypeChange,
+    handleStateChange,
+    handleCityChange,
     handleSubmit,
     handleFileUpload,
     removeUploadedFile,
@@ -132,40 +135,61 @@ const CompleteProfile = () => {
                     />
                   ))}
                 </div>
-
-                <div className="grid grid-cols-1 mb-5 ">
-                    <StateDropdown
-                        label={"State"}
-                        selectedState={formState.state}
-                        onChange={handleChange}
-                        placeholder='Select business type of your company'
-                    />
-                    <p className="text-cb-red text-sm">
-                        {errors['businessType'] ?? '' }
-                    </p>
-                </div>
               </div>
 
               {/* Address Information */}
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">{language.sections.addressInfo}</h2>
+                
+                {/* Street Address */}
+                <div className="grid grid-cols-1 gap-6 mb-6">
+                  <Input
+                    name="street"
+                    type="text"
+                    label="Street Address"
+                    placeholder="Enter your street address"
+                    value={formState.street}
+                    onChange={handleChange}
+                    error={errors.street}
+                    fullWidth
+                  />
+                </div>
+
+                {/* State and City */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <StateDropdown
+                      label="Province/Territory"
+                      selectedState={formState.state}
+                      onChange={handleStateChange}
+                      placeholder="Select province or territory"
+                      error={errors.state}
+                    />
+                  </div>
+                  <div>
+                    <CityDropdown
+                      label="City"
+                      selectedCity={formState.city}
+                      selectedState={formState.state}
+                      onChange={handleCityChange}
+                      placeholder="Select city"
+                      error={errors.city}
+                    />
+                  </div>
+                </div>
+
+                {/* Postal Code */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {inputFields.slice(2).map((field, index) => (
-                    <div key={field.name} className={field.name === 'street' ? 'md:col-span-2' : ''}>
-                      <Input
-                        {...field}
-                        value={formState[field.name as keyof typeof formState]}
-                        onChange={handleChange}
-                        error={errors[field.name]}
-                        fullWidth
-                        options={
-                          field.name === 'state' 
-                            ? provinces.map(province => ({ label: province.label, value: province.value }))
-                            : undefined
-                        }
-                      />
-                    </div>
-                  ))}
+                  <Input
+                    name="zip"
+                    type="text"
+                    label="Postal Code"
+                    placeholder="Enter your postal code (e.g., 380013, to be changed in canadian code later)"
+                    value={formState.zip}
+                    onChange={handleChange}
+                    error={errors.zip}
+                    fullWidth
+                  />
                 </div>
               </div>
 

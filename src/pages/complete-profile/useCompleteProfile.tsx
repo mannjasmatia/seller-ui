@@ -144,7 +144,7 @@ const useCompleteProfile = () => {
     },
   ];
 
-  const handleCategoryChange = (categories:string[])=>{
+  const handleCategoryChange = (categories: string[]) => {
     setFormState((prev) => ({
       ...prev,
       categories,
@@ -158,16 +158,53 @@ const useCompleteProfile = () => {
     }
   }
 
-  const handleBusinessTypeChange = (businessType:string)=>{
+  const handleBusinessTypeChange = (businessType: string) => {
     setFormState((prev) => ({
       ...prev,
       businessType,
     }));
 
-    if (errors.categories) {
+    if (errors.businessType) {
       setErrors(prev => ({
         ...prev,
         businessType: ''
+      }));
+    }
+  }
+
+  const handleStateChange = (state: string) => {
+    setFormState((prev) => ({
+      ...prev,
+      state,
+      city: '', // Clear city when state changes
+    }));
+
+    if (errors.state) {
+      setErrors(prev => ({
+        ...prev,
+        state: ''
+      }));
+    }
+
+    // Clear city error when state changes
+    if (errors.city) {
+      setErrors(prev => ({
+        ...prev,
+        city: ''
+      }));
+    }
+  }
+
+  const handleCityChange = (city: string) => {
+    setFormState((prev) => ({
+      ...prev,
+      city,
+    }));
+
+    if (errors.city) {
+      setErrors(prev => ({
+        ...prev,
+        city: ''
       }));
     }
   }
@@ -270,15 +307,25 @@ const useCompleteProfile = () => {
       }
     });
 
-    if(!formState.businessType){
-        newErrors['businessType'] = "Business type is required"
+    // Validate business type
+    if (!formState.businessType) {
+      newErrors['businessType'] = "Business type is required";
     }
 
-    if(!formState.categories || formState.categories.length===0){
-        newErrors['categories'] = "Select atleast 1 category"
+    // Validate categories
+    if (!formState.categories || formState.categories.length === 0) {
+      newErrors['categories'] = "Select atleast 1 category";
     }
 
-    
+    // Validate state
+    if (!formState.state) {
+      newErrors['state'] = "Province/Territory is required";
+    }
+
+    // Validate city
+    if (!formState.city) {
+      newErrors['city'] = "City is required";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -289,7 +336,7 @@ const useCompleteProfile = () => {
     e.preventDefault();
 
     if (!validateForm()) {
-        console.log("ERRORS : +++++ > ",errors)
+      console.log("ERRORS : +++++ > ", errors);
       customToast.error('Please fix the form errors before submitting');
       return;
     }
@@ -337,18 +384,18 @@ const useCompleteProfile = () => {
   }, [isSuccess, userInfo, dispatch, lang, navigate]);
 
   // Handle postal code formatting
-  useEffect(() => {
-    if (formState.zip) {
-      // Auto-format postal code
-      const formatted = formState.zip.toUpperCase().replace(/\s/g, '');
-      if (formatted.length === 6) {
-        const formattedZip = `${formatted.slice(0, 3)} ${formatted.slice(3)}`;
-        if (formattedZip !== formState.zip) {
-          setFormState(prev => ({ ...prev, zip: formattedZip }));
-        }
-      }
-    }
-  }, [formState.zip]);
+  // useEffect(() => {
+  //   if (formState.zip) {
+  //     // Auto-format postal code
+  //     const formatted = formState.zip.toUpperCase().replace(/\s/g, '');
+  //     if (formatted.length === 6) {
+  //       const formattedZip = `${formatted.slice(0, 3)} ${formatted.slice(3)}`;
+  //       if (formattedZip !== formState.zip) {
+  //         setFormState(prev => ({ ...prev, zip: formattedZip }));
+  //       }
+  //     }
+  //   }
+  // }, [formState.zip]);
 
   return {
     formState,
@@ -359,6 +406,8 @@ const useCompleteProfile = () => {
     handleChange,
     handleCategoryChange,
     handleBusinessTypeChange,
+    handleStateChange,
+    handleCityChange,
     handleSubmit,
     handleFileUpload,
     removeUploadedFile,

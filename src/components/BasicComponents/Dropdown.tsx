@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown, X, Search, Check, Loader2, Plus } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { ChevronDown, X, Search, Check, Loader2, Plus } from "lucide-react";
 
 // Types
 interface DropdownOption {
@@ -34,12 +34,12 @@ interface DynamicDropdownProps {
   };
   defaultValues?: DropdownOption[];
   multiSelect?: boolean;
-  allowSelectAll:boolean;
+  allowSelectAll: boolean;
   selectedValues?: string | string[];
   allowSearch?: boolean;
   debounceTimer?: number;
   limit?: number;
-  label?:string,
+  label?: string;
   placeholder?: string;
   onSelectionChange?: (values: string | string[]) => void;
   disabled?: boolean;
@@ -70,8 +70,8 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
   useQueryHook,
   defaultValues = [],
   multiSelect = false,
-  selectedValues = multiSelect ? [] : '',
-  allowSelectAll=false,
+  selectedValues = multiSelect ? [] : "",
+  allowSelectAll = false,
   allowSearch = true,
   debounceTimer = 300,
   limit = 10,
@@ -79,49 +79,51 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
   placeholder,
   onSelectionChange,
   disabled = false,
-  className = '',
+  className = "",
   transformItem,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [options, setOptions] = useState<DropdownOption[]>(defaultValues);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [internalSelected, setInternalSelected] = useState<string | string[]>(selectedValues);
   const [queryParams, setQueryParams] = useState<QueryParams>({
-    page: '1',
+    page: "1",
     limit: limit.toString(),
-    search: '',
+    search: "",
   });
+  // Add these state variables after existing useState declarations
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+  const [keyboardNavigationActive, setKeyboardNavigationActive] = useState(false);
 
   // Use React Query hook if provided
   const queryResult = useQueryHook ? useQueryHook(queryParams) : null;
   const [currentPage, setCurrentPage] = useState(1);
   const [hasNext, setHasNext] = useState(false);
   const [totalDocs, setTotalDocs] = useState(0);
-  
+
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  
+
   const debouncedSearchTerm = useDebounce(searchTerm, debounceTimer);
 
-  useEffect(()=>{
-    if(!query && !useQueryHook && defaultValues.length)
-    setOptions(defaultValues)
-  },[defaultValues])
+  useEffect(() => {
+    if (!query && !useQueryHook && defaultValues.length) setOptions(defaultValues);
+  }, [defaultValues]);
 
   // Handle React Query hook results
   useEffect(() => {
     if (queryResult?.data) {
       const response = queryResult.data;
       const transformedOptions = response.docs.map(transformItem);
-      
+
       if (parseInt(queryParams.page) === 1) {
         setOptions(transformedOptions);
       } else {
-        setOptions(prev => [...prev, ...transformedOptions]);
+        setOptions((prev) => [...prev, ...transformedOptions]);
       }
-      
+
       setHasNext(response.hasNext);
       setCurrentPage(response.currentPage);
       setTotalDocs(response.totalDocs);
@@ -144,12 +146,14 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        setFocusedIndex(-1); // Add this line
+        setKeyboardNavigationActive(false); // Add this line
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -165,19 +169,92 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
     if (useQueryHook || query) {
       setCurrentPage(1);
       setOptions([]);
-      
+
       const newParams = {
-        page: '1',
+        page: "1",
         limit: limit.toString(),
         search: debouncedSearchTerm,
       };
-      
+
       if (useQueryHook) {
         setQueryParams(newParams);
       } else if (query) {
         fetchData(1, debouncedSearchTerm, false);
       }
     }
+  }, [debouncedSearchTerm]);
+
+  // Filter options based on search term (for default values only)
+  const filteredOptions =
+    !query && !useQueryHook
+      ? options.filter(
+          (option) =>
+            option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            option.value.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      : options;
+
+  // key up down functionality
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isOpen) return;
+
+      switch (event.key) {
+        case "ArrowDown":
+          event.preventDefault();
+          setKeyboardNavigationActive(true);
+          setFocusedIndex((prev) => {
+            const nextIndex = prev < filteredOptions.length - 1 ? prev + 1 : 0;
+            return nextIndex;
+          });
+          break;
+
+        case "ArrowUp":
+          event.preventDefault();
+          setKeyboardNavigationActive(true);
+          setFocusedIndex((prev) => {
+            const nextIndex = prev > 0 ? prev - 1 : filteredOptions.length - 1;
+            return nextIndex;
+          });
+          break;
+
+        case "Enter":
+          event.preventDefault();
+          if (focusedIndex >= 0 && focusedIndex < filteredOptions.length) {
+            handleOptionToggle(filteredOptions[focusedIndex]);
+          }
+          break;
+
+        case "Escape":
+          event.preventDefault();
+          setIsOpen(false);
+          setFocusedIndex(-1);
+          setKeyboardNavigationActive(false);
+          break;
+
+        default:
+          // Reset keyboard navigation when typing in search
+          if (event.target === searchInputRef.current) {
+            setKeyboardNavigationActive(false);
+            setFocusedIndex(-1);
+          }
+          break;
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, filteredOptions, focusedIndex]);
+
+  // Add this useEffect
+  useEffect(() => {
+    setFocusedIndex(-1);
+    setKeyboardNavigationActive(false);
   }, [debouncedSearchTerm]);
 
   // Fetch data function
@@ -198,11 +275,11 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
       };
 
       const response = await query(params);
-      
+
       const transformedOptions = response.docs.map(transformItem);
 
       if (append) {
-        setOptions(prev => [...prev, ...transformedOptions]);
+        setOptions((prev) => [...prev, ...transformedOptions]);
       } else {
         setOptions(transformedOptions);
       }
@@ -210,9 +287,8 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
       setHasNext(response.hasNext);
       setCurrentPage(page);
       setTotalDocs(response.totalDocs);
-
     } catch (error) {
-      console.error('Error fetching dropdown data:', error);
+      console.error("Error fetching dropdown data:", error);
       if (!append) {
         setOptions([]);
       }
@@ -225,24 +301,16 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
   // Initial data load
   useEffect(() => {
     if (query && !defaultValues.length) {
-      fetchData(1, '', false);
+      fetchData(1, "", false);
     } else if (useQueryHook && !defaultValues.length) {
       // For React Query hooks, just set initial params
       setQueryParams({
-        page: '1',
+        page: "1",
         limit: limit.toString(),
-        search: '',
+        search: "",
       });
     }
   }, [query, useQueryHook, defaultValues.length, limit]);
-
-  // Filter options based on search term (for default values only)
-  const filteredOptions = (!query && !useQueryHook)
-    ? options.filter(option =>
-        option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        option.value.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : options;
 
   // Handle option selection
   const handleOptionToggle = (option: DropdownOption) => {
@@ -251,7 +319,7 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
     if (multiSelect) {
       const currentSelected = Array.isArray(internalSelected) ? internalSelected : [];
       if (currentSelected.includes(option.value)) {
-        newSelected = currentSelected.filter(val => val !== option.value);
+        newSelected = currentSelected.filter((val) => val !== option.value);
       } else {
         newSelected = [...currentSelected, option.value];
       }
@@ -268,7 +336,7 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
   const removeSelectedOption = (valueToRemove: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const currentSelected = Array.isArray(internalSelected) ? internalSelected : [];
-    const newSelected = currentSelected.filter(val => val !== valueToRemove);
+    const newSelected = currentSelected.filter((val) => val !== valueToRemove);
     setInternalSelected(newSelected);
     onSelectionChange?.(newSelected);
   };
@@ -276,7 +344,7 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
   // Clear all selections
   const clearAllSelections = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const newSelected = multiSelect ? [] : '';
+    const newSelected = multiSelect ? [] : "";
     setInternalSelected(newSelected);
     onSelectionChange?.(newSelected);
   };
@@ -285,9 +353,9 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
   const handleShowMore = () => {
     if (hasNext && !loadingMore) {
       const nextPage = currentPage + 1;
-      
+
       if (useQueryHook) {
-        setQueryParams(prev => ({
+        setQueryParams((prev) => ({
           ...prev,
           page: nextPage.toString(),
         }));
@@ -299,16 +367,16 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
 
   // Handle select all / clear all
   const handleSelectAll = () => {
-    if(!allowSelectAll){
-        return 
+    if (!allowSelectAll) {
+      return;
     }
-    const allOptionValues = filteredOptions.map(opt => opt.value);
+    const allOptionValues = filteredOptions.map((opt) => opt.value);
     const currentSelected = Array.isArray(internalSelected) ? internalSelected : [];
-    const isAllSelected = allOptionValues.every(value => currentSelected.includes(value));
-    
+    const isAllSelected = allOptionValues.every((value) => currentSelected.includes(value));
+
     if (isAllSelected) {
       // Remove all current options from selection
-      const remainingSelected = currentSelected.filter(value => !allOptionValues.includes(value));
+      const remainingSelected = currentSelected.filter((value) => !allOptionValues.includes(value));
       setInternalSelected(remainingSelected);
       onSelectionChange?.(remainingSelected);
     } else {
@@ -325,13 +393,13 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
       const selectedArray = Array.isArray(internalSelected) ? internalSelected : [];
       if (selectedArray.length === 0) return placeholder;
       if (selectedArray.length === 1) {
-        const option = options.find(opt => opt.value === selectedArray[0]);
+        const option = options.find((opt) => opt.value === selectedArray[0]);
         return option?.label || selectedArray[0];
       }
       return `${selectedArray.length} ${label ?? " items "} selected`;
     } else {
-      if (!internalSelected || internalSelected === '') return placeholder;
-      const option = options.find(opt => opt.value === internalSelected);
+      if (!internalSelected || internalSelected === "") return placeholder;
+      const option = options.find((opt) => opt.value === internalSelected);
       return option?.label || internalSelected;
     }
   };
@@ -340,28 +408,39 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
   const getSelectedOptions = (): DropdownOption[] => {
     if (!multiSelect) return [];
     const selectedArray = Array.isArray(internalSelected) ? internalSelected : [];
-    return options.filter(opt => selectedArray.includes(opt.value));
+    return options.filter((opt) => selectedArray.includes(opt.value));
   };
 
   const selectedArray = Array.isArray(internalSelected) ? internalSelected : [];
-  const isAllSelected = filteredOptions.length > 0 && filteredOptions.every(opt => selectedArray.includes(opt.value));
+  const isAllSelected =
+    filteredOptions.length > 0 && filteredOptions.every((opt) => selectedArray.includes(opt.value));
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       {/* Main dropdown button */}
-      {label && <div className="flex gap-1">
-        <h4 className='block text-sm font-medium text-gray-700 mb-1'>{label}</h4>
-        </div>}
+      {label && (
+        <div className="flex gap-1">
+          <h4 className="block text-sm font-medium text-gray-700 mb-1">{label}</h4>
+        </div>
+      )}
       <button
         type="button"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
+        onClick={() => {
+          if (!disabled) {
+            setIsOpen(!isOpen);
+            if (!isOpen) {
+              setFocusedIndex(-1);
+              setKeyboardNavigationActive(false);
+            }
+          }
+        }}
         disabled={disabled}
         className={`w-full flex items-center justify-between px-4 py-3 bg-white border-2 rounded-xl text-left focus:outline-none transition-all duration-200 ${
-          disabled 
-            ? 'opacity-50 cursor-not-allowed border-gray-200' 
-            : isOpen 
-              ? 'border-cb-red shadow-lg' 
-              : 'border-gray-200 hover:border-gray-300'
+          disabled
+            ? "opacity-50 cursor-not-allowed border-gray-200"
+            : isOpen
+            ? "border-cb-red shadow-lg"
+            : "border-gray-200 hover:border-gray-300"
         }`}
       >
         <div className="flex-1 min-w-0">
@@ -373,13 +452,11 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
             </span>
           ) : (
             <div className="flex items-center gap-2">
-              <span className="text-gray-900 font-medium">
-                {getDisplayText()}
-              </span>
+              <span className="text-gray-900 font-medium">{getDisplayText()}</span>
             </div>
           )}
         </div>
-        
+
         <div className="flex items-center space-x-2 ml-3">
           {selectedArray.length > 0 && (
             <button
@@ -389,27 +466,33 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
               <X className="h-4 w-4" />
             </button>
           )}
-          <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown
+            className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
         </div>
       </button>
 
       {/* Selected Items Display (for multiselect) */}
       {multiSelect && selectedArray.length > 1 && (
         <div className="mt-3 flex flex-wrap gap-2">
-          {getSelectedOptions().slice(0, 4).map((option, index) => (
-            <span
-              key={option.value}
-              className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-cb-red bg-opacity-10 text-white border border-cb-red/20"
-            >
-              {option.label}
-              <button
-                onClick={(e) => removeSelectedOption(option.value, e)}
-                className="ml-2 hover:text-cb-red transition-colors duration-200"
+          {getSelectedOptions()
+            .slice(0, 4)
+            .map((option, index) => (
+              <span
+                key={option.value}
+                className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-cb-red bg-opacity-10 text-white border border-cb-red/20"
               >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ))}
+                {option.label}
+                <button
+                  onClick={(e) => removeSelectedOption(option.value, e)}
+                  className="ml-2 hover:text-cb-red transition-colors duration-200"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
           {selectedArray.length > 4 && (
             <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
               +{selectedArray.length - 4} more
@@ -429,14 +512,14 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
                 <input
                   ref={searchInputRef}
                   type="text"
-                  placeholder={`Search ${multiSelect ? label ?? "items" : 'options'}...`}
+                  placeholder={`Search ${multiSelect ? label ?? "items" : "options"}...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:border-cb-red transition-colors duration-200"
                 />
                 {searchTerm && (
                   <button
-                    onClick={() => setSearchTerm('')}
+                    onClick={() => setSearchTerm("")}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     <X className="h-4 w-4" />
@@ -448,10 +531,10 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
 
           {/* Options list */}
           <div className="max-h-64 overflow-y-auto">
-            {(queryResult?.error || (query && !loading && !filteredOptions.length && searchTerm)) ? (
+            {queryResult?.error || (query && !loading && !filteredOptions.length && searchTerm) ? (
               <div className="p-4 text-center text-red-600">
                 <p className="font-medium">Failed to load options</p>
-                <p className="text-sm">{queryResult?.error?.message || 'No data found'}</p>
+                <p className="text-sm">{queryResult?.error?.message || "No data found"}</p>
               </div>
             ) : loading && currentPage === 1 ? (
               <div className="p-6 text-center">
@@ -463,12 +546,8 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
                 <div className="mb-2">
                   <Search className="h-8 w-8 mx-auto text-gray-300" />
                 </div>
-                <p className="font-medium">
-                  {searchTerm ? 'No options found' : 'No options available'}
-                </p>
-                {searchTerm && (
-                  <p className="text-xs mt-1">Try adjusting your search terms</p>
-                )}
+                <p className="font-medium">{searchTerm ? "No options found" : "No options available"}</p>
+                {searchTerm && <p className="text-xs mt-1">Try adjusting your search terms</p>}
               </div>
             ) : (
               <>
@@ -483,31 +562,44 @@ const Dropdown: React.FC<DynamicDropdownProps> = ({
                         onClick={handleSelectAll}
                         className="text-sm font-medium text-cb-red hover:text-cb-red/80 transition-colors duration-200"
                       >
-                        {isAllSelected ? 'Clear All' : 'Select All'}
+                        {isAllSelected ? "Clear All" : "Select All"}
                       </button>
                     </div>
                   </div>
                 )}
 
-                {filteredOptions.map((option) => {
+                {filteredOptions.map((option, index) => {
                   const isSelected = multiSelect
                     ? selectedArray.includes(option.value)
                     : internalSelected === option.value;
+                  const isFocused = keyboardNavigationActive && focusedIndex === index;
 
                   return (
                     <div
                       key={option.value}
                       onClick={() => handleOptionToggle(option)}
+                      onMouseEnter={() => {
+                        if (!keyboardNavigationActive) {
+                          setFocusedIndex(index);
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        if (!keyboardNavigationActive) {
+                          setFocusedIndex(-1);
+                        }
+                      }}
                       className={`flex items-center justify-between px-4 py-3 hover:bg-gray-50 cursor-pointer transition-all duration-200 ${
-                        isSelected ? 'bg-cb-red/5 border-r-2 border-cb-red' : ''
-                      }`}
+                        isSelected ? "bg-cb-red/5 border-r-2 border-cb-red" : ""
+                      } ${isFocused ? "bg-blue-50 ring-2 ring-blue-200" : ""}`}
                     >
-                      <span className={`flex-1 font-medium ${isSelected ? 'text-cb-red' : 'text-gray-700'}`}>
+                      <span
+                        className={`flex-1 font-medium ${
+                          isSelected ? "text-cb-red" : isFocused ? "text-blue-700" : "text-gray-700"
+                        }`}
+                      >
                         {option.label}
                       </span>
-                      {isSelected && (
-                        <Check className="h-4 w-4 text-cb-red flex-shrink-0" />
-                      )}
+                      {isSelected && <Check className="h-4 w-4 text-cb-red flex-shrink-0" />}
                     </div>
                   );
                 })}
