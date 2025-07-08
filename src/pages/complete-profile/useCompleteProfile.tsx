@@ -8,6 +8,7 @@ import { ValidationOptions } from '../../components/BasicComponents/types';
 import { InputType } from '../../components/BasicComponents/Input';
 import { useUpdateProfileApi } from '../../api/api-hooks/useProfileApi';
 import { useFetchAllCategoriesApi } from '../../api/api-hooks/useCategoryApi';
+import { State } from 'country-state-city';
 
 interface FormState {
   fullName: string;
@@ -26,8 +27,8 @@ interface UploadedFile {
 }
 
 interface Province {
-  name: string;
-  code: string;
+  label: string;
+  value: string;
 }
 
 interface BusinessType {
@@ -67,21 +68,10 @@ const useCompleteProfile = () => {
   const { mutate: updateProfile, isPending, isError, error, isSuccess } = useUpdateProfileApi();
 
   // Canadian provinces
-  const provinces: Province[] = [
-    { name: 'Alberta', code: 'AB' },
-    { name: 'British Columbia', code: 'BC' },
-    { name: 'Manitoba', code: 'MB' },
-    { name: 'New Brunswick', code: 'NB' },
-    { name: 'Newfoundland and Labrador', code: 'NL' },
-    { name: 'Northwest Territories', code: 'NT' },
-    { name: 'Nova Scotia', code: 'NS' },
-    { name: 'Nunavut', code: 'NU' },
-    { name: 'Ontario', code: 'ON' },
-    { name: 'Prince Edward Island', code: 'PE' },
-    { name: 'Quebec', code: 'QC' },
-    { name: 'Saskatchewan', code: 'SK' },
-    { name: 'Yukon', code: 'YT' },
-  ];
+  const provinces: Province[] = State.getStatesOfCountry('CA').map(state => ({
+    value: state.isoCode,
+    label: state.name,
+  }));
 
   // Input field configurations
   const inputFields = [
@@ -138,46 +128,17 @@ const useCompleteProfile = () => {
       } as ValidationOptions
     },
     {
-      name: 'city',
-      type: 'text' as InputType,
-      label: 'City',
-      placeholder: 'Enter your city',
-      validation: {
-        required: true,
-        minLength: 2,
-        maxLength: 50,
-        pattern: /^[a-zA-Z\s]+$/,
-        errorMessages: {
-          required: 'City is required',
-          minLength: 'City must be at least 2 characters',
-          maxLength: 'City cannot exceed 50 characters',
-          pattern: 'City can only contain letters and spaces'
-        }
-      } as ValidationOptions
-    },
-    {
-      name: 'state',
-      type: 'select' as InputType,
-      label: 'Province/Territory',
-      placeholder: 'Select your province or territory',
-      validation: {
-        required: true,
-        errorMessages: {
-          required: 'Province/Territory is required'
-        }
-      } as ValidationOptions
-    },
-    {
       name: 'zip',
       type: 'text' as InputType,
       label: 'Postal Code',
-      placeholder: 'Enter your postal code (e.g., K1A 0A6)',
+      placeholder: 'Enter your postal code (e.g., 380013, to be changed in canadian code later)',
       validation: {
         required: true,
-        pattern: /^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/,
+        pattern: /^\d{6}$/,
         errorMessages: {
           required: 'Postal code is required',
-          pattern: 'Please enter a valid Canadian postal code (e.g., K1A 0A6)'
+          pattern: 'Please enter a valid 6 digit code'
+          // pattern: 'Please enter a valid Canadian postal code (e.g., K1A 0A6)'
         }
       } as ValidationOptions
     },
@@ -213,20 +174,20 @@ const useCompleteProfile = () => {
 
   // Handle form input changes
   const handleChange = (value: any, event?: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    if (!event) return;
-    const { name } = event.target;
-
-    setFormState((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
+    if (event) {
+      const { name } = event.target;
+      setFormState((prev) => ({
         ...prev,
-        [name]: ''
+        [name]: value,
       }));
+
+      // Clear error when user starts typing
+      if (errors[name]) {
+        setErrors(prev => ({
+          ...prev,
+          [name]: ''
+        }));
+      }
     }
   };
 

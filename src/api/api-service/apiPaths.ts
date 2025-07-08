@@ -13,6 +13,7 @@ export const apiPaths: ApiPaths = {
     auth:{
         login:"api/v1/auth/login",
         verifyTokens: "api/v1/auth/verify-tokens",
+        logout: "api/v1/auth/logout",
 
         sendEmailVerification: "api/v1/auth/send-email-verification",
         verifyEmailOtp: "api/v1/auth/verify-email-otp",

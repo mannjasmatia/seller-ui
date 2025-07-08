@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/appStore";
-import { Edit, Save, X, Upload, Camera, User, Building, MapPin, Phone, Mail, Hash } from "lucide-react";
+import { Edit, Save, X, Upload, Camera, User, Building, MapPin, Phone, Mail, Hash, LogOut } from "lucide-react";
 import useProfile from "./useProfile";
 import Input from "../../components/BasicComponents/Input";
 import Button from "../../components/BasicComponents/Button";
@@ -13,6 +13,7 @@ import VerifyOtpModal from "../../modals/verify-otp/VerifyOtpModal";
 import StateDropdown from "../../components/state-city-dropdown/StateDropdown";
 import CityDropdown from "../../components/state-city-dropdown/CItyDropdown";
 import AvatarModal from "./components/AvatarModal";
+import ConfirmationModal from "../../modals/ConfirmationModal";
 
 const Profile: React.FC = () => {
   const language = useSelector((state: RootState) => state.language?.value)["profile"];
@@ -67,6 +68,12 @@ const Profile: React.FC = () => {
     setIsEmailOtpModalOpen,
     setIsPhoneOtpModalOpen,
 
+    //logout modal
+    isLogoutModalOpen,
+    setIsLogoutModalOpen,
+    isLoggingOut,
+    handleLogout,
+
     // Temp data
     tempEmail,
     tempPhoneNumber,
@@ -115,14 +122,24 @@ const Profile: React.FC = () => {
                     </Button>
                   </div>
                 ) : (
-                  <Button
-                    variant="solid"
-                    onClick={handleEdit}
-                    leftIcon={<Edit className="w-4 h-4" />}
-                    theme={['cb-red', 'white']}
-                  >
-                    {language.edit}
-                  </Button>
+                  <div className="flex space-x-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsLogoutModalOpen(true)}
+                      leftIcon={<LogOut className="w-4 h-4" />}
+                      className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                    >
+                      Logout
+                    </Button>
+                    <Button
+                      variant="solid"
+                      onClick={handleEdit}
+                      leftIcon={<Edit className="w-4 h-4" />}
+                      theme={['cb-red', 'white']}
+                    >
+                      {language.edit}
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
@@ -539,6 +556,19 @@ const Profile: React.FC = () => {
         title={language.mediaModal.title}
         download={true}
         downloadText={language.mediaModal.download}
+      />
+
+      {/* Logout Confirmation Modal */}
+      <ConfirmationModal
+        open={isLogoutModalOpen}
+        title="Logout Confirmation"
+        description="Are you sure you want to logout? You will be redirected to the login page."
+        confirmButtonText="Logout"
+        cancelButtonText="Cancel"
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogout}
+        isLoading={isLoggingOut}
+        theme={['cb-red', 'white']}
       />
 
       {/* Avatar Selection Modal - Not used */}

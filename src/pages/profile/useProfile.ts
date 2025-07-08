@@ -10,6 +10,7 @@ import {
   useUpdateProfileApi 
 } from '../../api/api-hooks/useProfileApi';
 import { 
+    useLogoutApi,
   useSendEmailVerificationApi, 
   useSendPhoneVerificationApi,
   useVerifyEmailOtpApi,
@@ -17,6 +18,7 @@ import {
 } from '../../api/api-hooks/useAuthApi';
 import { State, City } from 'country-state-city';
 import { ProfileFormState, UploadedFile } from './types.profile';
+import { resetAuthState } from '../../store/userSlice';
 
 const useProfile = () => {
   const { lang } = useParams();
@@ -81,6 +83,9 @@ const useProfile = () => {
   const { mutate: sendPhoneVerification, isPending: isSendingPhoneOtp, isSuccess: phoneOtpSent } = useSendPhoneVerificationApi();
   const { mutate: verifyEmailOtp, isPending: isVerifyingEmailOtp, isSuccess: emailOtpVerified } = useVerifyEmailOtpApi();
   const { mutate: verifyPhoneOtp, isPending: isVerifyingPhoneOtp, isSuccess: phoneOtpVerified } = useVerifyPhoneOtpApi();
+  // Logout state
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState<boolean>(false);
+  const { mutate: logout, isPending: isLoggingOut } = useLogoutApi();
 
   // Canadian provinces
   const provinces = State.getStatesOfCountry('CA').map(state => ({
@@ -543,6 +548,21 @@ const useProfile = () => {
     updateProfile(formData);
   };
 
+  // Handle logout
+  const handleLogout = () => {
+    logout(undefined, {
+      onSuccess: () => {
+        customToast.success("Logged out successfully");
+        dispatch(resetAuthState());
+        setIsLogoutModalOpen(false)
+        navigate(`/${lang}/`);
+      },
+      onError: () => {
+        customToast.error("Failed to logout. Please try again.");
+      }
+    });
+  };
+
   // Handle email OTP verification
   const handleEmailOtpVerification = (otp: string) => {
     verifyEmailOtp({ sessionToken, otp });
@@ -611,6 +631,12 @@ const useProfile = () => {
     setIsMediaModalOpen,
     setIsEmailOtpModalOpen,
     setIsPhoneOtpModalOpen,
+
+    //logout modal
+    isLogoutModalOpen,
+    setIsLogoutModalOpen,
+    isLoggingOut,
+    handleLogout,
     
     // Temp data
     tempEmail,

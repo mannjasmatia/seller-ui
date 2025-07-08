@@ -8,6 +8,7 @@ import useCompleteProfile from './useCompleteProfile';
 import CategoryFilterDropdown from '../products/components/CategoryFilterDropdown';
 import CategoryDropdown from '../../components/category-dropdown/CategoryDropdown';
 import BusinessTypeDropdown from '../../components/business-types-dropdown/BusinessTypesDropdown';
+import StateDropdown from '../../components/state-city-dropdown/StateDropdown';
 
 const CompleteProfile = () => {
   const language = useSelector((state: RootState) => state.language?.value)['completeProfile'];
@@ -131,6 +132,18 @@ const CompleteProfile = () => {
                     />
                   ))}
                 </div>
+
+                <div className="grid grid-cols-1 mb-5 ">
+                    <StateDropdown
+                        label={"State"}
+                        selectedState={formState.state}
+                        onChange={handleChange}
+                        placeholder='Select business type of your company'
+                    />
+                    <p className="text-cb-red text-sm">
+                        {errors['businessType'] ?? '' }
+                    </p>
+                </div>
               </div>
 
               {/* Address Information */}
@@ -147,7 +160,7 @@ const CompleteProfile = () => {
                         fullWidth
                         options={
                           field.name === 'state' 
-                            ? provinces.map(province => ({ label: province.name, value: province.name }))
+                            ? provinces.map(province => ({ label: province.label, value: province.value }))
                             : undefined
                         }
                       />

@@ -183,6 +183,7 @@ export const useInboxChat = () => {
             msg.timestamp === data.timestamp ? { ...msg, status: 'sent' } : msg
           )
         );
+        setTimeout(scrollToBottom, 100);
       },
       
       onMessageDelivered: (data) => {

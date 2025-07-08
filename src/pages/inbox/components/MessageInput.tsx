@@ -222,7 +222,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             disabled={!hasContent || !isConnected || disabled || isUploading}
             variant="solid"
             size="md"
-            className="px-6 py-3 flex-shrink-0 mb-1"
+            className="px-6 py-3 flex-shrink-0 mb-1 rounded-xl"
             theme={['cb-red', 'white']}
             title={getConnectionStatusText()}
           >
