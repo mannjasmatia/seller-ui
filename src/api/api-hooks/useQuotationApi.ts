@@ -15,8 +15,8 @@ export const useGetQuotationsApi = (params?: {
   return useQuery({
     queryKey: ["getQuotations", params],
     queryFn: () => quotationApi.getAllQuotations(params),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 0, 
+    gcTime: 0,
   });
 };
 
@@ -28,8 +28,8 @@ export const useGetQuotationByIdApi = (quotationId: string) => {
     queryKey: ["getQuotationById", quotationId],
     queryFn: () => quotationApi.getQuotationById(quotationId),
     enabled: !!quotationId,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, 
+    gcTime:0,
   });
 };
 

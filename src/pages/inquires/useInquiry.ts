@@ -26,7 +26,7 @@ export const useInquiry = () => {
   });
 
   // Modal state
-  const [selectedQuotationId, setSelectedQuotationId] = useState<string | null>('');
+  const [selectedQuotationId, setSelectedQuotationId] = useState<string>('');
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
 
@@ -177,7 +177,7 @@ export const useInquiry = () => {
       quotationId:selectedQuotationId as string,
       ...invoiceData
     }
-
+    console.log("data : ", data)
     generateInvoice(data, {
       onSuccess: (response) => {
         customToast.success('Invoice generated successfully');
@@ -188,7 +188,7 @@ export const useInquiry = () => {
         customToast.error(error?.response?.data?.message || 'Failed to generate invoice');
       }
     });
-  }, []);
+  }, [selectedQuotationId]);
 
   const closeInvoiceModal = useCallback(() => {
     setIsInvoiceModalOpen(false);

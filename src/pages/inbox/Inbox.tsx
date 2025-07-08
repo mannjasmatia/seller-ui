@@ -19,7 +19,7 @@ import ChatCard from "./components/ChatCard";
 import Message from "./components/Message";
 import MessageInput from "./components/MessageInput";
 import ImageModal from "./components/ImageModal";
-import InvoiceModal from "./components/InvoiceModal";
+import InvoiceModal from "./components/GenerateInvoiceModal";
 import QuotationDetailModal from "../inquires/components/QuotationDetailModal";
 import { useInboxChat } from "./useInbox";
 

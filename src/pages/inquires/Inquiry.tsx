@@ -6,7 +6,7 @@ import ConfirmationModal from '../../modals/ConfirmationModal';
 import useInquiry from './useInquiry';
 import InquiryCard from './components/InquiryCard';
 import QuotationDetailModal from './components/QuotationDetailModal';
-import InvoiceModal from '../inbox/components/InvoiceModal';
+import InvoiceModal from '../inbox/components/GenerateInvoiceModal';
 
 const Inquiry: React.FC = () => {
   const {
