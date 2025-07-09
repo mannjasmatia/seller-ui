@@ -228,7 +228,7 @@ const Orders: React.FC = () => {
                       <div className="flex items-center space-x-3">
                         <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
                           <DynamicImage
-                            src={`${MEDIA_URL}/${order.product.images[0]}`}
+                            src={order.product.images[0]}
                             alt={order.product.name}
                             objectFit="cover"
                             width="w-full"

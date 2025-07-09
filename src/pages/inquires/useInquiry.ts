@@ -139,6 +139,11 @@ export const useInquiry = () => {
   // Modal handlers
   const openDetailModal = (quotationId: string) => {
     setSelectedQuotationId(quotationId);
+    quotations.forEach((q)=>{
+      if(q._id===quotationId){
+        q.seen=true
+      }
+    })
     setIsDetailModalOpen(true);
   };
 
@@ -182,7 +187,14 @@ export const useInquiry = () => {
       onSuccess: (response) => {
         customToast.success('Invoice generated successfully');
         setIsInvoiceModalOpen(false);
+        closeDetailModal();
         setSelectedQuotationId('')
+        const quotation = quotations.find(q => q._id === selectedQuotationId);
+        if (quotation) {
+          quotation.status = 'accepted';
+          quotation.seen = true
+        }
+        
       },
       onError: (error: any) => {
         customToast.error(error?.response?.data?.message || 'Failed to generate invoice');
@@ -200,6 +212,7 @@ export const useInquiry = () => {
         customToast.success(language.success.quotationRejected);
         closeDetailModal();
         refetchQuotations();
+        
       },
       onError: (error: any) => {
         customToast.error(error?.response?.data?.message || language.errors.rejectFailed);
@@ -212,6 +225,11 @@ export const useInquiry = () => {
       onSuccess: () => {
         customToast.success(language.success.negotiationStarted);
         closeDetailModal();
+        const quotation = quotations.find(q => q._id === selectedQuotationId);
+        if (quotation) {
+          quotation.status = 'negotiation';
+          quotation.seen = true
+        }
         refetchQuotations();
       },
       onError: (error: any) => {

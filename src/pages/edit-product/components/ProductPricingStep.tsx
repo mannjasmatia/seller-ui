@@ -55,12 +55,6 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
       price: 0,
     };
 
-    // Remove max from previous tier since it's no longer the last
-    if (lastTier && data.quantityPriceTiers.length > 0) {
-      const newTiers = [...data.quantityPriceTiers];
-      // Don't remove max from last tier, just add new tier
-    }
-
     onUpdate({
       quantityPriceTiers: [...data.quantityPriceTiers, newTier],
     });
@@ -113,25 +107,42 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
 
   return (
     <div className="space-y-8">
-      {/* Base Price */}
+      {/* Price Range */}
       <div className="bg-gray-50 rounded-lg p-6">
         <div className="flex items-center mb-4">
           <DollarSign className="h-5 w-5 text-cb-red mr-2" />
-          <h3 className="text-lg font-medium text-gray-900">Base Pricing</h3>
+          <h3 className="text-lg font-medium text-gray-900">
+            {translations.pricing.priceRange}
+          </h3>
         </div>
 
-        <Input
-          type="number"
-          label={translations.pricing.basePrice}
-          placeholder={translations.pricing.basePricePlaceholder}
-          value={data.basePrice}
-          onChange={(value) => onUpdate({ basePrice: Number(value) || 0 })}
-          error={getError("basePrice")}
-          hint={translations.pricing.basePriceHint}
-          fullWidth
-          validation={{ required: true, min: 1 }}
-          leftIcon={<DollarSign className="h-4 w-4" />}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            type="number"
+            label={translations.pricing.minPrice}
+            placeholder={translations.pricing.minPricePlaceholder}
+            value={data.minPrice}
+            onChange={(value) => onUpdate({ minPrice: Number(value) || 0 })}
+            error={getError("minPrice")}
+            hint={translations.pricing.minPriceHint}
+            fullWidth
+            validation={{ required: true, min: 1 }}
+            leftIcon={<DollarSign className="h-4 w-4" />}
+          />
+
+          <Input
+            type="number"
+            label={translations.pricing.maxPrice}
+            placeholder={translations.pricing.maxPricePlaceholder}
+            value={data.maxPrice}
+            onChange={(value) => onUpdate({ maxPrice: Number(value) || 0 })}
+            error={getError("maxPrice")}
+            hint={translations.pricing.maxPriceHint}
+            fullWidth
+            validation={{ required: true, min: data.minPrice + 1 }}
+            leftIcon={<DollarSign className="h-4 w-4" />}
+          />
+        </div>
       </div>
 
       {/* Quantity Price Tiers */}
@@ -152,7 +163,7 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
 
         {data.quantityPriceTiers.length === 0 ? (
           <p className="text-gray-500 text-center py-4">
-            No price tiers added yet. Add tiers for volume discounts.
+            {translations.pricing.noTiers}
           </p>
         ) : (
           <div className="space-y-4">
@@ -163,7 +174,7 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
               >
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-medium text-gray-700">
-                    Tier {index + 1}
+                    {translations.pricing.tier} {index + 1}
                   </span>
                   <Button
                     variant="outline"
@@ -189,8 +200,8 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
                       required: true,
                       min: 1,
                       errorMessages: {
-                        required: "Tier minimum is required",
-                        min: "Tier minimum must be at least 1",
+                        required: translations.validation.required,
+                        min: translations.validation.minValue.replace('{min}', '1'),
                       },
                     }}
                     error={getError(`quantityPriceTiers.${index}.min`)}
@@ -212,7 +223,7 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
                     validation={{
                       min: tier.min + 1,
                       errorMessages: {
-                        min: `Max quantity must be greater than ${tier.min}`,
+                        min: translations.validation.minValue.replace('{min}', (tier.min + 1).toString()),
                       },
                     }}
                     hint={
@@ -236,8 +247,8 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
                       required: true,
                       min: 0,
                       errorMessages: {
-                        required: "Tier price is required",
-                        min: "Tier price cannot be negative",
+                        required: translations.validation.required,
+                        min: translations.validation.nonNegative,
                       },
                     }}
                     leftIcon={<DollarSign className="h-4 w-4" />}
@@ -277,7 +288,7 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-700">
-                  Lead Time {index + 1}
+                  {translations.pricing.leadTimeRange} {index + 1}
                 </span>
                 {data.leadTime.length > 1 && (
                   <Button
@@ -305,8 +316,8 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
                     required: true,
                     min: 1,
                     errorMessages: {
-                      required: "Lead time minimum is required",
-                      min: "Lead time minimum must be at least 1",
+                      required: translations.validation.required,
+                      min: translations.validation.minValue.replace('{min}', '1'),
                     },
                   }}
                   error={getError(`leadTime.${index}.min`)}
@@ -328,7 +339,7 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
                   validation={{
                     min: leadTime.min + 1,
                     errorMessages: {
-                      min: `Max quantity must be greater than ${leadTime.min}`,
+                      min: translations.validation.minValue.replace('{min}', (leadTime.min + 1).toString()),
                     },
                   }}
                   hint={
@@ -352,8 +363,8 @@ const ProductPricingStep: React.FC<ProductPricingStepProps> = ({
                     required: true,
                     min: 1,
                     errorMessages: {
-                      required: "Lead time days is required",
-                      min: "Lead time days must be at least 1",
+                      required: translations.validation.required,
+                      min: translations.validation.minValue.replace('{min}', '1'),
                     },
                   }}
                   error={getError(`leadTime.${index}.days`)}

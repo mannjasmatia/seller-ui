@@ -377,6 +377,14 @@
       "noMessages": "No messages yet",
       "activeConversations": "Active Conversations"
     },
+    "filters": {
+      "searchPlaceholder": "Search conversations...",
+      "allStatus": "All Status",
+      "active": "Active",
+      "completed": "Completed", 
+      "cancelled": "Cancelled",
+      "clearFilters": "Clear"
+    },
     
     "chatHeader": {
       "buyer": "Buyer",

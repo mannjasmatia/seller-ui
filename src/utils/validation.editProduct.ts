@@ -204,9 +204,19 @@ export class ProductValidator {
   static validateProductPricing(data: ProductFormData['pricing']): ValidationError[] {
     const errors: ValidationError[] = [];
 
-    // Base price validation
-    if (!data.basePrice || typeof data.basePrice !== 'number' || data.basePrice < 1) {
-      errors.push({ field: 'basePrice', message: 'Base price must be at least 1' });
+    // Min price validation
+    if (!data.minPrice || typeof data.minPrice !== 'number' || data.minPrice < 1) {
+      errors.push({ field: 'minPrice', message: 'Minimum price must be at least 1' });
+    }
+
+    // Max price validation
+    if (!data.maxPrice || typeof data.maxPrice !== 'number' || data.maxPrice < 1) {
+      errors.push({ field: 'maxPrice', message: 'Maximum price must be at least 1' });
+    }
+
+    // Price range validation
+    if (data.minPrice && data.maxPrice && data.minPrice >= data.maxPrice) {
+      errors.push({ field: 'maxPrice', message: 'Maximum price must be greater than minimum price' });
     }
 
     // Quantity price tiers validation

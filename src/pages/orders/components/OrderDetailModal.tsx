@@ -100,7 +100,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                     <div className="flex items-center space-x-4">
                       <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
                         <DynamicImage
-                          src={`${MEDIA_URL}/${order.product.images[0]}`}
+                          src={order.product.images[0]}
                           alt={order.product.name}
                           objectFit="cover"
                           width="w-full"

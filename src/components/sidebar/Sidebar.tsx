@@ -90,6 +90,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const handleItemClick = (item: SidebarItem) => {
     setActiveItem(item.id);
+    setIsHovered(false)
     setIsMobileOpen(false);
     onItemClick?.(item);
   };
@@ -241,7 +242,9 @@ const Sidebar: React.FC<SidebarProps> = ({
           {!shouldShowExpanded && (
             <div className="p-4 border-t border-gray-100 bg-white flex justify-center">
               <div className="w-8 h-8 bg-cb-red rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-semibold">U</span>
+                 <span className="text-white text-sm font-semibold">
+                    {String(userInfo?.companyName)?.toUpperCase().charAt(0) || '-'}
+                  </span>
               </div>
             </div>
           )}

@@ -267,7 +267,7 @@ const ProductImagesStep: React.FC<ProductImagesStepProps> = ({
                   >
                     <DynamicImage
                       key={`${item.type}-${actualIndex}`}
-                      src={!isNewFile ? `${MEDIA_URL}/${imageUrl}` : imageUrl}
+                      src={imageUrl}
                       alt={`Product image ${globalIndex + 1}`}
                       objectFit="cover"
                       width="w-full"

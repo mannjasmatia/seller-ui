@@ -1,0 +1,25 @@
+/* Smooth scroll container */
+.messages-container {
+  scroll-behavior: auto; /* Disable smooth scrolling for programmatic scrolls */
+  contain: layout style; /* Optimize rendering performance */
+  will-change: scroll-position; /* Hint to browser for optimization */
+}
+
+/* Prevent layout shifts during loading */
+.message-wrapper {
+  contain: layout; /* Contain layout calculations to individual messages */
+}
+
+/* Loading indicator should have consistent height */
+.load-more-trigger {
+  min-height: 60px; /* Consistent height to prevent jumps */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Optimize message rendering */
+.message-item {
+  contain: layout style;
+  transform: translateZ(0); /* Create compositing layer */
+}

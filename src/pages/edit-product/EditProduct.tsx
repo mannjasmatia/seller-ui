@@ -40,6 +40,8 @@ const EditProduct: React.FC = () => {
     handleDescriptionImagesUpload,
     handleDescriptionImageRemove,
     isStepCompleted,
+    navigate,
+    lang,
     STEPS,
     translations,
   } = useEditProduct();
@@ -97,13 +99,13 @@ const EditProduct: React.FC = () => {
     if (hasCurrentStepChanged()) {
       setShowCancelModal(true);
     } else {
-      window.history.back();
+      navigate(`/${lang}/products`)
     }
   };
 
   const confirmCancel = () => {
     setShowCancelModal(false);
-    window.history.back();
+    navigate(`/${lang}/products`)
   };
 
   const renderCurrentStep = () => {
@@ -188,7 +190,7 @@ const EditProduct: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 pb-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
@@ -217,7 +219,7 @@ const EditProduct: React.FC = () => {
                 disabled={isPending}
                 leftIcon={<ArrowLeft className="h-4 w-4" />}
               >
-                {translations.navigation.cancel}
+                {translations.navigation.exit}
               </Button>
             </div>
           </div>
@@ -238,7 +240,7 @@ const EditProduct: React.FC = () => {
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-3">
+          <div className="overflow-x-hidden lg:col-span-3">
             <div className="bg-white rounded-xl shadow-lg border border-gray-100">
               {/* Step Header */}
               <div className="px-8 py-6 border-b border-gray-200">

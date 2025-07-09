@@ -12,8 +12,13 @@ import {
   DollarSign,
   Store,
   Circle,
+  Search,
+  Filter,
+  X,
+  Loader
 } from "lucide-react";
 import Button from "../../components/BasicComponents/Button";
+import Input from "../../components/BasicComponents/Input";
 import { useNavigate } from "react-router-dom";
 import ChatCard from "./components/ChatCard";
 import Message from "./components/Message";
@@ -22,6 +27,7 @@ import ImageModal from "./components/ImageModal";
 import InvoiceModal from "./components/GenerateInvoiceModal";
 import QuotationDetailModal from "../inquires/components/QuotationDetailModal";
 import { useInboxChat } from "./useInbox";
+import DynamicImage from "../../components/BasicComponents/Image";
 
 const Inbox: React.FC = () => {
   const navigate = useNavigate();
@@ -43,11 +49,21 @@ const Inbox: React.FC = () => {
     isInvoiceModalOpen,
     quotationDetailModalOpen,
 
+    // Filter state
+    searchQuery,
+    statusFilter,
+
     // Loading states
     isLoadingChats,
     isLoadingMessages,
     isUploading,
     isGeneratingInvoice,
+    isFetchingNextChatsPage,
+    isFetchingNextMessagesPage,
+    hasNextChatsPage,
+    hasNextMessagesPage,
+
+    readyToFetchMore,
 
     // Error states
     isChatsError,
@@ -58,6 +74,9 @@ const Inbox: React.FC = () => {
     // Refs
     messagesEndRef,
     fileInputRef,
+    chatsLoadMoreRef,
+    messagesLoadMoreRef,
+    messagesContainerRef,
 
     // Handlers
     selectChat,
@@ -74,6 +93,11 @@ const Inbox: React.FC = () => {
     loadChats,
     setUploadError,
     reconnect,
+
+    // Filter handlers
+    handleSearchChange,
+    handleStatusFilterChange,
+    clearFilters,
 
     // Image modal handlers
     openImageModal,
@@ -122,15 +146,27 @@ const Inbox: React.FC = () => {
     if (!selectedChat) return null;
 
     const invoiceInfo = getInvoiceStatus();
-    console.log("Can generate invoice : ", canGenerateInvoice())
 
     return (
       <div className="border-b border-gray-200 bg-white px-4 py-2 shadow-2xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold">
-              {selectedChat.otherUser?.name?.charAt(0) || "B"}
-            </div>
+            {selectedChat.otherUser.profilePic ? (
+              <DynamicImage
+                src={selectedChat.otherUser.profilePic}
+                alt={selectedChat.otherUser.name}
+                width="w-10"
+                height="h-10"
+                objectFit="cover"
+                rounded="full"
+                className="border border-gray-200 "
+              />
+            ) : (
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold">
+                {selectedChat.otherUser?.name?.charAt(0) || "B"}
+              </div>
+              // <User className="w-5 h-5 text-gray-500" />
+            )}
             <div>
               <h3 className="font-semibold text-gray-900">{selectedChat.otherUser.name}</h3>
               <p className="text-sm text-gray-500">{language?.chatHeader?.buyer || "Customer"}</p>
@@ -188,47 +224,8 @@ const Inbox: React.FC = () => {
                 </span>
               </div>
             ) : null}
-
-            {/* Connection Status */}
-            {/* <div className="flex items-center gap-1">
-              {getConnectionIcon()}
-              <span className="text-xs text-gray-500">{getConnectionText()}</span>
-              {connectionStatus.status === "error" && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={reconnect}
-                  className="ml-2"
-                  theme={["gray-500", "white"]}
-                >
-                  Retry
-                </Button>
-              )}
-            </div> */}
           </div>
         </div>
-
-        {/* Chat Context Info */}
-        {/* {chatContext && (
-          <div className="mt-3 flex items-center gap-4 text-sm text-gray-600">
-            <div className="flex items-center gap-1">
-              <span>Phase:</span>
-              <span className="font-medium capitalize">{chatContext.phase.replace("_", " ")}</span>
-            </div>
-            {chatContext.hasActiveInvoice && (
-              <div className="flex items-center gap-1">
-                <DollarSign className="w-4 h-4" />
-                <span>Invoice: {chatContext.invoiceStatus}</span>
-              </div>
-            )}
-            {chatContext.hasOrder && (
-              <div className="flex items-center gap-1">
-                <FileText className="w-4 h-4" />
-                <span>Order Active</span>
-              </div>
-            )}
-          </div>
-        )} */}
       </div>
     );
   };
@@ -286,6 +283,72 @@ const Inbox: React.FC = () => {
     );
   };
 
+  const renderFilters = () => (
+    <div className="px-1 py-3 border-b border-gray-200 bg-white">
+      <div className="flex items-center gap-1">
+        {/* Search Input */}
+        <div className="">
+          <Input
+            type="text"
+            placeholder={language?.filters?.searchPlaceholder || "Search conversations..."}
+            value={searchQuery}
+            onChange={handleSearchChange}
+            leftIcon={<Search className="w-4 h-4" />}
+            className="w-full !px-0"
+            size="sm"
+          />
+        </div>
+
+        {/* Status Filter */}
+        <div className="w-20">
+          <Input
+            type="select"
+            value={statusFilter}
+            onChange={handleStatusFilterChange}
+            leftIcon={<Filter className="w-4 h-4" />}
+            options={[
+              { label: language?.filters?.allStatus || "All Status", value: "all" },
+              { label: language?.filters?.active || "Active", value: "active" },
+              { label: language?.filters?.completed || "Completed", value: "completed" },
+              { label: language?.filters?.cancelled || "Cancelled", value: "cancelled" }
+            ]}
+            size="sm"
+          />
+        </div>
+
+        {/* Clear Filters */}
+        {/* {(searchQuery || statusFilter !== 'all') && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearFilters}
+            leftIcon={<X className="w-4 h-4" />}
+            theme={["gray-500", "white"]}
+          >
+            {language?.filters?.clearFilters || "Clear"}
+          </Button>
+        )} */}
+      </div>
+
+      {/* Active Filters Indicator */}
+      {(searchQuery || statusFilter !== 'all') && (
+        <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+          <span>Active filters:</span>
+          {searchQuery && (
+            <span className="bg-cb-red/10 text-cb-red px-2 py-1 rounded-full text-xs">
+              Search: "{searchQuery}"
+            </span>
+          )}
+          {statusFilter !== 'all' && (
+            <span className="bg-cb-red/10 text-cb-red px-2 py-1 rounded-full text-xs">
+              Status: {statusFilter}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="max-h-[80dvh]">
       <div className="max-w-7xl">
@@ -325,18 +388,18 @@ const Inbox: React.FC = () => {
 
         <div className="flex h-[70dvh]">
           {/* Chat List Sidebar */}
-          <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+          <div className="w-92 bg-white border-r border-gray-200 flex flex-col">
             {/* Chat List Header */}
-            <div className="p-2 px-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
+            {/* <div className="p-2 px-4 border-b border-gray-200"> */}
+              {/* <div className="flex items-center justify-between">
                 <h2 className="flex gap-2 items-center justify-center font-semibold text-gray-900">
                   {language?.chatList?.activeConversations || "Active Conversations"}
                   <div className="h-3 w-3 bg-green-400 animate-pulse rounded-full "></div>
                 </h2>
-              </div>
+              </div> */}
 
               {/* Connection status in sidebar */}
-              {connectionStatus.status !== "connected" && (
+              {/* {connectionStatus.status !== "connected" && (
                 <div className="mt-2 flex items-center gap-2 text-sm">
                   {getConnectionIcon()}
                   <span
@@ -356,11 +419,14 @@ const Inbox: React.FC = () => {
                     </Button>
                   )}
                 </div>
-              )}
+              )} */}
 
               {/* Chat count */}
-              <p className="text-sm text-gray-500 mt-1">{chats.length} active conversations</p>
-            </div>
+              {/* <p className="text-sm text-gray-500 mt-1">{chats.length} active conversations</p> */}
+            {/* </div> */}
+
+            {/* Filters */}
+            {renderFilters()}
 
             {/* Chat List */}
             <div className="flex-1 overflow-y-auto">
@@ -380,18 +446,34 @@ const Inbox: React.FC = () => {
                   </p>
                 </div>
               ) : (
-                chats.map((chat) => (
-                  <ChatCard
-                    key={chat._id}
-                    chat={chat}
-                    isSelected={selectedChat?._id === chat._id}
-                    onSelect={selectChat}
-                    formatTime={formatTime}
-                    getTimeAgo={getTimeAgo}
-                    language={language}
-                    typingStatus={getTypingStatusForChat(chat._id)}
-                  />
-                ))
+                <>
+                  {chats.map((chat) => (
+                    <ChatCard
+                      key={chat._id}
+                      chat={chat}
+                      isSelected={selectedChat?._id === chat._id}
+                      onSelect={selectChat}
+                      formatTime={formatTime}
+                      getTimeAgo={getTimeAgo}
+                      language={language}
+                      typingStatus={getTypingStatusForChat(chat._id)}
+                    />
+                  ))}
+                  
+                  {/* Infinite scroll trigger for chats */}
+                  {hasNextChatsPage && (
+                    <div ref={chatsLoadMoreRef} className="p-4 text-center">
+                      {isFetchingNextChatsPage ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <Loader className="w-4 h-4 animate-spin" />
+                          <span className="text-sm text-gray-500">Loading more chats...</span>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-gray-400">Scroll to load more</div>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -404,8 +486,8 @@ const Inbox: React.FC = () => {
                 {renderChatHeader()}
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
-                  {isLoadingMessages ? (
+                <div ref={messagesContainerRef}  className="flex-1 overflow-y-auto p-4 bg-gray-50">
+                  {isLoadingMessages && messages.length === 0 ? (
                     renderLoadingState()
                   ) : messages.length === 0 ? (
                     <div className="text-center py-8">
@@ -420,11 +502,25 @@ const Inbox: React.FC = () => {
                     </div>
                   ) : (
                     <div className="space-y-2">
+                      {/* Infinite scroll trigger for messages (at top for reverse pagination) */}
+                      {hasNextMessagesPage && readyToFetchMore && (
+                        <div ref={messagesLoadMoreRef} className="py-4 text-center">
+                          {isFetchingNextMessagesPage ? (
+                            <div className="flex items-center justify-center gap-2">
+                              <Loader className="w-4 h-4 animate-spin" />
+                              <span className="text-sm text-gray-500">Loading more messages...</span>
+                            </div>
+                          ) : (
+                            <div className="text-sm text-gray-400">Scroll up to load more</div>
+                          )}
+                        </div>
+                      )}
+
                       {messages.map((message) => (
                         <Message
                           key={message._id}
                           message={message}
-                          isOwnMessage={message.senderModel.toLowerCase() === "seller"}
+                          isOwnMessage={message?.senderModel?.toLowerCase() === "seller"}
                           formatTime={formatTime}
                           onRetry={retryMessage}
                           onImageView={openImageModal}

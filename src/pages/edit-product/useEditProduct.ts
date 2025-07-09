@@ -74,24 +74,15 @@ export const useEditProduct = () => {
       about: ["", ""],
       moq: 0,
     },
-    attributes: [
-      {
-        name: "",
-        attributes: [
-          {
-            field: "",
-            value: "",
-          },
-        ],
-      },
-    ],
+    attributes: [],
     images: {
       images: [],
       originalImages: [],
       newFiles: [],
     },
     pricing: {
-      basePrice: 0,
+      minPrice: 0,
+      maxPrice: 0,
       quantityPriceTiers: [],
       leadTime: [],
     },
@@ -115,24 +106,15 @@ export const useEditProduct = () => {
       about: ["", ""],
       moq: 0,
     },
-    attributes: [
-      {
-        name: "",
-        attributes: [
-          {
-            field: "",
-            value: "",
-          },
-        ],
-      },
-    ],
+    attributes: [],
     images: {
       images: [],
       originalImages: [],
       newFiles: [],
     },
     pricing: {
-      basePrice: 0,
+      minPrice: 0,
+      maxPrice: 0,
       quantityPriceTiers: [],
       leadTime: [],
     },
@@ -291,8 +273,10 @@ export const useEditProduct = () => {
 
   useEffect(() => {
     if (pricingData) {
+
       const pricing = {
-        basePrice: pricingData.basePrice || 0,
+        minPrice: pricingData?.minPrice || 0,
+        maxPrice: pricingData?.maxPrice || 0,
         quantityPriceTiers: pricingData.quantityPriceTiers || [],
         leadTime: pricingData.leadTime || [],
       };
@@ -306,8 +290,10 @@ export const useEditProduct = () => {
       }));
       setOriginalFormData((prev) => ({
         ...prev,
-        originalPricing,
+        pricing: originalPricing,
       }));
+
+      
     }
   }, [pricingData]);
 
@@ -327,7 +313,7 @@ export const useEditProduct = () => {
       }));
       setOriginalFormData((prev) => ({
         ...prev,
-        originalVariations,
+        variations:originalVariations,
       }));
     }
   }, [variationsData]);
@@ -369,7 +355,7 @@ export const useEditProduct = () => {
 
       setOriginalFormData((prev) => ({
         ...prev,
-        originalDescription,
+        description: originalDescription,
       }));
     }
   }, [descriptionData]);
@@ -1150,6 +1136,9 @@ export const useEditProduct = () => {
 
     handleDescriptionImagesUpload,
     handleDescriptionImageRemove,
+
+    navigate,
+    lang,
 
     // Constants
     STEPS,

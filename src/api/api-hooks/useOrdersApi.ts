@@ -31,8 +31,9 @@ export const useGetOrderByIdApi = (orderId: string) => {
     queryKey: ["getOrderById", orderId],
     queryFn: () => ordersApi.getOrderById(orderId),
     enabled: !!orderId,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, 
+    gcTime: 0,
+    
     select: (data) => data?.data?.response as Order,
   });
 };
@@ -44,8 +45,9 @@ export const useGetOrdersApi = (params: OrdersListParams = {}) => {
   return useQuery({
     queryKey: ["getSellerOrders", params],
     queryFn: () => ordersApi.getOrders(params),
-    staleTime: 30 * 1000, // 30 seconds for more frequent updates
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0,
+    gcTime: 0,
+    
     select: (data) => data?.data?.response as ApiResponse & { docs: Order[] },
   });
 };

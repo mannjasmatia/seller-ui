@@ -1,50 +1,69 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { chatApi } from "../api/chat";
 
 /**
- * Custom hook for getting all chats
+ * Custom hook for getting all chats with infinite scroll
  */
-export const useGetChatsApi = (params?: {
-  page?: number;
-  limit?: number;
-  status?: 'active' | 'completed' | 'cancelled';
-}) => {
-  return useQuery({
-    queryKey: ["getChats", params],
-    queryFn: () => chatApi.getAllChats(params),
-    // staleTime: 2 * 60 * 1000, // 2 minutes
-    // gcTime: 5 * 60 * 1000, // 5 minutes
-  });
+export const useGetChatsApi = {
+  queryFn: (params?: {
+    page?: number;
+    limit?: number;
+    status?: 'active' | 'completed' | 'cancelled';
+    search?: string;
+  }) => chatApi.getAllChats(params),
+  
+  useInfinite: (params?: {
+    status?: 'active' | 'completed' | 'cancelled';
+    search?: string;
+  }) => {
+    return useInfiniteQuery({
+      queryKey: ["getChats", params],
+      queryFn: ({ pageParam = 1 }) => {
+        return chatApi.getAllChats({
+          page: pageParam,
+          limit: 20,
+          ...params
+        });
+      },
+      getNextPageParam: (lastPage) => {
+        const response = lastPage?.data?.response;
+        return response?.hasNext ? response.page + 1 : undefined;
+      },
+      initialPageParam: 1,
+    });
+  }
 };
 
 /**
- * Custom hook for getting chat messages
+ * Custom hook for getting chat messages with infinite scroll
  */
-export const useGetChatMessagesApi = (chatId: string, params?: {
-  page?: number;
-  limit?: number;
-}) => {
-  return useQuery({
-    queryKey: ["getChatMessages", chatId, params],
-    queryFn: () => chatApi.getChatMessages(chatId, params),
-    enabled: !!chatId,
-    // staleTime: 30 * 1000, // 30 seconds
-    // gcTime: 2 * 60 * 1000, // 2 minutes
-  });
+export const useGetChatMessagesApi = {
+  queryFn: (chatId: string, params?: {
+    page?: number;
+    limit?: number;
+  }) => chatApi.getChatMessages(chatId, params),
+  
+  useInfinite: (chatId: string, params?: {
+    limit?: number;
+  }) => {
+    return useInfiniteQuery({
+      queryKey: ["getChatMessages", chatId, params],
+      queryFn: ({ pageParam = 1 }) => {
+        if (!chatId) return Promise.resolve(null);
+        return chatApi.getChatMessages(chatId, {
+          page: pageParam,
+          limit: params?.limit || 20
+        });
+      },
+      getNextPageParam: (lastPage) => {
+        const response = lastPage?.data?.response;
+        return response?.pagination?.hasMore ? (response.pagination.page + 1) : undefined;
+      },
+      initialPageParam: 1,
+      enabled: !!chatId,
+    });
+  }
 };
-
-/**
- * Custom hook for getting chat by ID
- */
-// export const useGetChatByIdApi = (chatId: string) => {
-//   return useQuery({
-//     queryKey: ["getChatById", chatId],
-//     queryFn: () => chatApi.getChatById(chatId),
-//     enabled: !!chatId,
-//     staleTime: 1 * 60 * 1000, // 1 minute
-//     gcTime: 3 * 60 * 1000, // 3 minutes
-//   });
-// };
 
 /**
  * Custom hook for uploading media

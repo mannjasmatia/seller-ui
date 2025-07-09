@@ -88,7 +88,7 @@ const ProductCard: React.FC<EnhancedProductCardProps> = ({
 
   return (
     <div 
-      className={`group bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-cb-red/50 ${
+      className={`group bg-white h-[25rem] rounded-lg shadow-lg border border-gray-200 overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-cb-red/50 ${
         isHovered ? 'transform scale-[1.01] shadow-xl' : ''
       }`}
       onClick={onClick}
@@ -100,14 +100,14 @@ const ProductCard: React.FC<EnhancedProductCardProps> = ({
         <div className="w-2/5 relative bg-gray-50 overflow-hidden">
           {product.images?.length > 0 ? (
             <>
-              <div className="relative h-full group-hover:scale-105 transition-transform duration-300">
+              <div className="relative h-full flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                 <DynamicImage
-                  src={`${MEDIA_URL}/${product.images[currentImageIndex]}`}
+                  src={product.images[currentImageIndex]}
                   alt={product.name}
                   objectFit="cover"
-                  width="w-full"
-                  height="h-full"
-                  className="transition-all duration-300"
+                  // width="w-full"
+                  height="h-[25rem]"
+                  className="transition-all duration-300 !object-contain"
                 />
               </div>
 
@@ -116,8 +116,8 @@ const ProductCard: React.FC<EnhancedProductCardProps> = ({
                 <>
                   <button
                     onClick={(e) => handleImageNavigation('prev', e)}
-                    className={`absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/90 text-gray-800 p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white ${
-                      currentImageIndex === 0 ? 'cursor-not-allowed opacity-30' : ''
+                    className={`absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-600/90 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-gray-700 ${
+                      currentImageIndex === 0 ? 'cursor-not-allowed hidden' : ''
                     }`}
                     disabled={currentImageIndex === 0}
                   >
@@ -126,8 +126,8 @@ const ProductCard: React.FC<EnhancedProductCardProps> = ({
 
                   <button
                     onClick={(e) => handleImageNavigation('next', e)}
-                    className={`absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/90 text-gray-800 p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white ${
-                      currentImageIndex === product.images?.length - 1 ? 'cursor-not-allowed opacity-30' : ''
+                    className={`absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-600/90 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-gray-700 ${
+                      currentImageIndex === product.images?.length - 1 ? 'cursor-not-allowed hidden' : ''
                     }`}
                     disabled={currentImageIndex === product.images?.length - 1}
                   >

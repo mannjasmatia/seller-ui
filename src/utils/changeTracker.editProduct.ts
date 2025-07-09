@@ -120,6 +120,7 @@ export class ChangeTracker {
       getStepData(currentData, step)
     );
 
+
     return !this.deepEqual(originalStepData, currentStepData);
   }
 
@@ -221,13 +222,6 @@ export class ChangeTracker {
     const originalCleaned = cleanAttributes(original);
     const currentCleaned = cleanAttributes(current);
     
-    // Log for debugging (remove in production)
-    console.log('Attributes Comparison:', {
-      original: originalCleaned,
-      current: currentCleaned,
-      isEqual: this.deepEqual(originalCleaned, currentCleaned)
-    });
-    
     return !this.deepEqual(originalCleaned, currentCleaned);
   }
 
@@ -302,6 +296,7 @@ export class ChangeTracker {
     // 3. Existing images have been added/removed
     return pointsOrAttributesChanged || hasNewFiles || existingImagesChanged;
   }
+
   static hasImagesChanged(
     original: ProductImagesData,
     current: ProductImagesData

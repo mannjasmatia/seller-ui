@@ -134,14 +134,15 @@ export const InquiryCard: React.FC<QuotationCardProps> = ({
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           {/* Buyer Avatar */}
           <div className="relative w-10 h-10 flex-shrink-0">
-            {quotation.buyerProfilePic ? (
+            {quotation.buyerProfilePic || quotation?.buyerAvatar ? (
               <DynamicImage
-                src={`${MEDIA_URL}/${quotation.buyerProfilePic}`}
+                src={quotation.buyerProfilePic as string ?? quotation?.buyerAvatar}
                 alt={quotation.buyerName}
                 width="w-full"
                 height="h-full"
                 objectFit="cover"
                 rounded="full"
+                className='border border-gray-200'
               />
             ) : (
               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold">
@@ -189,7 +190,7 @@ export const InquiryCard: React.FC<QuotationCardProps> = ({
         {quotation.productImage && (
           <div className="w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
             <DynamicImage
-              src={`${MEDIA_URL}/${quotation.productImage}`}
+              src={quotation.productImage}
               alt={quotation.productName}
               width="w-full"
               height="h-full"

@@ -422,7 +422,7 @@ const SellerInvoicePage: React.FC = () => {
                   <div className="flex items-start gap-4">
                     {/* {invoice.quotationId.productId.images && invoice.quotationId.productId.images[0] && (
                       <DynamicImage
-                        src={`${MEDIA_URL}/${invoice.quotationId.productId.images[0]}`}
+                        src={invoice.quotationId.productId.images[0]}
                         alt={invoice.quotationId.productId.name}
                         width="w-24"
                         height="h-24"

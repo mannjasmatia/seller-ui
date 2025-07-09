@@ -219,7 +219,7 @@ export const QuotationDetailModal: React.FC<QuotationDetailModalProps> = ({
                       {quotation.productImages && quotation.productImages.length > 0 && (
                         <div className="w-24 h-24 flex-shrink-0">
                           <DynamicImage
-                            src={`${MEDIA_URL}/${quotation.productImages[0]}`}
+                            src={quotation.productImages[0]}
                             alt={quotation.productName}
                             width="w-full"
                             height="h-full"
@@ -251,15 +251,15 @@ export const QuotationDetailModal: React.FC<QuotationDetailModalProps> = ({
                     </h3>
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        {quotation.buyerProfilePic ? (
+                        {quotation.buyerProfilePic || quotation?.buyerAvatar ? (
                           <DynamicImage
-                            src={`${MEDIA_URL}/${quotation.buyerProfilePic}`}
+                            src={quotation.buyerProfilePic as string ?? quotation?.buyerAvatar}
                             alt={quotation.buyerName}
                             width="w-12"
                             height="h-12"
                             objectFit="cover"
                             rounded="full"
-                            className="border border-gray-200"
+                            className="border border-gray-200 "
                           />
                         ) : (
                           <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold">

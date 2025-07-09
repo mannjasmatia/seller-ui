@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Loader2, ZoomIn, ZoomOut, RefreshCw } from 'lucide-react';
+import MediaModal from '../../modals/MediaModal';
+
+const MEDIA_URL = import.meta.env.VITE_MEDIA_URL;
 
 interface ImageProps {
   src: string;
@@ -21,6 +24,8 @@ interface ImageProps {
   onClick?: () => void;
   caption?: string;
   placeholder?: string;
+  allowProxy?: boolean;
+  expandOnClick?:boolean;
 }
 
 const DynamicImage: React.FC<ImageProps> = ({
@@ -42,6 +47,8 @@ const DynamicImage: React.FC<ImageProps> = ({
   onClick,
   caption,
   placeholder = '/api/placeholder/400/320',
+  allowProxy=true,
+  expandOnClick
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
@@ -50,6 +57,15 @@ const DynamicImage: React.FC<ImageProps> = ({
   const [retryCount, setRetryCount] = useState<number>(0);
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showMediaModal, setShowMediaModal] = useState<boolean>(false);
+  const isProxyImage = allowProxy && !src.includes("http") && isNaN(Number(src))
+  const isAvatar = !isProxyImage && !isNaN(Number(src))
+
+  useEffect(() => {
+    if (isProxyImage) {
+      setCurrentSrc(`${MEDIA_URL}/${src}`);
+    }
+  }, [isProxyImage]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -57,14 +73,14 @@ const DynamicImage: React.FC<ImageProps> = ({
     
     // Create a new Image object to preload and check if the image can load
     const img = new Image();
-    img.src = src;
+    img.src = isProxyImage ? `${MEDIA_URL}/${src}` : src;
     
     // Start with placeholder
-    setCurrentSrc(placeholder);
+    setCurrentSrc(isProxyImage ? `${MEDIA_URL}/${src}` : placeholder);
     
     img.onload = () => {
       setIsLoading(false);
-      setCurrentSrc(src);
+      setCurrentSrc(isProxyImage ? `${MEDIA_URL}/${src}` : src);
       if (onLoad) onLoad();
     };
     
@@ -116,13 +132,15 @@ const DynamicImage: React.FC<ImageProps> = ({
     img.onerror = () => {
       setIsLoading(false);
       setIsError(true);
-      setCurrentSrc(fallbackSrc);
+      setCurrentSrc(isProxyImage ? `${MEDIA_URL}/${src}` : src);
       if (onError) onError();
     };
   };
 
   const toggleZoom = () => {
-    if (zoomable) {
+    if (expandOnClick) {
+      setShowMediaModal(true);
+    }else if (zoomable) {
       setIsZoomed(!isZoomed);
     }
   };
@@ -180,7 +198,7 @@ const DynamicImage: React.FC<ImageProps> = ({
         <img
           ref={imageRef}
           // crossOrigin="anonymous"
-          src={currentSrc}
+          src={isAvatar ? `/avatars/avatar-${src}.svg` : currentSrc}
           alt={alt}
           loading={lazyLoad ? loading : undefined}
           onLoad={handleLoad}
@@ -235,6 +253,10 @@ const DynamicImage: React.FC<ImageProps> = ({
       {/* Caption */}
       {caption && !isLoading && !isError && (
         <p className="text-sm text-gray-600 mt-1">{caption}</p>
+      )}
+
+      {showMediaModal && (
+        <MediaModal open={showMediaModal} onClose={() => setShowMediaModal(false)} src={currentSrc} className="!object-contain"  />
       )}
     </div>
   );

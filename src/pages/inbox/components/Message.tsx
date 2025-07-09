@@ -175,7 +175,7 @@ export const Message: React.FC<MessageProps> = ({
           {message.media.slice(0, maxDisplay).map((media, index) => (
             <div key={index} className="relative group">
               <DynamicImage
-                src={`${MEDIA_URL}/${media.url}`}
+                src={media.url}
                 alt={media.name || `Image ${index + 1}`}
                 width="w-full"
                 height={imageCount === 1 ? "h-48" : "h-32"}

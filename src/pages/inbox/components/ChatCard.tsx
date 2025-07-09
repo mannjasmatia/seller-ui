@@ -150,7 +150,7 @@ export const ChatCard: React.FC<ChatCardProps> = ({
         <div className="relative w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
           {chat.otherUser.profilePic ? (
             <DynamicImage
-              src={`${MEDIA_URL}/${chat.otherUser.profilePic}`}
+              src={chat.otherUser.profilePic}
               alt={chat.otherUser.name}
               width="w-full"
               height="h-full"

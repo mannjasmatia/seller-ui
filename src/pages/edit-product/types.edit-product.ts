@@ -35,7 +35,8 @@ export interface LeadTime {
 }
 
 export interface ProductPricing {
-  basePrice: number;
+  minPrice: number;
+  maxPrice: number;
   quantityPriceTiers: QuantityPriceTier[];
   leadTime: LeadTime[];
 }
@@ -144,4 +145,3 @@ export interface ValidationError {
   field: string;
   message: string;
 }
-

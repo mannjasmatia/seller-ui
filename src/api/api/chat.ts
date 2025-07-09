@@ -8,12 +8,13 @@ export const getAllChats = (params?: {
   page?: number;
   limit?: number;
   status?: 'active' | 'completed' | 'cancelled';
+  search?: string;
 }) => {
   return ApiService({
     method: 'GET',
     endpoint: apiPaths.chat.all,
     params,
-    isChatApi:true
+    isChatApi: true
   });
 };
 
@@ -28,20 +29,9 @@ export const getChatMessages = (chatId: string, params?: {
     method: 'GET',
     endpoint: `${apiPaths.chat.messages}/${chatId}`,
     params,
-    isChatApi:true
+    isChatApi: true
   });
 };
-
-/**
- * Get chat by ID
- */
-// export const getChatById = (chatId: string) => {
-//   return ApiService({
-//     method: 'GET',
-//     endpoint: `${apiPaths.chat.getById}/${chatId}`,
-//     isChatApi:true,
-//   });
-// };
 
 /**
  * Upload media files
@@ -51,11 +41,10 @@ export const uploadMedia = (files: FormData) => {
     method: 'POST',
     endpoint: apiPaths.media.upload,
     data: files,
-    isChatApi:true,
+    isChatApi: true,
     headers: {
       // Don't set Content-Type for FormData
     }
-
   });
 };
 
@@ -66,17 +55,15 @@ export const downloadMedia = (fileName: string) => {
   return ApiService({
     method: 'GET',
     endpoint: `${apiPaths.media.download}`,
-    params:{fileName},
-    // responseType: 'blob', // Ensure you get a Blob for file download
+    params: { fileName },
     isChatApi: true,
-    responseType:'blob',
+    responseType: 'blob',
   });
 };
 
 export const chatApi = {
   getAllChats,
   getChatMessages,
-  // getChatById,
   uploadMedia,
   downloadMedia
 };

@@ -122,7 +122,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({
 
         {/* Image */}
         <img
-          src={`${MEDIA_URL}/${currentImage.url}`}
+          src={!currentImage.url.includes('http') ? `${MEDIA_URL}/${currentImage.url}` : currentImage.url}
           alt={currentImage.name}
           className="max-w-full max-h-full object-contain"
         />

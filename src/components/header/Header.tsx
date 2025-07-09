@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../../store/appStore";
 import { UserCircle2 } from "lucide-react";
+import DynamicImage from "../BasicComponents/Image";
 
 const MEDIA_URL = import.meta.env.VITE_MEDIA_URL;
 
@@ -31,10 +32,11 @@ const Header = () => {
                 
                 <div className="flex items-center">
                     {userInfo?.companyLogo ? (
-                        <img 
-                            src={`${MEDIA_URL}/${userInfo?.companyLogo}`} 
+                        <DynamicImage 
+                            src={userInfo?.companyLogo ?? userInfo?.logo} 
+                            allowProxy={true}
                             onClick={handleProfileClick}
-                            crossOrigin="anonymous"
+                            // crossOrigin="anonymous"
                             alt="Profile" 
                             className="w-8 sm:w-12 h-8 sm:h-12 rounded-full border-2 border-white cursor-pointer hover:border-gray-200 transition-colors" 
                         />
