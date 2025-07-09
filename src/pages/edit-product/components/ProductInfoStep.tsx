@@ -162,7 +162,7 @@ const ProductInfoStep: React.FC<ProductInfoStepProps> = ({
       </div>
 
       {/* MOQ */}
-      {data && data?.moq && (
+      {data?.moq && (
         <div>
           <Input
             type="number"

@@ -4,6 +4,7 @@ import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { FilterState } from '../../types.dashboard';
 import moment from 'moment';
 import { useProductPerformanceApi } from '../../../../api/api-hooks/useAnalyticsPerformanceApi';
+import { trimZeroValues } from '../../../../utils/trimZeroValues';
 
 interface PerformanceData {
   period: string;
@@ -117,6 +118,11 @@ export const usePerformanceGraph = ({
     if (!apiData?.x || !apiData?.y) {
       return [];
     }
+
+    const {x:trimmedX,y:trimmedY}= trimZeroValues(apiData?.x, apiData?.y)
+    
+    apiData.x = trimmedX;
+    apiData.y = trimmedY;
 
     return apiData.x.map((period, index) => ({
       period,

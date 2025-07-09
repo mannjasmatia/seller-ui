@@ -104,7 +104,7 @@ export const useProductsList = () => {
   }, [navigate, lang]);
 
   const handleCardClick = useCallback((productId: string) => {
-    navigate(`/${lang}/products/${productId}`);
+    // navigate(`/${lang}/products/${productId}`);
   }, [navigate, lang]);
 
   const handleDeleteProduct = useCallback((productId: string) => {

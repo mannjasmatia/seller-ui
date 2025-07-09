@@ -9,7 +9,7 @@ export interface ProductInfo {
   name: string;
   categoryId: string;
   about: string[];
-  moq?: number;
+  moq: number;
 }
 
 export interface ProductAttribute {

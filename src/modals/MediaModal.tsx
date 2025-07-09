@@ -270,6 +270,7 @@ export const MediaModal: React.FC<MediaModalProps> = ({
             <img
               src={currentFile.src}
               alt={currentFile.alt || alt}
+              // crossOrigin='anonymous'
               className={`
                 transition-all duration-300
                 ${isLoading ? 'opacity-0' : 'opacity-100'}

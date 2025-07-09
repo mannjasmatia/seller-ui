@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import moment from 'moment';
 import { FilterState } from '../../types.dashboard';
 import { useProductAnalyticsApi } from '../../../../api/api-hooks/useAnalyticsPerformanceApi';
+import { trimZeroValues } from '../../../../utils/trimZeroValues';
 
 interface UseProductsBarChartProps {
   filterState: FilterState;
@@ -108,10 +109,17 @@ export const useProductsBar = ({ filterState, selectedProductIds, type }: UsePro
 
     const dataKey = type === 'products' ? 'productsSold' : 'profit';
 
+    const {x:trimmedX,y:trimmedY}= trimZeroValues(apiData?.x, apiData?.y)
+
+    apiData.x = trimmedX;
+    apiData.y = trimmedY;
+
     return apiData.x.map((period:any, index:any) => ({
       period,
       [dataKey]: apiData.y[index] || 0
     }));
+
+
   }, [apiData, type]);
 
   return {
