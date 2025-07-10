@@ -64,6 +64,7 @@ const Inbox: React.FC = () => {
     hasNextMessagesPage,
 
     readyToFetchMore,
+    debouncedDelayLoading,
 
     // Error states
     isChatsError,
@@ -505,7 +506,7 @@ const Inbox: React.FC = () => {
                       {/* Infinite scroll trigger for messages (at top for reverse pagination) */}
                       {hasNextMessagesPage && readyToFetchMore && (
                         <div ref={messagesLoadMoreRef} className="py-4 text-center">
-                          {isFetchingNextMessagesPage ? (
+                          {debouncedDelayLoading ||isFetchingNextMessagesPage ? (
                             <div className="flex items-center justify-center gap-2">
                               <Loader className="w-4 h-4 animate-spin" />
                               <span className="text-sm text-gray-500">Loading more messages...</span>

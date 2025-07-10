@@ -30,7 +30,7 @@ export const useInboxChat = () => {
     currentIndex: 0,
   });
   const [readyToFetchMore, setReadyToFetchMore] = useState(false);
-
+  const [debouncedDelayLoading, setDebouncedDelayLoading]= useState(false)
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "completed" | "cancelled">("all");
@@ -83,7 +83,7 @@ export const useInboxChat = () => {
     queryFn: ({ pageParam = 1 }) => {
       const params: any = {
         page: pageParam,
-        limit: 9,
+        limit: 20,
       };
 
       if (statusFilter !== "all") {
@@ -117,7 +117,7 @@ export const useInboxChat = () => {
       if (!selectedChat?._id) return Promise.resolve(null);
       return useGetChatMessagesApi.queryFn(selectedChat._id, {
         page: pageParam,
-        limit: 30,
+        limit: 10,
       });
     },
     getNextPageParam: (lastPage) => {
@@ -256,9 +256,9 @@ export const useInboxChat = () => {
           }
 
           // Disable further fetching until this one completes
-          setReadyToFetchMore(false);
-
-          fetchNextMessagesPage();
+          // setReadyToFetchMore(true);
+          setDebouncedDelayLoading(true)
+          setTimeout(fetchNextMessagesPage, 1000);
         }
       },
       {
@@ -424,6 +424,7 @@ export const useInboxChat = () => {
   useEffect(() => {
     if (selectedChat && messagesData?.pages) {
 
+      setReadyToFetchMore(false)
       // Store current scroll position before updating messages
       const container = messagesContainerRef.current;
       const wasAtBottom = container
@@ -445,7 +446,7 @@ export const useInboxChat = () => {
           setTimeout(() => {
             setReadyToFetchMore(true);
             isFirstLoad.current = false;
-          }, 100);
+          }, 1000);
         }, 50);
       } else if (messagesData.pages.length > 1 && container) {
         // Infinite scroll - preserve scroll position
@@ -463,15 +464,18 @@ export const useInboxChat = () => {
             // Allow more fetching after position is preserved
             setTimeout(() => {
               setReadyToFetchMore(true);
-            }, 100);
+              // setDebouncedDelayLoading(false)
+            }, 500);
           }
         }, 50);
       } else if (wasAtBottom) {
         // If user was at bottom, keep them at bottom (for new messages)
         setTimeout(() => scrollToBottom("smooth"), 100);
+        // setDebouncedDelayLoading(false)
       } else {
         // For other cases, just enable fetching
         setReadyToFetchMore(true);
+        // setDebouncedDelayLoading(false)
       }
     }
   }, [selectedChat, messagesData, scrollToBottom]);
@@ -975,6 +979,7 @@ export const useInboxChat = () => {
     hasNextMessagesPage,
 
     readyToFetchMore,
+    debouncedDelayLoading,
 
     // Error states
     isChatsError,

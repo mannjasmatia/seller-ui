@@ -9,7 +9,7 @@ export const useProductAnalyticsApi = (params: AnalyticsQueryParams, enabled: bo
   return useQuery({
     queryKey: ['product-analytics', params],
     queryFn: () => analyticsApi.getProductAnalytics(params),
-    enabled: enabled && !!(params.from && params.to && params.granularity) && isValid ,
+    enabled: enabled && params?.products.length>0 && !!(params.from && params.to && params.granularity) && isValid ,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     // select: (data: any) => data?.data?.response,
@@ -21,7 +21,7 @@ export const useProductPerformanceApi = (params: PerformanceQueryParams, enabled
   return useQuery({
     queryKey: ['product-performance', params],
     queryFn: () => analyticsApi.getProductPerformance(params),
-    enabled: enabled && !!(params.from && params.to && params.granularity) && isValid,
+    enabled: enabled && params?.products.length>0 && !!(params.from && params.to && params.granularity) && isValid,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     // select: (data: any) => data?.data?.response,
@@ -33,7 +33,7 @@ export const usePerformanceSummaryApi = (params: PerformanceSummaryParams, enabl
   return useQuery({
     queryKey: ['performance-summary', params],
     queryFn: () => analyticsApi.getPerformanceSummary(params),
-    enabled: enabled && !!(params.from && params.to) && isValid,
+    enabled: enabled && params?.products.length>0 && !!(params.from && params.to) && isValid,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     // select: (data: any) => data?.data?.response
