@@ -26,8 +26,8 @@ import MessageInput from "./components/MessageInput";
 import ImageModal from "./components/ImageModal";
 import InvoiceModal from "./components/GenerateInvoiceModal";
 import QuotationDetailModal from "../inquires/components/QuotationDetailModal";
-import { useInboxChat } from "./useInbox";
 import DynamicImage from "../../components/BasicComponents/Image";
+import useInbox from "./useInbox";
 
 const Inbox: React.FC = () => {
   const navigate = useNavigate();
@@ -49,6 +49,11 @@ const Inbox: React.FC = () => {
     isInvoiceModalOpen,
     quotationDetailModalOpen,
 
+    // Messages infinite scroll states
+    initialLoading,
+    readyToFetchMore,
+    isLoadingMore,
+
     // Filter state
     searchQuery,
     statusFilter,
@@ -63,9 +68,6 @@ const Inbox: React.FC = () => {
     hasNextChatsPage,
     hasNextMessagesPage,
 
-    readyToFetchMore,
-    debouncedDelayLoading,
-
     // Error states
     isChatsError,
 
@@ -78,6 +80,7 @@ const Inbox: React.FC = () => {
     chatsLoadMoreRef,
     messagesLoadMoreRef,
     messagesContainerRef,
+    messagesListRef,
 
     // Handlers
     selectChat,
@@ -115,7 +118,7 @@ const Inbox: React.FC = () => {
 
     // Language
     language,
-  } = useInboxChat();
+  } = useInbox();
 
   const getConnectionIcon = () => {
     switch (connectionStatus.status) {
@@ -166,7 +169,6 @@ const Inbox: React.FC = () => {
               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold">
                 {selectedChat.otherUser?.name?.charAt(0) || "B"}
               </div>
-              // <User className="w-5 h-5 text-gray-500" />
             )}
             <div>
               <h3 className="font-semibold text-gray-900">{selectedChat.otherUser.name}</h3>
@@ -197,8 +199,6 @@ const Inbox: React.FC = () => {
               >
                 {language?.chatHeader?.generateInvoice || "Generate Invoice"}
               </Button>
-
-            //   No View invoice functionality as of now (remove false and add invoiceInfo.hasInvoice later)
             ) : false ? (
               <div className="flex items-center gap-2">
                 <Button
@@ -243,13 +243,6 @@ const Inbox: React.FC = () => {
             "Choose a conversation from the sidebar to start messaging with customers"}
         </p>
       </div>
-    </div>
-  );
-
-  const renderLoadingState = () => (
-    <div className="text-center py-8">
-      <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-gray-400" />
-      <p className="text-gray-500">{language?.loadingMessages || "Loading messages..."}</p>
     </div>
   );
 
@@ -316,19 +309,6 @@ const Inbox: React.FC = () => {
             size="sm"
           />
         </div>
-
-        {/* Clear Filters */}
-        {/* {(searchQuery || statusFilter !== 'all') && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearFilters}
-            leftIcon={<X className="w-4 h-4" />}
-            theme={["gray-500", "white"]}
-          >
-            {language?.filters?.clearFilters || "Clear"}
-          </Button>
-        )} */}
       </div>
 
       {/* Active Filters Indicator */}
@@ -349,6 +329,86 @@ const Inbox: React.FC = () => {
       )}
     </div>
   );
+
+  const renderMessagesContent = () => {
+    if (messages.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            {language?.empty?.noMessages || "No messages yet"}
+          </h3>
+          <p className="text-gray-500">
+            {language?.empty?.noMessagesDescription ||
+              "Start the conversation with your customer!"}
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-2 sticky">
+        {/* Load More Messages Trigger (at top for reverse pagination) */}
+        {hasNextMessagesPage && readyToFetchMore && (
+          <div ref={messagesLoadMoreRef} className="py-4 text-center">
+            {isLoadingMore ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader className="w-4 h-4 animate-spin" />
+                <span className="text-sm text-gray-500">Loading more messages...</span>
+              </div>
+            ) : (
+              <div className="text-sm text-gray-400">Scroll up to load more</div>
+            )}
+          </div>
+        )}
+
+        {/* Messages */}
+        {messages.map((message) => (
+          <Message
+            key={message._id}
+            message={message}
+            isOwnMessage={message?.senderModel?.toLowerCase() === "seller"}
+            formatTime={formatTime}
+            onRetry={retryMessage}
+            onImageView={openImageModal}
+            language={language}
+          />
+        ))}
+
+        {/* Typing Indicator */}
+        {renderTypingIndicator()}
+
+        <div ref={messagesEndRef} />
+      </div>
+    );
+  };
+
+  const renderInitialLoadingOverlay = () => {
+    if (!initialLoading) return null;
+
+    return (
+      <div className="absolute inset-0 bg-white bg-opacity-90 z-50 flex items-center justify-center backdrop-blur-sm">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-cb-red border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">{language?.loadingMessages || "Loading messages..."}</p>
+          <p className="text-sm text-gray-500 mt-1">Please wait...</p>
+        </div>
+      </div>
+    );
+  };
+
+  const renderLoadMoreOverlay = () => {
+    if (!isLoadingMore) return null;
+
+    return (
+      <div className="absolute top-0 left-0 right-0 bg-white bg-opacity-95 z-40 p-4 text-center border-b border-gray-200 backdrop-blur-sm">
+        <div className="flex items-center justify-center gap-2">
+          <Loader className="w-4 h-4 animate-spin text-cb-red" />
+          <span className="text-sm text-gray-600 font-medium">Loading more messages...</span>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="max-h-[80dvh]">
@@ -390,42 +450,6 @@ const Inbox: React.FC = () => {
         <div className="flex h-[70dvh]">
           {/* Chat List Sidebar */}
           <div className="w-92 bg-white border-r border-gray-200 flex flex-col">
-            {/* Chat List Header */}
-            {/* <div className="p-2 px-4 border-b border-gray-200"> */}
-              {/* <div className="flex items-center justify-between">
-                <h2 className="flex gap-2 items-center justify-center font-semibold text-gray-900">
-                  {language?.chatList?.activeConversations || "Active Conversations"}
-                  <div className="h-3 w-3 bg-green-400 animate-pulse rounded-full "></div>
-                </h2>
-              </div> */}
-
-              {/* Connection status in sidebar */}
-              {/* {connectionStatus.status !== "connected" && (
-                <div className="mt-2 flex items-center gap-2 text-sm">
-                  {getConnectionIcon()}
-                  <span
-                    className={`${connectionStatus.status === "error" ? "text-red-600" : "text-yellow-600"}`}
-                  >
-                    {getConnectionText()}
-                  </span>
-                  {connectionStatus.status === "error" && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={reconnect}
-                      className="ml-auto"
-                      theme={["cb-red", "white"]}
-                    >
-                      Reconnect
-                    </Button>
-                  )}
-                </div>
-              )} */}
-
-              {/* Chat count */}
-              {/* <p className="text-sm text-gray-500 mt-1">{chats.length} active conversations</p> */}
-            {/* </div> */}
-
             {/* Filters */}
             {renderFilters()}
 
@@ -480,61 +504,29 @@ const Inbox: React.FC = () => {
           </div>
 
           {/* Chat Area */}
-          <div className="max-h-[70dvh] flex-1 flex flex-col ">
+          <div className="max-h-[70dvh] flex-1 flex flex-col">
             {selectedChat ? (
               <>
                 {/* Chat Header */}
                 {renderChatHeader()}
 
-                {/* Messages */}
-                <div ref={messagesContainerRef}  className="flex-1 overflow-y-auto p-4 bg-gray-50">
-                  {isLoadingMessages && messages.length === 0 ? (
-                    renderLoadingState()
-                  ) : messages.length === 0 ? (
-                    <div className="text-center py-8">
-                      <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">
-                        {language?.empty?.noMessages || "No messages yet"}
-                      </h3>
-                      <p className="text-gray-500">
-                        {language?.empty?.noMessagesDescription ||
-                          "Start the conversation with your customer!"}
-                      </p>
+                {/* Messages Area with Overlays */}
+                <div className="flex-1 relative overflow-hidden">
+                  {/* Messages Container */}
+                  <div 
+                    ref={messagesContainerRef} 
+                    className="h-full overflow-y-auto p-4 bg-gray-50"
+                  >
+                    <div ref={messagesListRef}>
+                      {renderMessagesContent()}
                     </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {/* Infinite scroll trigger for messages (at top for reverse pagination) */}
-                      {hasNextMessagesPage && readyToFetchMore && (
-                        <div ref={messagesLoadMoreRef} className="py-4 text-center">
-                          {debouncedDelayLoading ||isFetchingNextMessagesPage ? (
-                            <div className="flex items-center justify-center gap-2">
-                              <Loader className="w-4 h-4 animate-spin" />
-                              <span className="text-sm text-gray-500">Loading more messages...</span>
-                            </div>
-                          ) : (
-                            <div className="text-sm text-gray-400">Scroll up to load more</div>
-                          )}
-                        </div>
-                      )}
+                  </div>
 
-                      {messages.map((message) => (
-                        <Message
-                          key={message._id}
-                          message={message}
-                          isOwnMessage={message?.senderModel?.toLowerCase() === "seller"}
-                          formatTime={formatTime}
-                          onRetry={retryMessage}
-                          onImageView={openImageModal}
-                          language={language}
-                        />
-                      ))}
+                  {/* Initial Loading Overlay */}
+                  {renderInitialLoadingOverlay()}
 
-                      {/* Typing Indicator */}
-                      {renderTypingIndicator()}
-
-                      <div ref={messagesEndRef} />
-                    </div>
-                  )}
+                  {/* Load More Overlay */}
+                  {renderLoadMoreOverlay()}
                 </div>
 
                 {/* Message Input */}

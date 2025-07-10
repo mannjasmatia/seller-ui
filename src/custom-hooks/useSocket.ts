@@ -99,7 +99,7 @@ const useSocket = (url?: string) => {
     });
 
     newSocket.on('reconnect', (attemptNumber) => {
-      console.log('🔄 Seller socket reconnected after', attemptNumber, 'attempts');
+      // console.log('🔄 Seller socket reconnected after', attemptNumber, 'attempts');
       reconnectAttempts.current = 0;
       reconnectDelay.current = 1000;
       setConnectionStatus({
@@ -109,7 +109,7 @@ const useSocket = (url?: string) => {
     });
 
     newSocket.on('reconnect_attempt', (attemptNumber) => {
-      console.log('🔄 Seller socket reconnection attempt', attemptNumber);
+      // console.log('🔄 Seller socket reconnection attempt', attemptNumber);
       setConnectionStatus({
         status: 'connecting',
         isConnected: false
@@ -117,7 +117,7 @@ const useSocket = (url?: string) => {
     });
 
     newSocket.on('reconnect_failed', () => {
-      console.log('❌ Seller socket reconnection failed');
+      // console.log('❌ Seller socket reconnection failed');
       setConnectionStatus({
         status: 'error',
         isConnected: false
@@ -126,53 +126,53 @@ const useSocket = (url?: string) => {
 
     // Setup message event listeners
     newSocket.on('messageReceived', (message: ChatMessage) => {
-      console.log('📨 Seller message received:', message);
+      // console.log('📨 Seller message received:', message);
       handlersRef.current.onMessageReceived?.(message);
     });
 
     newSocket.on('messageSent', (data) => {
-      console.log('✅ Seller message sent confirmation:', data);
+      // console.log('✅ Seller message sent confirmation:', data);
       handlersRef.current.onMessageSent?.(data);
     });
 
     newSocket.on('messageDelivered', (data) => {
-      console.log('📬 Seller message delivered confirmation:', data);
+      // console.log('📬 Seller message delivered confirmation:', data);
       handlersRef.current.onMessageDelivered?.(data);
     });
 
     newSocket.on('messageFailed', (data) => {
-      console.log('❌ Seller message failed:', data);
+      // console.log('❌ Seller message failed:', data);
       handlersRef.current.onMessageFailed?.(data);
     });
 
     newSocket.on('chatOpened', (data) => {
-      console.log('👁️ Chat opened by buyer:', data);
+      // console.log('👁️ Chat opened by buyer:', data);
       handlersRef.current.onChatOpened?.(data);
     });
 
     newSocket.on('startTyping', (data) => {
-      console.log('⌨️ Buyer started typing:', data);
+      // console.log('⌨️ Buyer started typing:', data);
       handlersRef.current.onStartTyping?.(data);
     });
 
     newSocket.on('stopTyping', (data) => {
-      console.log('🛑 Buyer stopped typing:', data);
+      // console.log('🛑 Buyer stopped typing:', data);
       handlersRef.current.onStopTyping?.(data);
     });
 
     newSocket.on('image_upload_start', (data) => {
-      console.log('📤 Buyer image upload started:', data);
+      // console.log('📤 Buyer image upload started:', data);
       handlersRef.current.onImageUploadStart?.(data);
     });
 
     newSocket.on('image_upload_complete', (data) => {
-      console.log('✅ Buyer image upload completed:', data);
+      // console.log('✅ Buyer image upload completed:', data);
       handlersRef.current.onImageUploadComplete?.(data);
     });
 
     // Error handling
     newSocket.on('error', (error) => {
-      console.error('🔥 Socket error:', error);
+      // console.error('🔥 Socket error:', error);
     });
 
     setSocket(newSocket);
@@ -182,7 +182,7 @@ const useSocket = (url?: string) => {
 
   const disconnect = useCallback(() => {
     if (socketRef.current) {
-      console.log('🔌 Disconnecting seller socket...');
+      // console.log('🔌 Disconnecting seller socket...');
       socketRef.current.disconnect();
       setSocket(null);
       socketRef.current = null;
@@ -195,14 +195,14 @@ const useSocket = (url?: string) => {
 
   const emit = useCallback((event: string, data: any) => {
     if (socketRef.current?.connected) {
-      console.log(`📤 Seller emitting ${event}:`, data);
+      // console.log(`📤 Seller emitting ${event}:`, data);
       socketRef.current.emit(event, data);
       return true;
     }
-    console.warn('⚠️ Seller socket not connected, cannot emit:', event, {
-      hasSocket: !!socketRef.current,
-      socketConnected: socketRef.current?.connected
-    });
+    // console.warn('⚠️ Seller socket not connected, cannot emit:', event, {
+    //   hasSocket: !!socketRef.current,
+    //   socketConnected: socketRef.current?.connected
+    // });
     return false;
   }, []);
 
@@ -237,7 +237,7 @@ const useSocket = (url?: string) => {
   // Auto reconnect with exponential backoff
   const reconnect = useCallback(() => {
     if (connectionStatus.status === 'error' || connectionStatus.status === 'disconnected') {
-      console.log('🔄 Manual reconnection attempt...');
+      // console.log('🔄 Manual reconnection attempt...');
       disconnect();
       setTimeout(() => {
         connect();
