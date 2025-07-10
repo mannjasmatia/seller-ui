@@ -50,11 +50,14 @@ export const useInbox = () => {
   const messagesObserverRef = useRef<IntersectionObserver | null>(null);
   const chatsLoadMoreRef = useRef<HTMLDivElement>(null);
   const messagesLoadMoreRef = useRef<HTMLDivElement>(null);
-  
+
   // Messages container refs
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesListRef = useRef<HTMLDivElement>(null);
-  const scrollPositionRef = useRef<{ scrollTop: number; scrollHeight: number }>({ scrollTop: 0, scrollHeight: 0 });
+  const scrollPositionRef = useRef<{ scrollTop: number; scrollHeight: number }>({
+    scrollTop: 0,
+    scrollHeight: 0,
+  });
 
   // Debounce search query
   useEffect(() => {
@@ -87,7 +90,7 @@ export const useInbox = () => {
     queryFn: ({ pageParam = 1 }) => {
       const params: any = {
         page: pageParam,
-        limit: 20,
+        limit: 7,
       };
 
       if (statusFilter !== "all") {
@@ -158,7 +161,11 @@ export const useInbox = () => {
   // Update chats from infinite query
   useEffect(() => {
     if (chatsData?.pages) {
-      const allChats = chatsData.pages.flatMap((page) => page?.data?.response?.docs || []);
+      let allChats: Chat[] = [];
+      chatsData.pages.forEach((page) => {
+        const pageChats = (page?.data?.response?.docs as Chat[]) || [];
+        allChats = [...pageChats, ...allChats];
+      });
       setChats(allChats);
     }
   }, [chatsData]);
@@ -214,12 +221,12 @@ export const useInbox = () => {
     if (messagesContainerRef.current && messagesLoadMoreRef.current) {
       const container = messagesContainerRef.current;
       const loader = messagesLoadMoreRef.current;
-      
+
       scrollPositionRef.current = {
         scrollTop: container.scrollTop,
         scrollHeight: container.scrollHeight,
       };
-      
+
       // console.log('Stored scroll position:', scrollPositionRef.current);
     }
   }, []);
@@ -229,15 +236,15 @@ export const useInbox = () => {
     if (messagesContainerRef.current) {
       const container = messagesContainerRef.current;
       const stored = scrollPositionRef.current;
-      
+
       // Calculate new scroll position
       const heightDifference = container.scrollHeight - stored.scrollHeight;
       const newScrollTop = stored.scrollTop + heightDifference;
-      
+
       requestAnimationFrame(() => {
         container.scrollTop = newScrollTop;
       });
-      
+
       // console.log('Restored scroll position:', {
       //   oldHeight: stored.scrollHeight,
       //   newHeight: container.scrollHeight,
@@ -293,13 +300,13 @@ export const useInbox = () => {
           messagesData.pages.length > 0
         ) {
           // console.log("Triggering fetch more messages...");
-          
+
           // Store current scroll position
           storeScrollPosition();
-          
+
           // Set loading state
           setIsLoadingMore(true);
-          
+
           // Fetch after delay
           setTimeout(() => {
             fetchNextMessagesPage();
@@ -343,7 +350,7 @@ export const useInbox = () => {
       // Combine all messages from all pages
       let allMessages: ChatMessage[] = [];
       messagesData.pages.forEach((page) => {
-        const pageMessages = page?.data?.response?.messages as ChatMessage[] || [];
+        const pageMessages = (page?.data?.response?.messages as ChatMessage[]) || [];
         allMessages = [...pageMessages, ...allMessages];
       });
 
@@ -353,21 +360,20 @@ export const useInbox = () => {
       if (messagesData.pages.length === 1 && !isLoadingMore) {
         // Initial load - show loading, then scroll to bottom
         // console.log('Initial load detected');
-        
+
         setTimeout(() => {
           scrollToBottom("auto");
           setInitialLoading(false);
-          
+
           // Enable fetching more after scroll is complete
           setTimeout(() => {
             setReadyToFetchMore(true);
           }, 1000);
         }, 50);
       } else if (isLoadingMore) {
-        
         // Infinite scroll - restore position then hide loading
         // console.log('Infinite scroll detected');
-        
+
         setTimeout(() => {
           restoreScrollPosition();
           setIsLoadingMore(false);
@@ -390,31 +396,37 @@ export const useInbox = () => {
           setTimeout(() => scrollToBottom("smooth"), 100);
         }
 
-        // Update chat list with new message
-        setChats((prev) => {
-          const updatedChats = prev.map((chat) => {
-            if (chat._id === message.chat) {
-              // Emit openChat only if this is the currently selected chat
-              if (currentSelectedChat?._id === message.chat) {
-                socketOpenChat(chat._id, chat.otherUser._id);
+        const chatExists = chats.some((chat) => chat._id === message.chat);
+        if (!chatExists) {
+          // Optionally: refetch chats or handle unknown chat
+          refetchChats();
+        } else {
+          // Update chat list with new message
+          setChats((prev) => {
+            const updatedChats = prev.map((chat) => {
+              if (chat._id === message.chat) {
+                // Emit openChat only if this is the currently selected chat
+                if (currentSelectedChat?._id === message.chat) {
+                  socketOpenChat(chat._id, chat.otherUser._id);
+                }
+
+                console.log("Updating chat:", chat._id);
+                return {
+                  ...chat,
+                  lastMessage: message,
+                  lastMessageAt: message.createdAt,
+                  hasUnread: currentSelectedChat?._id !== message.chat,
+                };
               }
+              return chat;
+            });
 
-              console.log("Updating chat:", chat._id);
-              return {
-                ...chat,
-                lastMessage: message,
-                lastMessageAt: message.createdAt,
-                hasUnread: currentSelectedChat?._id !== message.chat,
-              };
-            }
-            return chat;
+            // Move updated chat to top
+            const chatToMove = updatedChats.find((chat) => chat._id === message.chat);
+            const otherChats = updatedChats.filter((chat) => chat._id !== message.chat);
+            return chatToMove ? [chatToMove, ...otherChats] : updatedChats;
           });
-
-          // Move updated chat to top
-          const chatToMove = updatedChats.find((chat) => chat._id === message.chat);
-          const otherChats = updatedChats.filter((chat) => chat._id !== message.chat);
-          return chatToMove ? [chatToMove, ...otherChats] : updatedChats;
-        });
+        }
       },
 
       onMessageSent: (data) => {
@@ -539,13 +551,13 @@ export const useInbox = () => {
     (chat: Chat) => {
       if (selectedChat?._id === chat?._id) return;
 
-      console.log('Selecting chat:', chat._id);
+      console.log("Selecting chat:", chat._id);
 
       // Step 1 & 2: Set initial loading and reset state
       setInitialLoading(true);
       setReadyToFetchMore(false);
       setIsLoadingMore(false);
-      
+
       setSelectedChat(chat);
       setMessages([]);
       setTypingUsers(new Set());
@@ -875,7 +887,7 @@ export const useInbox = () => {
       generateInvoice(data, {
         onSuccess: (response) => {
           customToast.success("Invoice generated successfully");
-          setSelectedChat({...selectedChat,phase:'invoice_sent'})
+          setSelectedChat({ ...selectedChat, phase: "invoice_sent" });
           setIsInvoiceModalOpen(false);
         },
         onError: (error: any) => {
